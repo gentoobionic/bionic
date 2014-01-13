@@ -62,10 +62,7 @@ typedef __kernel_ino_t       ino_t;
 typedef __kernel_key_t       key_t;
 typedef __kernel_mode_t      mode_t;
 typedef __kernel_nlink_t	 nlink_t;
-#ifndef _OFF_T_DEFINED_
-#define _OFF_T_DEFINED_
 typedef __kernel_off_t       off_t;
-#endif
 typedef __kernel_loff_t      loff_t;
 typedef loff_t               off64_t;  /* GLibc-specific */
 
@@ -87,7 +84,7 @@ typedef  .... pthread_t;
 
 #ifndef _SIZE_T_DEFINED_
 #define _SIZE_T_DEFINED_
-typedef unsigned int  size_t;
+typedef unsigned long  size_t;
 #endif
 
 /* size_t is defined by the GCC-specific <stddef.h> */

@@ -221,11 +221,13 @@ typedef struct
 #ifdef HAVE_UNWIND_CONTEXT_STRUCT
 typedef struct _Unwind_Context __unwind_context;
 #else
-typedef _Unwind_Context __unwind_context;
+typedef int __unwind_context;
 #endif
 
 static _Unwind_Reason_Code trace_function(__unwind_context *context, void *arg)
 {
+    return _URC_NO_REASON;
+#if 0
     stack_crawl_state_t* state = (stack_crawl_state_t*)arg;
     if (state->count) {
         intptr_t ip = (intptr_t)_Unwind_GetIP(context);
@@ -241,6 +243,11 @@ static _Unwind_Reason_Code trace_function(__unwind_context *context, void *arg)
      * unwinding the stack.
      */
     return _URC_END_OF_STACK;
+#endif
+}
+
+_Unwind_Reason_Code _Unwind_Backtrace (_Unwind_Trace_Fn f, void *p) {
+    return _URC_NO_REASON;
 }
 
 static inline

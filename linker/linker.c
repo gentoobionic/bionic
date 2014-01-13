@@ -585,8 +585,8 @@ static void dump(soinfo *si)
 #endif
 
 static const char *sopaths[] = {
-    "/vendor/lib",
-    "/system/lib",
+    "/lib",
+    "/usr/lib",
     0
 };
 
@@ -669,7 +669,6 @@ is_prelinked(int fd, const char *name)
     }
 
     if (strncmp(info.tag, "PRE ", 4)) {
-        WARN("`%s` is not a prelinked library\n", name);
         return 0;
     }
 
@@ -2118,7 +2117,7 @@ sanitize:
          * is.  Don't use alloc_info(), because the linker shouldn't
          * be on the soinfo list.
          */
-    strlcpy((char*) linker_soinfo.name, "/system/bin/linker", sizeof linker_soinfo.name);
+    strlcpy((char*) linker_soinfo.name, "/bin/linker", sizeof linker_soinfo.name);
     linker_soinfo.flags = 0;
     linker_soinfo.base = 0;     // This is the important part; must be zero.
     insert_soinfo_into_debug_map(&linker_soinfo);

@@ -37,7 +37,6 @@
 	.eabi_attribute 26, 2
 	.eabi_attribute 30, 4
 	.eabi_attribute 18, 4
-	.hidden	atexit
 	.code	16
 	.thumb_func
 ENTRY(atexit)

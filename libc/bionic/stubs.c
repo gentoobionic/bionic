@@ -31,7 +31,6 @@
 #include <pwd.h>
 #include <netdb.h>
 #include <mntent.h>
-#include <private/android_filesystem_config.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -351,7 +350,6 @@ app_id_to_group(gid_t  gid, stubs_state_t*  state)
     return gr;
 }
 
-
 struct passwd*
 getpwuid(uid_t uid)
 {
@@ -392,7 +390,7 @@ getgrouplist (const char *user, gid_t group,
         return -1;
     }
     groups[0] = group;
-    return (*ngroups = 1);
+   return (*ngroups = 1);
 }
 
 char*
@@ -405,6 +403,42 @@ getlogin(void)
     } else {
         return NULL;
     }
+}
+
+int getlogin_r(char *buf, size_t bufsize)
+{
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return -1;
+}
+
+struct passwd *
+getpwent(void) {
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return NULL;
+}
+
+void
+setpwent(void) {
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+}
+
+void
+setgrent(void) {
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+}
+
+void
+endgrent(void) {
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+}
+
+struct group*
+getgrent(void) {
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return NULL;
 }
 
 struct group*
@@ -441,53 +475,83 @@ getgrnam(const char *name)
 
 struct netent* getnetbyname(const char *name)
 {
-    fprintf(stderr, "FIX ME! implement getgrnam() %s:%d\n", __FILE__, __LINE__);
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
     return NULL;
 }
 
 void endpwent(void)
 {
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
 }
 
 struct mntent* getmntent(FILE* f)
 {
-    fprintf(stderr, "FIX ME! implement getmntent() %s:%d\n", __FILE__, __LINE__);
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
     return NULL;
+}
+
+/* This is a GNU extension. We are under no obligation to implement it. */
+struct mntent *getmntent_r(FILE *fp, struct mntent *mntbuf,
+                                  char *buf, int buflen)
+{
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return NULL;
+}
+
+FILE *setmntent(const char *filename, const char *type) {
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return NULL;
+}
+
+int endmntent(FILE *fp) {
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return -1;
 }
 
 char* ttyname(int fd)
 {
-    fprintf(stderr, "FIX ME! implement ttyname() %s:%d\n", __FILE__, __LINE__);
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
     return NULL;
 }
 
 int ttyname_r(int fd, char *buf, size_t buflen)
 {
-    fprintf(stderr, "FIX ME! implement ttyname_r() %s:%d\n", __FILE__, __LINE__);
-    return -ERANGE;
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return -1;
 }
 
 struct netent *getnetbyaddr(uint32_t net, int type)
 {
     fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
     return NULL;
 }
 
 struct protoent *getprotobyname(const char *name)
 {
     fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
     return NULL;
 }
 
 struct protoent *getprotobynumber(int proto)
 {
     fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
     return NULL;
 }
 
 char* getusershell(void)
 {
     fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
     return NULL;
 }
 
@@ -499,4 +563,75 @@ void setusershell(void)
 void endusershell(void)
 {
     fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+}
+
+ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream)
+{
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return -1;
+}
+
+ssize_t getline(char **lineptr, size_t *n, FILE *stream)
+{
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return -1;
+}
+
+int addmntent(FILE *fp, const struct mntent *mnt)
+{
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return -1;
+}
+
+char *hasmntopt(const struct mntent *mnt, const char *opt)
+{
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return NULL;
+}
+
+struct utmp *getutid(struct utmp *ut)
+{
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return NULL;
+}
+struct utmp *getutline(struct utmp *ut)
+{
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return NULL;
+}
+
+
+int tcdrain(int fd)
+{
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return -1;
+}
+
+struct ether_addr *ether_aton_r(const char *asc,
+                                       struct ether_addr *addr)
+{
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return NULL;
+}
+
+int ether_hostton(const char *hostname, struct ether_addr *addr)
+{
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return -1;
+}
+
+char *crypt(const char *key, const char *salt)
+{
+    fprintf(stderr, "FIX ME! implement %s() %s:%d\n", __FUNCTION__, __FILE__, __LINE__);
+    errno = ENOSYS;
+    return NULL;
 }

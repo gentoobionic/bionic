@@ -42,6 +42,9 @@
 #include <strings.h>
 #include <memory.h>
 
+/* gcc relies on PAGE_SIZE being defined */
+#include <asm/page.h>
+
 __BEGIN_DECLS
 
 #define EXIT_FAILURE 1
@@ -138,6 +141,7 @@ extern int    unlockpt(int);
 extern char*  ptsname(int);
 extern int    ptsname_r(int, char*, size_t);
 extern int    getpt(void);
+extern int    posix_openpt(int flags);
 
 static __inline__ int grantpt(int __fd __attribute((unused)))
 {

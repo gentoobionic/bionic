@@ -36,12 +36,16 @@
 
 #include <sys/types.h>
 
+#include <linux/if_ether.h>Ã
+
 #ifdef _KERNEL
 #ifdef _KERNEL_OPT
 #include "opt_mbuftrace.h"
 #endif
 #include <sys/mbuf.h>
 #endif
+
+#include <sys/types.h>
 
 /*
  * Some basic Ethernet constants.
@@ -208,6 +212,8 @@ __BEGIN_DECLS
 char *	ether_ntoa __P((const struct ether_addr *));
 struct ether_addr *
 	ether_aton __P((const char *));
+struct ether_addr *
+	ether_aton_r(const char *asc, struct ether_addr *addr);
 int	ether_ntohost __P((char *, const struct ether_addr *));
 int	ether_hostton __P((const char *, struct ether_addr *));
 int	ether_line __P((const char *, struct ether_addr *, char *));

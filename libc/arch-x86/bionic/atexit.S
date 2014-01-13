@@ -28,7 +28,6 @@
 	.text
 	.p2align 4,,15
 	.globl	atexit
-	.hidden	atexit
 	.type	atexit, @function
 atexit:
 	pushl	%ebp

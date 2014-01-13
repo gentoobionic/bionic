@@ -66,12 +66,12 @@
 #include <sys/socket.h>
 
 #ifndef _PATH_HEQUIV
-# define	_PATH_HEQUIV	"/system/etc/hosts.equiv"
+# define	_PATH_HEQUIV	"/etc/hosts.equiv"
 #endif
-#define	_PATH_HOSTS	"/system/etc/hosts"
-#define	_PATH_NETWORKS	"/system/etc/networks"
-#define	_PATH_PROTOCOLS	"/system/etc/protocols"
-#define	_PATH_SERVICES	"/system/etc/services"
+#define	_PATH_HOSTS	"/etc/hosts"
+#define	_PATH_NETWORKS	"/etc/networks"
+#define	_PATH_PROTOCOLS	"/etc/protocols"
+#define	_PATH_SERVICES	"/etc/services"
 
 #define  MAXHOSTNAMELEN  256
 

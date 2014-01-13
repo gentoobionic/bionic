@@ -172,10 +172,8 @@ extern int ttyname_r(int, char*, size_t);
 
 extern int  acct(const char*  filepath);
 
-static __inline__ int getpagesize(void) {
-  extern unsigned int __page_size;
-  return __page_size;
-}
+extern int getpagesize(void);
+
 static __inline__ int __getpageshift(void) {
   extern unsigned int __page_shift;
   return __page_shift;
@@ -191,17 +189,23 @@ extern int cacheflush(long start, long end, long flags);
 extern pid_t tcgetpgrp(int fd);
 extern int   tcsetpgrp(int fd, pid_t _pid);
 
+extern char * mkdtemp(char *tmplt);
+
 #if 0 /* MISSING FROM BIONIC */
-extern pid_t  getsid(pid_t);
 extern int execvpe(const char *, char * const *, char * const *);
 extern int execlpe(const char *, const char *, ...);
 extern int getfsuid(uid_t);
 extern int setfsuid(uid_t);
-extern int getlogin_r(char* name, size_t namesize);
-extern int sethostname(const char *, size_t);
 extern int getdomainname(char *, size_t);
 extern int setdomainname(const char *, size_t);
 #endif /* MISSING */
+
+extern int sethostname(const char *, size_t);
+
+// FIXME: stubs
+extern pid_t  getsid(pid_t);
+extern int getlogin_r(char* name, size_t namesize);
+extern char *crypt(const char *key, const char *salt);
 
 /* Used to retry syscalls that can return EINTR. */
 #define TEMP_FAILURE_RETRY(exp) ({         \

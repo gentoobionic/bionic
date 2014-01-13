@@ -79,11 +79,26 @@ struct utmp
 #define ut_time ut_tv.tv_sec
 #define ut_addr ut_addr_v6[0]
 
+/* Definitions for ut_type. */
+#define EMPTY              0
+#define RUN_LVL            1    /* this is a RUN_LEVEL record */
+#define BOOT_TIME          2    /* this is a REBOOT record */
+#define INIT_PROCESS       5    /* this process was spawned by INIT */
+#define LOGIN_PROCESS      6    /* this is a 'getty' process waiting */
+#define USER_PROCESS       7    /* any other user process */
+#define DEAD_PROCESS       8    /* this process has died (wtmp only) */
+
 __BEGIN_DECLS
 
 int utmpname(const char*);
 void setutent();
 struct utmp* getutent();
+void pututline(struct utmp* utmp);
+struct utmp *getutid(struct utmp *ut);
+struct utmp *getutline(struct utmp *ut);
+
+void setutent(void);
+void endutent(void);
 
 __END_DECLS
 

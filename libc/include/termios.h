@@ -99,6 +99,11 @@ static __inline__ int cfsetispeed(struct termios *s, speed_t  speed)
   return 0;
 }
 
+static __inline__ int cfsetspeed(struct termios *s, speed_t  speed)
+{
+    return cfsetospeed(s,speed) || cfsetispeed(s,speed);
+}
+
 static __inline__ void cfmakeraw(struct termios *s)
 {
     s->c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL|IXON);
@@ -107,6 +112,8 @@ static __inline__ void cfmakeraw(struct termios *s)
     s->c_cflag &= ~(CSIZE|PARENB);
     s->c_cflag |= CS8;
 }
+
+extern int tcdrain(int fd);
 
 __END_DECLS
 

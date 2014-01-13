@@ -37,6 +37,16 @@
 
 __BEGIN_DECLS
 
+#ifndef S_BLKSIZE
+#define S_BLKSIZE 512
+#endif
+
+/* POSIX.1b objects.  Note that these macros always evaluate to zero.  But
+   they do it by enforcing the correct use of the macros.  */
+#define S_TYPEISMQ(buf)  ((buf)->st_mode - (buf)->st_mode)
+#define S_TYPEISSEM(buf) ((buf)->st_mode - (buf)->st_mode)
+#define S_TYPEISSHM(buf) ((buf)->st_mode - (buf)->st_mode)
+
 /* really matches stat64 in the kernel, hence the padding
  * Note: The kernel zero's the padded region because glibc might read them
  * in the hope that the kernel has stretched to using larger sizes.

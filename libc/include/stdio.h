@@ -60,11 +60,6 @@
 typedef	unsigned long    size_t;
 #endif
 
-#ifndef	_OFF_T_DEFINED_
-#define	_OFF_T_DEFINED_
-typedef	long    off_t;
-#endif
-
 #ifndef NULL
 #ifdef 	__GNUG__
 #define	NULL	__null
@@ -214,9 +209,7 @@ __END_DECLS
 #define	SEEK_END	2	/* set file offset to EOF plus offset */
 #endif
 
-#define	stdin	(&__sF[0])
-#define	stdout	(&__sF[1])
-#define	stderr	(&__sF[2])
+extern FILE *stdin, *stdout, *stderr;
 
 /*
  * Functions defined in ANSI C standard.
@@ -332,6 +325,11 @@ int	 putchar_unlocked(int);
 char	*tempnam(const char *, const char *);
 #endif
 __END_DECLS
+
+#if __POSIX_VISIBLE >= 200809
+ssize_t getline(char **lineptr, size_t *n, FILE *stream);
+ssize_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream);
+#endif /* __POSIX_VISIBLE >= 200809 */
 
 #endif /* __BSD_VISIBLE || __POSIX_VISIBLE || __XPG_VISIBLE */
 

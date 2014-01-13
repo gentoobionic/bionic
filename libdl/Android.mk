@@ -51,6 +51,12 @@ endif
 
 include $(BUILD_SHARED_LIBRARY)
 
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:= libdl.c
+LOCAL_MODULE:= libdl
+include $(BUILD_STATIC_LIBRARY)
+
 BUILD_DLTEST:=0
 ifeq ($(BUILD_DLTEST),1)
 

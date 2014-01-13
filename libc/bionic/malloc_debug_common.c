@@ -344,7 +344,7 @@ static void malloc_init_impl(void)
                          __progname, malloc_double_free_backlog);
             }
 
-            so_name = "/system/lib/libc_malloc_debug_leak.so";
+            so_name = "/lib/libc_malloc_debug_leak.so";
             break;
         }
         case 20:
@@ -360,7 +360,7 @@ static void malloc_init_impl(void)
                           __progname);
                 return;
             }
-            so_name = "/system/lib/libc_malloc_debug_qemu.so";
+            so_name = "/lib/libc_malloc_debug_qemu.so";
             break;
         default:
             error_log("%s: Debug level %d is unknown\n",

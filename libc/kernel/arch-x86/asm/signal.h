@@ -23,10 +23,11 @@
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #include <linux/time.h>
 #include <linux/compiler.h>
+#include <stdint.h>
 struct siginfo;
-#define NSIG 32
+#define NSIG 64
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
-typedef unsigned long sigset_t;
+typedef uint64_t sigset_t;
 #endif
 #define SIGHUP 1
 #define SIGINT 2

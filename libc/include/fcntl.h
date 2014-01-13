@@ -48,6 +48,7 @@ extern int  openat(int fd, const char*  path, int  mode, ...);
 extern int  unlinkat(int dirfd, const char *pathname, int flags);
 extern int  fcntl(int   fd, int   command, ...);
 extern int  creat(const char*  path, mode_t  mode);
+extern ssize_t readahead(int fd, off64_t offset, size_t count);
 
 __END_DECLS
 

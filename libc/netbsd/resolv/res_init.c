@@ -318,7 +318,7 @@ __res_vinit(res_state statp, int preinit) {
 	if (nserv > 0)
 		statp->nscount = nserv;
 #endif
-#ifdef ANDROID_CHANGES /* READ FROM SYSTEM PROPERTIES */
+#if 0 /* READ FROM SYSTEM PROPERTIES */
 	dns_last_change_counter = _get_dns_change_count();
 
 	nserv = 0;

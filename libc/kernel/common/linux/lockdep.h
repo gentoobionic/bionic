@@ -19,7 +19,6 @@
 #ifndef __LINUX_LOCKDEP_H
 #define __LINUX_LOCKDEP_H
 #include <linux/linkage.h>
-#include <linux/list.h>
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #include <linux/debug_locks.h>
 #include <linux/stacktrace.h>

@@ -34,6 +34,12 @@
 #define MAXPATHLEN  PATH_MAX
 #define MAXSYMLINKS 8
 
+#define NBBY 8
+#define	setbit(a,i) ((a)[(i)/NBBY] |= 1<<((i)%NBBY))
+#define	clrbit(a,i) ((a)[(i)/NBBY] &= ~(1<<((i)%NBBY)))
+#define	isset(a,i) ((a)[(i)/NBBY] & (1<<((i)%NBBY)))
+#define	isclr(a,i) (((a)[(i)/NBBY] & (1<<((i)%NBBY))) == 0)
+
 #define ALIGNBYTES  3
 #define ALIGN(p)    (((unsigned int)(p) + ALIGNBYTES) &~ ALIGNBYTES)
 

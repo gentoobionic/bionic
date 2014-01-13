@@ -55,6 +55,7 @@ int     getgroups:getgroups32(int, gid_t *)    205
 pid_t   getpgid(pid_t)             132
 pid_t   getppid()                  64
 pid_t   setsid()                   66
+pid_t   getsid()                   147
 int     setgid:setgid32(gid_t)     214
 int     seteuid:seteuid32(uid_t)   stub
 int     __setreuid:setreuid32(uid_t, uid_t)   203
@@ -85,6 +86,8 @@ int     capget(cap_user_header_t header, cap_user_data_t data) 184
 int     capset(cap_user_header_t header, const cap_user_data_t data) 185
 int     sigaltstack(const stack_t*, stack_t*) 186
 int     acct(const char*  filepath)  51
+int     sethostname(const char *, size_t) 74
+int     pivot_root(const char *, const char *) 117,118,117
 
 # file descriptors
 ssize_t     read (int, void*, size_t)        3
@@ -134,6 +137,8 @@ int         mkdirat(int dirfd, const char *pathname, mode_t mode)  323,296
 int         fchownat(int dirfd, const char *path, uid_t owner, gid_t group, int flags)  325,298
 int         fchmodat(int dirfd, const char *path, mode_t mode, int flags)  333,306
 int         renameat(int olddirfd, const char *oldpath, int newdirfd, const char *newpath)  329,302
+ssize_t     readahead(int, off64_t, size_t) 225
+
 int         fsetxattr(int, const char *, const void *, size_t, int) 228
 ssize_t     fgetxattr(int, const char *, void *, size_t) 231
 ssize_t     flistxattr(int, char *, size_t) 234
@@ -173,6 +178,8 @@ ssize_t llistxattr(const char *, char *, size_t) 233
 int     removexattr(const char *, const char *) 235
 int     lremovexattr(const char *, const char *) 236
 int     __statfs64:statfs64(const char *, size_t, struct statfs *)  266,268
+int     swapon(const char *, int) 87
+int     swapoff(const char *) 115
 
 # time
 int           pause ()                       29
@@ -193,6 +200,8 @@ int           __timer_getoverrun:timer_getoverrun(timer_t)                      
 int           __timer_delete:timer_delete(timer_t)                                                      261,263
 int           utimes(const char*, const struct timeval tvp[2])                          269, 271
 int           utimensat(int, const char *, const struct timespec times[2], int)         348, 320, 320
+int           stime(time_t *) 25
+int           adjtimex(struct timex *) 124
 
 # signals
 int     sigaction(int, const struct sigaction *, struct sigaction *)  67
@@ -253,6 +262,17 @@ int __getcpu:getcpu(unsigned *cpu, unsigned *node, void *unused) 345,318
 # io priorities
 int ioprio_set(int which, int who, int ioprio) 314,289
 int ioprio_get(int which, int who) 315,290
+
+# ipc
+int   msgget (key_t, int) 186,303,242
+int   msgctl (int, int, struct msqid_ds *) 187,304,243
+int   semget(key_t, int, int) 190,299,238
+int   semctl(int, int, int, ...) 191,300,239
+int   semop(int, struct sembuf *, unsigned) 193,298,237
+int   shmget(key_t, size_t, int) 194,307,246
+int   shmctl(int, int, struct shmid_ds *) 195,308,247
+void* shmat(int, const void *, int) 196,305,244
+int   shmdt(const void *) 197,306,245
 
 # other
 int     uname(struct utsname *)  122

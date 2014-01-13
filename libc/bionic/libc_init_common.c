@@ -139,7 +139,8 @@ void __libc_fini(void* array)
         func();
     }
 
-#ifndef LIBC_STATIC
+//#ifndef LIBC_STATIC
+#if 0
     {
         extern void __libc_postfini(void) __attribute__((weak));
         if (__libc_postfini)

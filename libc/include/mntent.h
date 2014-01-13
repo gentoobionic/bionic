@@ -30,7 +30,10 @@
 
 #include <stdio.h>
 
+#define MNTTYPE_SWAP "swap"
 #define MNTTYPE_IGNORE "ignore"
+
+#define MNTOPT_NOAUTO "noauto"
 
 struct mntent
 {
@@ -46,7 +49,13 @@ struct mntent
 __BEGIN_DECLS
 
 
-struct mntent* getmntent(FILE*);
+extern struct mntent* getmntent(FILE*);
+extern FILE *setmntent(const char *filename, const char *type);
+extern int endmntent(FILE *fp);
+extern struct mntent *getmntent_r(FILE *fp, struct mntent *mntbuf,
+                                  char *buf, int buflen);
+extern int addmntent(FILE *fp, const struct mntent *mnt);
+extern char *hasmntopt(const struct mntent *mnt, const char *opt);
 
 __END_DECLS
 

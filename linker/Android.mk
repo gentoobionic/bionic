@@ -40,6 +40,8 @@ LOCAL_MODULE:= linker
 
 LOCAL_STATIC_LIBRARIES := libc_nomalloc
 
+LOCAL_TAIL_MATTER := -lgcc
+
 #LOCAL_FORCE_STATIC_EXECUTABLE := true # not necessary when not including BUILD_EXECUTABLE
 
 #
@@ -63,6 +65,11 @@ $(linked_module): $(TARGET_CRTBEGIN_STATIC_O) $(all_objects) $(all_libraries) $(
 	$(transform-o-to-static-executable)
 	@echo "target PrefixSymbols: $(PRIVATE_MODULE) ($@)"
 	$(hide) $(TARGET_OBJCOPY) --prefix-symbols=__dl_ $@
+
+$(LOCAL_BUILT_MODULE): TARGET_CRTBEGIN_STATIC_O :=
+$(LOCAL_BUILT_MODULE): TARGET_CRTBEGIN_DYNAMIC_O :=
+$(LOCAL_BUILT_MODULE): TARGET_CRTEND_STATIC_O :=
+$(LOCAL_BUILT_MODULE): TARGET_CRTEND_O :=
 
 #
 # end of BUILD_EXECUTABLE hack

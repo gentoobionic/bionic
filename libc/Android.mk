@@ -10,6 +10,7 @@ libc_common_src_files := \
 	unistd/alarm.c \
 	unistd/brk.c \
 	unistd/creat.c \
+	unistd/crypt.c \
 	unistd/daemon.c \
 	unistd/eventfd.c \
 	unistd/exec.c \
@@ -21,10 +22,13 @@ libc_common_src_files := \
 	unistd/getcwd.c \
 	unistd/getdtablesize.c \
 	unistd/gethostname.c \
+	unistd/getlogin.c \
 	unistd/getopt_long.c \
+	unistd/getpagesize.c \
 	unistd/getpgrp.c \
 	unistd/getpriority.c \
 	unistd/getpt.c \
+	unistd/getusershell.c \
 	unistd/initgroups.c \
 	unistd/isatty.c \
 	unistd/issetugid.c \
@@ -35,9 +39,11 @@ libc_common_src_files := \
 	unistd/open.c \
 	unistd/openat.c \
 	unistd/opendir.c \
+	unistd/openpty.c \
 	unistd/pathconf.c \
 	unistd/perror.c \
 	unistd/popen.c \
+	unistd/posix_openpt.c \
 	unistd/pread.c \
 	unistd/pselect.c \
 	unistd/ptsname.c \
@@ -70,6 +76,7 @@ libc_common_src_files := \
 	unistd/tcgetpgrp.c \
 	unistd/tcsetpgrp.c \
 	unistd/time.c \
+	unistd/ttyname.c \
 	unistd/umount.c \
 	unistd/unlockpt.c \
 	unistd/usleep.c \
@@ -106,6 +113,8 @@ libc_common_src_files := \
 	stdio/fwrite.c \
 	stdio/getc.c \
 	stdio/getchar.c \
+	stdio/getdelim.c \
+	stdio/getline.c \
 	stdio/gets.c \
 	stdio/makebuf.c \
 	stdio/mktemp.c \
@@ -178,6 +187,7 @@ libc_common_src_files := \
 	stdlib/wchar.c \
 	string/index.c \
 	string/memccpy.c \
+	string/mempcpy.c \
 	string/memchr.c \
 	string/memmem.c \
 	string/memrchr.c \
@@ -186,6 +196,7 @@ libc_common_src_files := \
 	string/strcasestr.c \
 	string/strcat.c \
 	string/strchr.c \
+	string/strchrnul.c \
 	string/strcoll.c \
 	string/strcspn.c \
 	string/strdup.c \
@@ -279,7 +290,6 @@ libc_common_src_files := \
 	bionic/semaphore.c \
 	bionic/sha1.c \
 	bionic/ssp.c \
-	bionic/stubs.c \
 	bionic/system_properties.c \
 	bionic/tdelete.c \
 	bionic/tdestroy.c \
@@ -319,10 +329,40 @@ libc_common_src_files := \
 	netbsd/nameser/ns_netint.c \
 	netbsd/nameser/ns_print.c \
 	netbsd/nameser/ns_samedomain.c \
+	netdb/getnetbyaddr.c \
+	netdb/getnetbyname.c \
+	netdb/getprotobyname.c \
+	netdb/getprotobynumber.c \
+	netinet/ether_hostton.c \
+	netinet/ether_line.c \
 	regex/regcomp.c \
 	regex/regerror.c \
 	regex/regexec.c \
 	regex/regfree.c \
+	shadow/endspent.c \
+	shadow/fgetspent.c \
+	shadow/getspent.c \
+	shadow/getspnam.c \
+	shadow/lckpwdf.c \
+	shadow/putspent.c \
+	shadow/setspent.c \
+	shadow/sgetspent.c \
+	shadow/ulckpwdf.c \
+	termios/tcdrain.c \
+	utmp/getutid.c \
+	utmp/getutline.c \
+	grp/getgrent.c \
+	grp/getgrgid.c \
+	grp/getgrnam.c \
+	grp/getgrouplist.c \
+	mntent/addmntent.c \
+	mntent/endmntent.c \
+	mntent/getmntent.c \
+	mntent/hasmntopt.c \
+	mntent/setmntent.c \
+	pwd/getpwent.c \
+	pwd/getpwnam.c \
+	pwd/getpwuid.c \
 
 # The following files are common, but must be compiled
 # with different C flags when building a static C library.
@@ -448,6 +488,7 @@ libc_common_cflags := \
 		-DSOFTFLOAT                     \
 		-DFLOATING_POINT		\
 		-DINET6 \
+		-I$(LOCAL_PATH) \
 		-I$(LOCAL_PATH)/private \
 		-DUSE_DL_PREFIX \
 		-DPOSIX_MISTAKE \
@@ -626,6 +667,8 @@ LOCAL_MODULE := libc_nomalloc
 LOCAL_WHOLE_STATIC_LIBRARIES := libc_common
 LOCAL_SYSTEM_SHARED_LIBRARIES :=
 
+LOCAL_LDLIBS := -lgcc
+
 include $(BUILD_STATIC_LIBRARY)
 
 
@@ -692,6 +735,7 @@ LOCAL_MODULE:= libc
 LOCAL_SHARED_LIBRARIES := libdl
 LOCAL_WHOLE_STATIC_LIBRARIES := libc_common
 LOCAL_SYSTEM_SHARED_LIBRARIES :=
+LOCAL_LDFLAGS := -lgcc
 
 include $(BUILD_SHARED_LIBRARY)
 

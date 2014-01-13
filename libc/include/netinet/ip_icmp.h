@@ -38,6 +38,8 @@
 #include <netinet/ip.h>
 #include <sys/cdefs.h>
 
+#include <linux/icmp.h>
+
 __BEGIN_DECLS
 
 /*

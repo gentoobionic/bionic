@@ -33,6 +33,8 @@
 #include <sys/types.h>
 #include <asm/unistd.h>
 
+#include <sys/linux-syscalls.h>
+
 __BEGIN_DECLS
 
 int syscall(int number, ...);

@@ -22,7 +22,6 @@
 #include <linux/linkage.h>
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #include <linux/mmzone.h>
-#include <linux/list.h>
 #include <linux/sched.h>
 #include <asm/atomic.h>
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */

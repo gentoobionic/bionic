@@ -22,7 +22,7 @@
 #include <linux/threads.h>
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #include <linux/bitmap.h>
-typedef struct { DECLARE_BITMAP(bits, NR_CPUS); } cpumask_t;
+typedef struct { unsigned long bits[NR_CPUS]; } cpumask_t;
 #define cpu_set(cpu, dst) __cpu_set((cpu), &(dst))
 #define cpu_clear(cpu, dst) __cpu_clear((cpu), &(dst))
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */

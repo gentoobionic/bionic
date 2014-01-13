@@ -54,8 +54,10 @@
 #ifndef _RESOLV_PRIVATE_H_
 #define	_RESOLV_PRIVATE_H_
 
+#include <netinet/in.h>
 #include <resolv.h>
 #include "resolv_static.h"
+#include "arpa_nameser.h"
 
 /*
  * Revision information.  This is the release date in YYYYMMDD format.
@@ -96,7 +98,7 @@ struct __res_state; /* forward */
  */
 
 #ifndef _PATH_RESCONF
-#ifdef ANDROID_CHANGES
+#if 0
 #define _PATH_RESCONF        "/etc/ppp/resolv.conf"
 #else
 #define _PATH_RESCONF        "/etc/resolv.conf"
@@ -277,13 +279,13 @@ __BEGIN_DECLS
 extern struct __res_state *__res_get_state(void);
 extern void __res_put_state(struct __res_state *);
 
-#ifndef ANDROID_CHANGES
+#if 1
 /*
  * Source and Binary compatibility; _res will not work properly
  * with multi-threaded programs.
  */
-extern struct __res_state *__res_state(void);
-#define _res (*__res_state())
+extern struct __res_state *__res_get_state(void);
+#define _res (*__res_get_state())
 #endif
 
 __END_DECLS
@@ -341,7 +343,7 @@ extern const struct res_sym __p_type_syms[];
 extern const struct res_sym __p_rcode_syms[];
 #endif /* SHARED_LIBBIND */
 
-#ifndef ADNROID_CHANGES
+#if 1
 #define b64_ntop		__b64_ntop
 #define b64_pton		__b64_pton
 #endif
@@ -415,7 +417,7 @@ int		res_dnok(const char *);
 int		sym_ston(const struct res_sym *, const char *, int *);
 const char *	sym_ntos(const struct res_sym *, int, int *);
 const char *	sym_ntop(const struct res_sym *, int, int *);
-#ifndef ANDROID_CHANGES
+#if 1
 int		b64_ntop(u_char const *, size_t, char *, size_t);
 int		b64_pton(char const *, u_char *, size_t);
 #endif
