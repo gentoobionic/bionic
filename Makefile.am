@@ -1,0 +1,1 @@
+SUBDIRS = libc libdl libm libstdc++ libthread_db linker
