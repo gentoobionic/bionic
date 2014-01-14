@@ -190,15 +190,19 @@ void free_malloc_leak_info(uint8_t* info)
     dlfree(info);
 }
 
+#if 0
 struct mallinfo mallinfo()
 {
     return dlmallinfo();
 }
+#endif
 
+#if 0
 void* valloc(size_t bytes) {
     /* assume page size of 4096 bytes */
     return memalign( getpagesize(), bytes );
 }
+#endif
 
 /* Support for malloc debugging.
  * Note that if USE_DL_PREFIX is not defined, it's assumed that memory

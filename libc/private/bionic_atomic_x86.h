@@ -19,7 +19,7 @@
 /* Define a full memory barrier, this is only needed if we build the
  * platform for a multi-core device.
  */
-#if defined(ANDROID_SMP) && ANDROID_SMP == 1
+#if 1
 __ATOMIC_INLINE__ void
 __bionic_memory_barrier()
 {

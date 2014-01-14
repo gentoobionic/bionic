@@ -640,10 +640,7 @@ DEFAULT_MMAP_THRESHOLD       default: 256K
 
 /* #define HAVE_USR_INCLUDE_MALLOC_H */
 
-#if !ANDROID
 #ifdef HAVE_USR_INCLUDE_MALLOC_H
-#include "/usr/include/malloc.h"
-#else /* HAVE_USR_INCLUDE_MALLOC_H */
 
 struct mallinfo {
   MALLINFO_FIELD_TYPE arena;    /* non-mmapped space allocated from system */
@@ -660,7 +657,6 @@ struct mallinfo {
 
 #endif /* HAVE_USR_INCLUDE_MALLOC_H */
 #endif /* NO_MALLINFO */
-#endif /* ANDROID */
 
 #ifdef __cplusplus
 extern "C" {

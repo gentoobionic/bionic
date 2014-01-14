@@ -11,10 +11,10 @@ if [ "$1" = clean ]; then
   if [ -e "Makefile" ]; then
     make clean
   fi
-  for e in la lo lai o so in m4 stamp class inc; do
+  for e in la lo lai o so m4 stamp; do
     rm -f $(find . -name "*.${e}" -type f)
   done
-  for e in Makefile depcomp INSTALL config.guess config.sub config.log config.status configure install-sh ltmain.sh missing libtool; do
+  for e in Makefile.in Makefile depcomp INSTALL config.guess config.sub config.log config.status configure install-sh ltmain.sh missing libtool; do
     rm -f $(find . -name "${e}" -type f -o -type l)
   done
   for e in autom4te.cache .libs .deps; do
