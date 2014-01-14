@@ -21,6 +21,16 @@ if [ "$1" = clean ]; then
     rm -Rf $(find . -name "${e}" -type d)
   done
 else
+	#	cp libc/Makefile.am.in blah
+	#	for arch in arm x86; do
+    # a little magic to have automake properly informed of the gensyscalls output
+    #_top_builddir=${PWD}
+    #_top_scrdir="${0/configure/}"
+    #SYSCALLS_TO_COMPILE="$(python ${_top_srcdir}libc/tools/gensyscalls.py ${arch})"
+    #SYSCALLS_TO_COMPILE="$(echo ${SYSCALLS_TO_COMPILE})"
+    #echo "${SYSTOOLS_TO_COMPILE}"
+    #python ${_top_srcdir}libc/tools/sed.py libc/Makefile.am.in libc/Makefile.am "#SYSCALLS_TO_COMPILE_$(echo ${arch} | tr [:lower:] [:upper:])#" "${SYSCALLS_TO_COMPILE}" 
+
   if [ "$(which libtoolize)" != "" ]; then
     libtoolize && aclocal && automake --add-missing && autoconf
   else

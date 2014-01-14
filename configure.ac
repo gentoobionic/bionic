@@ -73,14 +73,6 @@ AC_SUBST(COMMON_LDFLAGS)
 COMMON_LDFLAGS_X86="-Wl,--exclude-libs=libgcc_eh.a"
 AC_SUBST(COMMON_LDFLAGS_X86)
 
-dnl a little magic to have automake properly informed of the gensyscalls output
-_top_builddir=${PWD}
-_top_scrdir="${0/configure/}"
-echo "_top_srcdir='${_top_srcdir}'"
-SYSCALLS_TO_COMPILE="$(python ${_top_srcdir}libc/tools/gensyscalls.py)"
-SYSCALLS_TO_COMPILE="$(echo ${SYSCALLS_TO_COMPILE})"
-python ${_top_srcdir}libc/tools/sed.py libc/Makefile.am.in libc/Makefile.am "#SYSCALLS_TO_COMPILE#" "${SYSCALLS_TO_COMPILE}" 
-
 AC_CONFIG_FILES(
     Makefile
     libgcc_shared_fake/Makefile
