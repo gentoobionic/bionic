@@ -10,7 +10,7 @@ bionic_archs = [ "arm", "x86" ]
 # call D_setlevel to set the verbosity level
 # and D(), D2(), D3(), D4() to add traces
 #
-verbose = 1
+verbose = 0
 
 def D(msg):
     global verbose

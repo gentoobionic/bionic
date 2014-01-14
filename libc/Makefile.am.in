@@ -1,5 +1,11 @@
 SUBDIRS = zoneinfo
 
+BUILT_SOURCES =
+
+libc_crt_target_cflags =
+
+lib_LTLIBRARIES = libc_common.la libc.a libc_static.a
+
 # Define the common source files for all the libc instances
 # =========================================================
 libc_common_src_files = \
@@ -506,7 +512,7 @@ endif
 
 if TARGET_ARCH_IS_ARM
   libc_common_cflags += -fstrict-aliasing
-  libc_crt_target_cflags = -mthumb-interwork
+  libc_crt_target_cflags += -mthumb-interwork
   #
   # Define HAVE_ARM_TLS_REGISTER macro to indicate to the C library
   # that it should access the hardware TLS register directly in
@@ -522,12 +528,11 @@ if ARCH_ARM_USE_NON_NEON_MEMCPY
 endif
 else # !arm
 if TARGET_ARCH_IS_X86
-    libc_crt_target_cflags =
 if ARCH_X86_HAVE_SSE2
-        libc_crt_target_cflags += -DUSE_SSE2=1
+    libc_crt_target_cflags += -DUSE_SSE2=1
 endif
 if ARCH_X86_HAVE_SSSE3
-        libc_crt_target_cflags += -DUSE_SSSE3=1
+    libc_crt_target_cflags += -DUSE_SSSE3=1
 endif
 endif # x86
 endif # !arm

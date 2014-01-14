@@ -78,7 +78,8 @@ _top_builddir=${PWD}
 _top_scrdir="${0/configure/}"
 echo "_top_srcdir='${_top_srcdir}'"
 SYSCALLS_TO_COMPILE="$(python ${_top_srcdir}libc/tools/gensyscalls.py)"
-sed -e "s|#SYSCALLS_TO_COMPILE#|${SYSCALLS_TO_COMPILE}|g" ${_top_srcdir}libc/Makefile.am.in > ${_top_srcdir}libc/Makefile.am 
+SYSCALLS_TO_COMPILE="$(echo ${SYSCALLS_TO_COMPILE})"
+python ${_top_srcdir}libc/tools/sed.py libc/Makefile.am.in libc/Makefile.am "#SYSCALLS_TO_COMPILE#" "${SYSCALLS_TO_COMPILE}" 
 
 AC_CONFIG_FILES(
     Makefile
