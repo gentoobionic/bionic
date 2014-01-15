@@ -4,6 +4,12 @@ define compiler-include-path
 $(shell echo | @CC@ -v -x c -E - 2>&1 | grep -A 1 "^#include" | tail -n 1)
 endef
 
+BUILT_SOURCES = $(top_builddir)/syscalls.stamp
+
+$(top_builddir)/syscalls.stamp: $(top_srcdir)/libc/SYSCALLS.TXT
+	echo "CFRIEDT GENERATING SYSCALLS.STAMP"
+	python $(top_srcdir)/libc/tools/gensyscalls.py $(TARGET_ARCH) > $@
+
 # ========================================================
 # custom make rules
 # ========================================================
@@ -54,7 +60,6 @@ libc_crt_target_cflags =
 
 AM_CPFLAGS = -fPIC
 
-#lib_LTLIBRARIES = libc_common.la libc.la libc_static.la
 lib_LTLIBRARIES = libc.la libc_static.la
 noinst_LTLIBRARIES = libc_common.la 
 
@@ -439,6 +444,9 @@ libc_static_common_src_files = \
 # Architecture specific source files go here
 # =========================================================
 if TARGET_ARCH_IS_ARM
+
+# FIXME: need to do something about the .c.arm situation
+
 libc_common_src_files += \
 	bionic/bionic_clone.c \
 	arch-arm/bionic/__get_pc.S \
@@ -469,8 +477,6 @@ libc_common_src_files += \
 	string/bcopy.c \
 	string/strncmp.c \
 	unistd/socketcalls.c
-
-libc_common_src_files += $(shell if [ ! -f $(top_builddir)/syscalls.stamp ]; then python ${top_srcdir}/libc/tools/gensyscalls.py $(TARGET_ARCH) | tee $(top_builddir)/syscalls.stamp; else cat $(top_builddir)/syscalls.stamp; fi)
 
 # These files need to be arm so that gdbserver
 # can set breakpoints in them without messing
@@ -520,10 +526,6 @@ libc_common_src_files += \
 	bionic/pthread-rwlocks.c \
 	bionic/pthread-timers.c \
 	bionic/ptrace.c
-
-libc_common_src_files += $(shell ${top_srcdir}/libc/tools/gensyscalls.py $(TARGET_ARCH))
-
-libc_common_src_files = $(sort $(libc_common_src_files))
 
 libc_static_common_src_files += \
         bionic/pthread.c
@@ -689,8 +691,14 @@ BUILT_SOURCES += $(top_builddir)/crtend_android.o
 # libc_common.a
 # ========================================================
 
-#_libc_common_la_DEPENDENCIES = syscalls.stamp
-_libc_common_la_SOURCES = $(libc_common_src_files)
+# xxx: we only want an .a file, not a .so, so hijack libtool
+
+define generated-sources
+$(shell cat $(top_builddir)/syscalls.stamp 2>/dev/null)
+endef
+
+_libc_common_la_DEPENDENCIES = $(top_builddir)/syscalls.stamp
+_libc_common_la_SOURCES = $(libc_common_src_files) $(call generated-sources)
 _libc_common_la_CFLAGS = $(libc_common_cflags)
 _libc_common_la_LDFLAGS = @COMMON_LDFLAGS@ -L$(top_builddir)/libdl/.libs -L$(top_builddir)/libthread_db/.libs
 if TARGET_ARCH_IS_ARM
@@ -730,19 +738,49 @@ $(foreach st,$(filter %.S,$(_libc_common_la_SOURCES)), $(eval $(call transform-S
 # libc.a
 # ========================================================
 
-libc_static_la_SOURCES = $(sort \
+# xxx: we only want an .a file, not a .so, so hijack libtool
+
+_libc_static_la_SOURCES = \
 	$(libc_arch_static_src_files) \
 	$(libc_static_common_src_files) \
 	bionic/dlmalloc.c \
 	bionic/malloc_debug_common.c \
-	bionic/libc_init_static.c)
+	bionic/libc_init_static.c
 
-libc_static_la_LDFLAGS = @COMMON_LDFLAGS@
-libc_static_la_CFLAGS = $(libc_common_cflags) \
-                -DLIBC_STATIC
-libc_static_la_CPPFLAGS = $(addprefix -I,$(libc_common_c_includes))
-libc_static_la_LIBADD = libc_common.la
-#libc_static_la_DEPENDENCIES = syscalls.stamp
+_libc_static_la_LDFLAGS = @COMMON_LDFLAGS@
+_libc_static_la_CFLAGS = $(libc_common_cflags) -DLIBC_STATIC
+_libc_static_la_CFLAGS = $(addprefix -I,$(libc_common_c_includes))
+_libc_static_la_LIBADD = libc_common.la
+_libc_static_la_DEPENDENCIES = libc_common.la
+
+_libc_static_la_OBJECTS = \
+  $(subst /,_, \
+  	$(addprefix libc_static_la-, \ 
+      $(patsubst %.S, %.lo, $(filter %.S, $(_libc_static_la_SOURCES))) \
+      $(patsubst %.c, %.lo, $(filter %.c, $(_libc_static_la_SOURCES))) \
+      $(patsubst %.cpp, %.lo, $(filter %.cpp, $(_libc_static_la_SOURCES))) \
+      $(patsubst %.cc, %.lo, $(filter %.cc, $(_libc_static_la_SOURCES))) \
+      $(patsubst %.s, %.lo, $(filter %.s, $(_libc_static_la_SOURCES))) \
+    ) \
+  )
+
+#_libc_common_la_LINK = \
+#	$(LIBTOOL) -static --tag=CC $(AM_LIBTOOLFLAGS) \
+#	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(_libc_common_la_CFLAGS) \
+#	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+
+libc_static.Plo:
+	touch .deps/$@
+
+libc_static.la: $(_libc_static_la_OBJECTS) $(_libc_static_la_DEPENDENCIES) $(_EXTRA_libc_static_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(LINK) $(addprefix .libs/,$(_libc_static_la_OBJECTS)) $(_libc_static_la_LIBADD) $(LIBS)
+	sed -e 's|installed=no|installed=yes|' $@ > .libs/$(@)i
+
+$(foreach st,$(filter %.c,$(_libc_static_la_SOURCES)), $(eval $(call transform-c-to-o, libc_static, $(st))))
+$(foreach st,$(filter %.cc,$(_libc_static_la_SOURCES)), $(eval $(call transform-cpp-to-o, libc_static, $(st), .cc)))
+$(foreach st,$(filter %.cpp,$(_libc_static_la_SOURCES)), $(eval $(call transform-cpp-to-o, libc_static, $(st), .cpp)))
+$(foreach st,$(filter %.S,$(_libc_static_la_SOURCES)), $(eval $(call transform-S-to-o, libc_static, $(st))))
+
 
 # ========================================================
 # libc.so
@@ -755,7 +793,7 @@ libc_static_la_LIBADD = libc_common.la
 # see libc/bionic/pthread_debug.c for details
 
 libc_la_CFLAGS = $(libc_common_cflags) -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=0
-libc_la_LDLIBS = -ldl
+libc_la_LIBADD = libc_common.la -ldl -lgcc
 libc_la_LDFLAGS = @COMMON_LDFLAGS@
 
 if TARGET_ARCH_IS_ARM
@@ -772,7 +810,7 @@ libc_la_SOURCES = \
 	bionic/malloc_debug_common.c \
 	bionic/pthread_debug.c \
 	bionic/libc_init_dynamic.c
-#libc_la_DEPENDENCIES = syscalls.stamp
+libc_la_DEPENDENCIES = $(top_builddir)/syscalls.stamp
 
 # WARNING: The only library libc.so should depend on is libdl.so!  If you add other libraries,
 # make sure to add -Wl,--exclude-libs=libgcc.a to the LOCAL_LDFLAGS for those libraries.  This
@@ -781,9 +819,6 @@ libc_la_SOURCES = \
 # should, instead relying on the external symbols from the dependent libraries.  That would
 # create an "cloaked" dependency on libgcc.a in libc though the libraries, which is not what
 # you wanted!
-
-libc_la_LIBADD = libc_common.la
-libc_la_LDFLAGS = -lgcc
 
 # For all builds, except for the -user build we will enable memory
 # allocation checking (including memory leaks, buffer overwrites, etc.)

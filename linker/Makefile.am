@@ -8,11 +8,12 @@ endef
 
 bin_PROGRAMS = linker
 linker_SOURCES = linker.c linker_format.c linker_environ.c dlfcn.c debugger.c rt.c
-linker_CFLAGS = -DLINKER_DEBUG=0 -nocrtfiles -nostdinc -include $(top_srcdir)/libc/arch-@TARGET_ARCH@/AndroidConfig.h
+linker_CFLAGS = -DLINKER_DEBUG=0 -nostartfiles -nostdinc -include $(top_srcdir)/libc/arch-@TARGET_ARCH@/AndroidConfig.h
 linker_CFLAGS += -fno-stack-protector -Wstrict-overflow=5 -fvisibility=hidden
 linker_CFLAGS += -I$(call compiler-include-path)
+linker_CFLAGS += -I$(top_srcdir)/libc/include
 linker_LDFLAGS = -Wl,-no-undefined -nodefaultlibs -L$(top_builddir) -L$(top_builddir)/libc/.libs
-linker_LDLIBS = -lc_static -lgcc
+linker_LDADD = -lc_static -lgcc
 
 linker_CFLAGS += -I$(top_srcdir)/libc/arch-@TARGET_ARCH@/include
 linker_CFLAGS += -I$(top_srcdir)/libc/kernel/arch-@TARGET_ARCH@
