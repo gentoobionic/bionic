@@ -1,10 +1,62 @@
 SUBDIRS = zoneinfo
 
+define compiler-include-path
+$(shell echo | @CC@ -v -x c -E - 2>&1 | grep -A 1 "^#include" | tail -n 1)
+endef
+
+# ========================================================
+# custom make rules
+# ========================================================
+
+define transform-c-to-o
+$(eval _lib := $(strip $(1)))
+$(eval _src := $(strip $(2)))
+$(eval _tgt := $(addprefix $(_lib)_la-,$(subst /,_,$(_src:.c=.lo))))
+$(_tgt): $(_src)
+		$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_$(_lib)_la_CFLAGS) $(CFLAGS) -MT $$@ -MD -MP -MF $(DEPDIR)/$$(@:.lo=.Tpo) -c -o $(builddir)/.libs/$$@ `test -f '$$<' || echo '$(srcdir)/'`$$<
+		$(am__mv) $(DEPDIR)/$$(@:.lo=.Tpo) $(DEPDIR)/$$(@:.lo=.Plo)
+endef
+
+define transform-cpp-to-o
+$(eval _lib := $(strip $(1)))
+$(eval _src := $(strip $(2)))
+$(eval _ext := $(strip $(3)))
+$(eval _tgt := $(addprefix $(_lib)_la-,$(subst /,_,$(_src:$(_ext)=.lo))))
+$(_tgt): $(_src)
+		$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_$(_lib)_la_CFLAGS) $(CXXFLAGS) -MT $$@ -MD -MP -MF $(DEPDIR)/$$(@:.lo=.Tpo) -c -o $(builddir)/.libs/$$@ `test -f '$$<' || echo '$(srcdir)/'`$$<
+		$(am__mv) $(DEPDIR)/$$(@:.lo=.Tpo) $(DEPDIR)/$$(@:.lo=.Plo)
+endef
+
+define transform-S-to-o
+$(eval _lib := $(strip $(1)))
+$(eval _src := $(strip $(2)))
+$(eval _tgt := $(addprefix $(_lib)_la-,$(subst /,_,$(_src:.S=.lo))))
+$(_tgt): $(_src)
+		$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_$(_lib)_la_CFLAGS) $(CFLAGS) -MT $$@ -MD -MP -MF $(DEPDIR)/$$(@:.lo=.Tpo) -c -o $(builddir)/.libs/$$@ `test -f '$$<' || echo '$(srcdir)/'`$$<
+		$(am__mv) $(DEPDIR)/$$(@:.lo=.Tpo) $(DEPDIR)/$$(@:.lo=.Plo)
+endef
+
+
 BUILT_SOURCES =
+
+common_cppflags =
+common_cppflags += -nostdinc -include $(top_srcdir)/libc/arch-@TARGET_ARCH@/AndroidConfig.h
+common_cppflags += -I$(top_srcdir)/libc/arch-@TARGET_ARCH@/include
+common_cppflags += -I$(call compiler-include-path)
+
+common_cppflags += -I$(top_srcdir)/libc/arch-@TARGET_ARCH@/include
+common_cppflags += -I$(top_srcdir)/libc/kernel/arch-@TARGET_ARCH@
+
+common_cppflags += -I$(top_srcdir)/libc/include
+common_cppflags += -I$(top_srcdir)/libc/kernel/common/linux -I$(top_srcdir)/libc/kernel/common
 
 libc_crt_target_cflags =
 
-lib_LTLIBRARIES = libc_common.la libc.la libc_static.la
+AM_CPFLAGS = -fPIC
+
+#lib_LTLIBRARIES = libc_common.la libc.la libc_static.la
+lib_LTLIBRARIES = libc.la libc_static.la
+noinst_LTLIBRARIES = libc_common.la 
 
 # Define the common source files for all the libc instances
 # =========================================================
@@ -418,7 +470,7 @@ libc_common_src_files += \
 	string/strncmp.c \
 	unistd/socketcalls.c
 
-libc_common_src_files += arch-arm/syscalls/__brk.S arch-arm/syscalls/__fcntl.S arch-arm/syscalls/__fcntl64.S arch-arm/syscalls/__fork.S arch-arm/syscalls/__fstatfs64.S arch-arm/syscalls/__getcpu.S arch-arm/syscalls/__getcwd.S arch-arm/syscalls/__getpriority.S arch-arm/syscalls/__ioctl.S arch-arm/syscalls/__llseek.S arch-arm/syscalls/__mmap2.S arch-arm/syscalls/__open.S arch-arm/syscalls/__openat.S arch-arm/syscalls/__ptrace.S arch-arm/syscalls/__reboot.S arch-arm/syscalls/__rt_sigaction.S arch-arm/syscalls/__rt_sigprocmask.S arch-arm/syscalls/__rt_sigtimedwait.S arch-arm/syscalls/__sched_getaffinity.S arch-arm/syscalls/__set_tls.S arch-arm/syscalls/__setresuid.S arch-arm/syscalls/__setreuid.S arch-arm/syscalls/__setuid.S arch-arm/syscalls/__sigsuspend.S arch-arm/syscalls/__statfs64.S arch-arm/syscalls/__sys_clone.S arch-arm/syscalls/__syslog.S arch-arm/syscalls/__timer_create.S arch-arm/syscalls/__timer_delete.S arch-arm/syscalls/__timer_getoverrun.S arch-arm/syscalls/__timer_gettime.S arch-arm/syscalls/__timer_settime.S arch-arm/syscalls/__wait4.S arch-arm/syscalls/__waitid.S arch-arm/syscalls/_exit.S arch-arm/syscalls/_exit_thread.S arch-arm/syscalls/accept.S arch-arm/syscalls/access.S arch-arm/syscalls/acct.S arch-arm/syscalls/adjtimex.S arch-arm/syscalls/bind.S arch-arm/syscalls/cacheflush.S arch-arm/syscalls/capget.S arch-arm/syscalls/capset.S arch-arm/syscalls/chdir.S arch-arm/syscalls/chmod.S arch-arm/syscalls/chown.S arch-arm/syscalls/chroot.S arch-arm/syscalls/clock_getres.S arch-arm/syscalls/clock_gettime.S arch-arm/syscalls/clock_nanosleep.S arch-arm/syscalls/clock_settime.S arch-arm/syscalls/close.S arch-arm/syscalls/connect.S arch-arm/syscalls/delete_module.S arch-arm/syscalls/dup.S arch-arm/syscalls/dup2.S arch-arm/syscalls/epoll_create.S arch-arm/syscalls/epoll_ctl.S arch-arm/syscalls/epoll_wait.S arch-arm/syscalls/eventfd.S arch-arm/syscalls/execve.S arch-arm/syscalls/faccessat.S arch-arm/syscalls/fchdir.S arch-arm/syscalls/fchmod.S arch-arm/syscalls/fchmodat.S arch-arm/syscalls/fchown.S arch-arm/syscalls/fchownat.S arch-arm/syscalls/fdatasync.S arch-arm/syscalls/fgetxattr.S arch-arm/syscalls/flistxattr.S arch-arm/syscalls/flock.S arch-arm/syscalls/fremovexattr.S arch-arm/syscalls/fsetxattr.S arch-arm/syscalls/fstat.S arch-arm/syscalls/fstatat.S arch-arm/syscalls/fsync.S arch-arm/syscalls/ftruncate.S arch-arm/syscalls/ftruncate64.S arch-arm/syscalls/futex.S arch-arm/syscalls/getdents.S arch-arm/syscalls/getegid.S arch-arm/syscalls/geteuid.S arch-arm/syscalls/getgid.S arch-arm/syscalls/getgroups.S arch-arm/syscalls/getitimer.S arch-arm/syscalls/getpeername.S arch-arm/syscalls/getpgid.S arch-arm/syscalls/getpid.S arch-arm/syscalls/getppid.S arch-arm/syscalls/getresgid.S arch-arm/syscalls/getresuid.S arch-arm/syscalls/getrlimit.S arch-arm/syscalls/getrusage.S arch-arm/syscalls/getsid.S arch-arm/syscalls/getsockname.S arch-arm/syscalls/getsockopt.S arch-arm/syscalls/gettid.S arch-arm/syscalls/gettimeofday.S arch-arm/syscalls/getuid.S arch-arm/syscalls/getxattr.S arch-arm/syscalls/init_module.S arch-arm/syscalls/inotify_add_watch.S arch-arm/syscalls/inotify_init.S arch-arm/syscalls/inotify_rm_watch.S arch-arm/syscalls/ioprio_get.S arch-arm/syscalls/ioprio_set.S arch-arm/syscalls/klogctl.S arch-arm/syscalls/lchown.S arch-arm/syscalls/lgetxattr.S arch-arm/syscalls/link.S arch-arm/syscalls/listen.S arch-arm/syscalls/listxattr.S arch-arm/syscalls/llistxattr.S arch-arm/syscalls/lremovexattr.S arch-arm/syscalls/lseek.S arch-arm/syscalls/lsetxattr.S arch-arm/syscalls/lstat.S arch-arm/syscalls/madvise.S arch-arm/syscalls/mincore.S arch-arm/syscalls/mkdir.S arch-arm/syscalls/mkdirat.S arch-arm/syscalls/mknod.S arch-arm/syscalls/mlock.S arch-arm/syscalls/mount.S arch-arm/syscalls/mprotect.S arch-arm/syscalls/mremap.S arch-arm/syscalls/msgctl.S arch-arm/syscalls/msgget.S arch-arm/syscalls/msync.S arch-arm/syscalls/munlock.S arch-arm/syscalls/munmap.S arch-arm/syscalls/nanosleep.S arch-arm/syscalls/pause.S arch-arm/syscalls/perf_event_open.S arch-arm/syscalls/personality.S arch-arm/syscalls/pipe.S arch-arm/syscalls/pipe2.S arch-arm/syscalls/pivot_root.S arch-arm/syscalls/poll.S arch-arm/syscalls/prctl.S arch-arm/syscalls/pread64.S arch-arm/syscalls/pwrite64.S arch-arm/syscalls/read.S arch-arm/syscalls/readahead.S arch-arm/syscalls/readlink.S arch-arm/syscalls/readv.S arch-arm/syscalls/recvfrom.S arch-arm/syscalls/recvmsg.S arch-arm/syscalls/removexattr.S arch-arm/syscalls/rename.S arch-arm/syscalls/renameat.S arch-arm/syscalls/rmdir.S arch-arm/syscalls/sched_get_priority_max.S arch-arm/syscalls/sched_get_priority_min.S arch-arm/syscalls/sched_getparam.S arch-arm/syscalls/sched_getscheduler.S arch-arm/syscalls/sched_rr_get_interval.S arch-arm/syscalls/sched_setaffinity.S arch-arm/syscalls/sched_setparam.S arch-arm/syscalls/sched_setscheduler.S arch-arm/syscalls/sched_yield.S arch-arm/syscalls/select.S arch-arm/syscalls/semctl.S arch-arm/syscalls/semget.S arch-arm/syscalls/semop.S arch-arm/syscalls/sendfile.S arch-arm/syscalls/sendmsg.S arch-arm/syscalls/sendto.S arch-arm/syscalls/setgid.S arch-arm/syscalls/setgroups.S arch-arm/syscalls/sethostname.S arch-arm/syscalls/setitimer.S arch-arm/syscalls/setpgid.S arch-arm/syscalls/setpriority.S arch-arm/syscalls/setregid.S arch-arm/syscalls/setresgid.S arch-arm/syscalls/setrlimit.S arch-arm/syscalls/setsid.S arch-arm/syscalls/setsockopt.S arch-arm/syscalls/settimeofday.S arch-arm/syscalls/setxattr.S arch-arm/syscalls/shmat.S arch-arm/syscalls/shmctl.S arch-arm/syscalls/shmdt.S arch-arm/syscalls/shmget.S arch-arm/syscalls/shutdown.S arch-arm/syscalls/sigaction.S arch-arm/syscalls/sigaltstack.S arch-arm/syscalls/sigpending.S arch-arm/syscalls/sigprocmask.S arch-arm/syscalls/socket.S arch-arm/syscalls/socketpair.S arch-arm/syscalls/stat.S arch-arm/syscalls/stime.S arch-arm/syscalls/swapoff.S arch-arm/syscalls/swapon.S arch-arm/syscalls/symlink.S arch-arm/syscalls/sync.S arch-arm/syscalls/sysinfo.S arch-arm/syscalls/times.S arch-arm/syscalls/truncate.S arch-arm/syscalls/umask.S arch-arm/syscalls/umount2.S arch-arm/syscalls/uname.S arch-arm/syscalls/unlink.S arch-arm/syscalls/unlinkat.S arch-arm/syscalls/utimensat.S arch-arm/syscalls/utimes.S arch-arm/syscalls/vfork.S arch-arm/syscalls/write.S arch-arm/syscalls/writev.S
+libc_common_src_files += $(shell if [ ! -f $(top_builddir)/syscalls.stamp ]; then python ${top_srcdir}/libc/tools/gensyscalls.py $(TARGET_ARCH) | tee $(top_builddir)/syscalls.stamp; else cat $(top_builddir)/syscalls.stamp; fi)
 
 # These files need to be arm so that gdbserver
 # can set breakpoints in them without messing
@@ -469,7 +521,9 @@ libc_common_src_files += \
 	bionic/pthread-timers.c \
 	bionic/ptrace.c
 
-libc_common_src_files += arch-x86/syscalls/__brk.S arch-x86/syscalls/__fcntl.S arch-x86/syscalls/__fcntl64.S arch-x86/syscalls/__fork.S arch-x86/syscalls/__fstatfs64.S arch-x86/syscalls/__getcpu.S arch-x86/syscalls/__getcwd.S arch-x86/syscalls/__getpriority.S arch-x86/syscalls/__ioctl.S arch-x86/syscalls/__llseek.S arch-x86/syscalls/__mmap2.S arch-x86/syscalls/__open.S arch-x86/syscalls/__openat.S arch-x86/syscalls/__ptrace.S arch-x86/syscalls/__reboot.S arch-x86/syscalls/__rt_sigaction.S arch-x86/syscalls/__rt_sigprocmask.S arch-x86/syscalls/__rt_sigtimedwait.S arch-x86/syscalls/__sched_getaffinity.S arch-x86/syscalls/__set_thread_area.S arch-x86/syscalls/__setresuid.S arch-x86/syscalls/__setreuid.S arch-x86/syscalls/__setuid.S arch-x86/syscalls/__sigsuspend.S arch-x86/syscalls/__statfs64.S arch-x86/syscalls/__sys_clone.S arch-x86/syscalls/__syslog.S arch-x86/syscalls/__timer_create.S arch-x86/syscalls/__timer_delete.S arch-x86/syscalls/__timer_getoverrun.S arch-x86/syscalls/__timer_gettime.S arch-x86/syscalls/__timer_settime.S arch-x86/syscalls/__wait4.S arch-x86/syscalls/__waitid.S arch-x86/syscalls/_exit.S arch-x86/syscalls/_exit_thread.S arch-x86/syscalls/_waitpid.S arch-x86/syscalls/accept.S arch-x86/syscalls/access.S arch-x86/syscalls/acct.S arch-x86/syscalls/adjtimex.S arch-x86/syscalls/bind.S arch-x86/syscalls/capget.S arch-x86/syscalls/capset.S arch-x86/syscalls/chdir.S arch-x86/syscalls/chmod.S arch-x86/syscalls/chown.S arch-x86/syscalls/chroot.S arch-x86/syscalls/clock_getres.S arch-x86/syscalls/clock_gettime.S arch-x86/syscalls/clock_nanosleep.S arch-x86/syscalls/clock_settime.S arch-x86/syscalls/close.S arch-x86/syscalls/connect.S arch-x86/syscalls/delete_module.S arch-x86/syscalls/dup.S arch-x86/syscalls/dup2.S arch-x86/syscalls/epoll_create.S arch-x86/syscalls/epoll_ctl.S arch-x86/syscalls/epoll_wait.S arch-x86/syscalls/eventfd.S arch-x86/syscalls/execve.S arch-x86/syscalls/faccessat.S arch-x86/syscalls/fchdir.S arch-x86/syscalls/fchmod.S arch-x86/syscalls/fchmodat.S arch-x86/syscalls/fchown.S arch-x86/syscalls/fchownat.S arch-x86/syscalls/fdatasync.S arch-x86/syscalls/fgetxattr.S arch-x86/syscalls/flistxattr.S arch-x86/syscalls/flock.S arch-x86/syscalls/fremovexattr.S arch-x86/syscalls/fsetxattr.S arch-x86/syscalls/fstat.S arch-x86/syscalls/fstatat.S arch-x86/syscalls/fsync.S arch-x86/syscalls/ftruncate.S arch-x86/syscalls/ftruncate64.S arch-x86/syscalls/futex.S arch-x86/syscalls/getdents.S arch-x86/syscalls/getegid.S arch-x86/syscalls/geteuid.S arch-x86/syscalls/getgid.S arch-x86/syscalls/getgroups.S arch-x86/syscalls/getitimer.S arch-x86/syscalls/getpeername.S arch-x86/syscalls/getpgid.S arch-x86/syscalls/getpid.S arch-x86/syscalls/getppid.S arch-x86/syscalls/getresgid.S arch-x86/syscalls/getresuid.S arch-x86/syscalls/getrlimit.S arch-x86/syscalls/getrusage.S arch-x86/syscalls/getsid.S arch-x86/syscalls/getsockname.S arch-x86/syscalls/getsockopt.S arch-x86/syscalls/gettid.S arch-x86/syscalls/gettimeofday.S arch-x86/syscalls/getuid.S arch-x86/syscalls/getxattr.S arch-x86/syscalls/init_module.S arch-x86/syscalls/inotify_add_watch.S arch-x86/syscalls/inotify_init.S arch-x86/syscalls/inotify_rm_watch.S arch-x86/syscalls/ioprio_get.S arch-x86/syscalls/ioprio_set.S arch-x86/syscalls/kill.S arch-x86/syscalls/klogctl.S arch-x86/syscalls/lchown.S arch-x86/syscalls/lgetxattr.S arch-x86/syscalls/link.S arch-x86/syscalls/listen.S arch-x86/syscalls/listxattr.S arch-x86/syscalls/llistxattr.S arch-x86/syscalls/lremovexattr.S arch-x86/syscalls/lseek.S arch-x86/syscalls/lsetxattr.S arch-x86/syscalls/lstat.S arch-x86/syscalls/madvise.S arch-x86/syscalls/mincore.S arch-x86/syscalls/mkdir.S arch-x86/syscalls/mkdirat.S arch-x86/syscalls/mknod.S arch-x86/syscalls/mlock.S arch-x86/syscalls/mount.S arch-x86/syscalls/mprotect.S arch-x86/syscalls/mremap.S arch-x86/syscalls/msgctl.S arch-x86/syscalls/msgget.S arch-x86/syscalls/msync.S arch-x86/syscalls/munlock.S arch-x86/syscalls/munmap.S arch-x86/syscalls/nanosleep.S arch-x86/syscalls/pause.S arch-x86/syscalls/perf_event_open.S arch-x86/syscalls/personality.S arch-x86/syscalls/pipe.S arch-x86/syscalls/pipe2.S arch-x86/syscalls/pivot_root.S arch-x86/syscalls/poll.S arch-x86/syscalls/prctl.S arch-x86/syscalls/pread64.S arch-x86/syscalls/pwrite64.S arch-x86/syscalls/read.S arch-x86/syscalls/readahead.S arch-x86/syscalls/readlink.S arch-x86/syscalls/readv.S arch-x86/syscalls/recvfrom.S arch-x86/syscalls/recvmsg.S arch-x86/syscalls/removexattr.S arch-x86/syscalls/rename.S arch-x86/syscalls/renameat.S arch-x86/syscalls/rmdir.S arch-x86/syscalls/sched_get_priority_max.S arch-x86/syscalls/sched_get_priority_min.S arch-x86/syscalls/sched_getparam.S arch-x86/syscalls/sched_getscheduler.S arch-x86/syscalls/sched_rr_get_interval.S arch-x86/syscalls/sched_setaffinity.S arch-x86/syscalls/sched_setparam.S arch-x86/syscalls/sched_setscheduler.S arch-x86/syscalls/sched_yield.S arch-x86/syscalls/select.S arch-x86/syscalls/semctl.S arch-x86/syscalls/semget.S arch-x86/syscalls/semop.S arch-x86/syscalls/sendfile.S arch-x86/syscalls/sendmsg.S arch-x86/syscalls/sendto.S arch-x86/syscalls/setgid.S arch-x86/syscalls/setgroups.S arch-x86/syscalls/sethostname.S arch-x86/syscalls/setitimer.S arch-x86/syscalls/setpgid.S arch-x86/syscalls/setpriority.S arch-x86/syscalls/setregid.S arch-x86/syscalls/setresgid.S arch-x86/syscalls/setrlimit.S arch-x86/syscalls/setsid.S arch-x86/syscalls/setsockopt.S arch-x86/syscalls/settimeofday.S arch-x86/syscalls/setxattr.S arch-x86/syscalls/shmat.S arch-x86/syscalls/shmctl.S arch-x86/syscalls/shmdt.S arch-x86/syscalls/shmget.S arch-x86/syscalls/shutdown.S arch-x86/syscalls/sigaction.S arch-x86/syscalls/sigaltstack.S arch-x86/syscalls/sigpending.S arch-x86/syscalls/sigprocmask.S arch-x86/syscalls/socket.S arch-x86/syscalls/socketpair.S arch-x86/syscalls/stat.S arch-x86/syscalls/stime.S arch-x86/syscalls/swapoff.S arch-x86/syscalls/swapon.S arch-x86/syscalls/symlink.S arch-x86/syscalls/sync.S arch-x86/syscalls/sysinfo.S arch-x86/syscalls/tgkill.S arch-x86/syscalls/times.S arch-x86/syscalls/tkill.S arch-x86/syscalls/truncate.S arch-x86/syscalls/umask.S arch-x86/syscalls/umount2.S arch-x86/syscalls/uname.S arch-x86/syscalls/unlink.S arch-x86/syscalls/unlinkat.S arch-x86/syscalls/utimensat.S arch-x86/syscalls/utimes.S arch-x86/syscalls/write.S arch-x86/syscalls/writev.S
+libc_common_src_files += $(shell ${top_srcdir}/libc/tools/gensyscalls.py $(TARGET_ARCH))
+
+libc_common_src_files = $(sort $(libc_common_src_files))
 
 libc_static_common_src_files += \
         bionic/pthread.c
@@ -486,7 +540,10 @@ endif # !arm
 
 # Define some common cflags
 # ========================================================
-libc_common_cflags = \
+
+libc_common_cflags = $(common_cppflags)
+
+libc_common_cflags += \
 		-DWITH_ERRLIST			\
 		-DANDROID_CHANGES		\
 		-DUSE_LOCKS 			\
@@ -559,9 +616,11 @@ endif
 # Define some common includes
 # ========================================================
 libc_common_c_includes = \
+		$(top_srcdir)/libc/include  \
 		$(top_srcdir)/libc/stdlib  \
 		$(top_srcdir)/libc/string  \
-		$(top_srcdir)/libc/stdio
+		$(top_srcdir)/libc/stdio   \
+		$(top_srcdir)/libm/include
 
 # Needed to access private/__dso_handle.S from
 # crtbegin_xxx.S and crtend_xxx.S
@@ -630,28 +689,60 @@ BUILT_SOURCES += $(top_builddir)/crtend_android.o
 # libc_common.a
 # ========================================================
 
-libc_common_la_SOURCES = $(libc_common_src_files)
-libc_common_la_CFLAGS = $(libc_common_cflags)
+#_libc_common_la_DEPENDENCIES = syscalls.stamp
+_libc_common_la_SOURCES = $(libc_common_src_files)
+_libc_common_la_CFLAGS = $(libc_common_cflags)
+_libc_common_la_LDFLAGS = @COMMON_LDFLAGS@ -L$(top_builddir)/libdl/.libs -L$(top_builddir)/libthread_db/.libs
 if TARGET_ARCH_IS_ARM
-libc_common_la_CFLAGS += -DCRT_LEGACY_WORKAROUND
+_libc_common_la_CFLAGS += -DCRT_LEGACY_WORKAROUND
 endif
-libc_common_la_CPPFLAGS = $(addprefix -I,$(libc_common_c_includes))
+_libc_common_la_CFLAGS += $(addprefix -I,$(libc_common_c_includes))
+
+_libc_common_la_OBJECTS = \
+  $(subst /,_, \
+  	$(addprefix libc_common_la-, \ 
+      $(patsubst %.S, %.lo, $(filter %.S, $(_libc_common_la_SOURCES))) \
+      $(patsubst %.c, %.lo, $(filter %.c, $(_libc_common_la_SOURCES))) \
+      $(patsubst %.cpp, %.lo, $(filter %.cpp, $(_libc_common_la_SOURCES))) \
+      $(patsubst %.cc, %.lo, $(filter %.cc, $(_libc_common_la_SOURCES))) \
+      $(patsubst %.s, %.lo, $(filter %.s, $(_libc_common_la_SOURCES))) \
+    ) \
+  )
+
+#_libc_common_la_LINK = \
+#	$(LIBTOOL) -static --tag=CC $(AM_LIBTOOLFLAGS) \
+#	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(_libc_common_la_CFLAGS) \
+#	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+
+libc_common.Plo:
+	touch .deps/$@
+
+libc_common.la: $(_libc_common_la_OBJECTS) $(_libc_common_la_DEPENDENCIES) $(_EXTRA_libc_common_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(LINK) $(addprefix .libs/,$(_libc_common_la_OBJECTS)) $(_libc_common_la_LIBADD) $(LIBS)
+	sed -e 's|installed=no|installed=yes|' $@ > .libs/$(@)i
+
+$(foreach st,$(filter %.c,$(_libc_common_la_SOURCES)), $(eval $(call transform-c-to-o, libc_common, $(st))))
+$(foreach st,$(filter %.cc,$(_libc_common_la_SOURCES)), $(eval $(call transform-cpp-to-o, libc_common, $(st), .cc)))
+$(foreach st,$(filter %.cpp,$(_libc_common_la_SOURCES)), $(eval $(call transform-cpp-to-o, libc_common, $(st), .cpp)))
+$(foreach st,$(filter %.S,$(_libc_common_la_SOURCES)), $(eval $(call transform-S-to-o, libc_common, $(st))))
 
 # ========================================================
 # libc.a
 # ========================================================
 
-libc_static_la_SOURCES = \
+libc_static_la_SOURCES = $(sort \
 	$(libc_arch_static_src_files) \
 	$(libc_static_common_src_files) \
 	bionic/dlmalloc.c \
 	bionic/malloc_debug_common.c \
-	bionic/libc_init_static.c
+	bionic/libc_init_static.c)
 
+libc_static_la_LDFLAGS = @COMMON_LDFLAGS@
 libc_static_la_CFLAGS = $(libc_common_cflags) \
                 -DLIBC_STATIC
 libc_static_la_CPPFLAGS = $(addprefix -I,$(libc_common_c_includes))
 libc_static_la_LIBADD = libc_common.la
+#libc_static_la_DEPENDENCIES = syscalls.stamp
 
 # ========================================================
 # libc.so
@@ -664,6 +755,8 @@ libc_static_la_LIBADD = libc_common.la
 # see libc/bionic/pthread_debug.c for details
 
 libc_la_CFLAGS = $(libc_common_cflags) -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=0
+libc_la_LDLIBS = -ldl
+libc_la_LDFLAGS = @COMMON_LDFLAGS@
 
 if TARGET_ARCH_IS_ARM
 # TODO: At some point, we need to remove this custom linker script.
@@ -679,6 +772,7 @@ libc_la_SOURCES = \
 	bionic/malloc_debug_common.c \
 	bionic/pthread_debug.c \
 	bionic/libc_init_dynamic.c
+#libc_la_DEPENDENCIES = syscalls.stamp
 
 # WARNING: The only library libc.so should depend on is libdl.so!  If you add other libraries,
 # make sure to add -Wl,--exclude-libs=libgcc.a to the LOCAL_LDFLAGS for those libraries.  This

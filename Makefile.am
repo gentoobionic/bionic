@@ -1,1 +1,1 @@
-SUBDIRS = libc libdl libm libstdc++ libthread_db linker
+SUBDIRS = libdl libm libc libthread_db linker libstdc++

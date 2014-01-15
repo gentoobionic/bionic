@@ -92,7 +92,6 @@ syscall_src += arch-x86/syscalls/mkdirat.S
 syscall_src += arch-x86/syscalls/fchownat.S
 syscall_src += arch-x86/syscalls/fchmodat.S
 syscall_src += arch-x86/syscalls/renameat.S
-syscall_src += arch-x86/syscalls/readahead.S
 syscall_src += arch-x86/syscalls/fsetxattr.S
 syscall_src += arch-x86/syscalls/fgetxattr.S
 syscall_src += arch-x86/syscalls/flistxattr.S

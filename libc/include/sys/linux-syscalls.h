@@ -81,7 +81,6 @@
 #define __NR_sync                         (__NR_SYSCALL_BASE + 36)
 #define __NR_fcntl64                      (__NR_SYSCALL_BASE + 221)
 #define __NR_sendfile                     (__NR_SYSCALL_BASE + 187)
-#define __NR_readahead                    (__NR_SYSCALL_BASE + 225)
 #define __NR_fsetxattr                    (__NR_SYSCALL_BASE + 228)
 #define __NR_fgetxattr                    (__NR_SYSCALL_BASE + 231)
 #define __NR_flistxattr                   (__NR_SYSCALL_BASE + 234)

@@ -137,7 +137,6 @@ int         mkdirat(int dirfd, const char *pathname, mode_t mode)  323,296
 int         fchownat(int dirfd, const char *path, uid_t owner, gid_t group, int flags)  325,298
 int         fchmodat(int dirfd, const char *path, mode_t mode, int flags)  333,306
 int         renameat(int olddirfd, const char *oldpath, int newdirfd, const char *newpath)  329,302
-ssize_t     readahead(int, off64_t, size_t) 225
 
 int         fsetxattr(int, const char *, const void *, size_t, int) 228
 ssize_t     fgetxattr(int, const char *, void *, size_t) 231

@@ -180,6 +180,7 @@ libm_common_flags = -nostdinc -include $(top_srcdir)/libc/arch-@TARGET_ARCH@/And
 libm_common_flags += -I$(call compiler-include-path)
 
 libm_la_LDFLAGS = @COMMON_LDFLAGS@
+libm_la_LDLIBS = -lc
 
 if TARGET_ARCH_IS_X86
 libm_la_CFLAGS += -march=i686 -m32

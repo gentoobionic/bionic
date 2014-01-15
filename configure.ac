@@ -12,6 +12,13 @@ LT_INIT
 
 AC_PROG_LIBTOOL
 
+# -Wl,-no-undefined 
+# -L$(top_builddir)/libc/.libs -L$(top_builddir)/libthread_db/.libs -L$(top_builddir)/libdl/.libs
+COMMON_LDFLAGS='-Wl,-no-undefined -nodefaultlibs -Wl,--exclude-libs=libgcc.a -L$(top_builddir)'
+
+COMMON_LDFLAGS_X86="-Wl,--exclude-libs=libgcc_eh.a"
+AC_SUBST(COMMON_LDFLAGS_X86)
+
 case $host_os in
   *linux*)
   ;;
@@ -26,6 +33,7 @@ case $host_cpu in
     ARCH_X86_HAVE_SSE2=true;
     ARCH_X86_HAVE_SSSE3=true;
     TARGET_CPU_SMP=true;
+    COMMON_LDFLAGS="${COMMON_LDFLAGS} ${COMMON_LDFLAGS_X86}";
   ;;
   *arm*)
     TARGET_ARCH=arm;
@@ -39,6 +47,8 @@ case $host_cpu in
 esac
 
 AC_SUBST(TARGET_ARCH)
+
+AC_SUBST(COMMON_LDFLAGS)
 
 AM_CONDITIONAL([TARGET_CPU_SMP],[test x$TARGET_CPU_SMP = xtrue])
 AC_SUBST(TARGET_ARCH)
@@ -66,12 +76,6 @@ AC_SUBST(TARGET_ARCH_IS_X86_OR_ARM)
 dnl autotools is a bit dumb about this
 PLUSPLUS="++"
 AC_SUBST(PLUSPLUS)
-
-COMMON_LDFLAGS='-nodefaultlibs -Wl,--exclude-libs=libgcc.a -L$(top_builddir)'
-AC_SUBST(COMMON_LDFLAGS)
-
-COMMON_LDFLAGS_X86="-Wl,--exclude-libs=libgcc_eh.a"
-AC_SUBST(COMMON_LDFLAGS_X86)
 
 AC_CONFIG_FILES(
     Makefile
