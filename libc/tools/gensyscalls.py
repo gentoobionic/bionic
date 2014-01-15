@@ -451,9 +451,9 @@ class State:
         #self.other_files.append( path )
 
     # now generate each syscall stub
-    def gen_syscall_stubs(self):
+    def gen_syscall_stubs(self, arch):
         for sc in self.syscalls:
-            if sc.has_key("asm-arm") and 'arm' in all_archs:
+            if sc.has_key("asm-arm") and 'arm' == arch:
                 fname = "arch-arm/syscalls/%s.S" % sc["func"]
                 D2( ">>> generating "+fname )
                 fp = create_file( fname )
@@ -461,7 +461,7 @@ class State:
                 fp.close()
                 self.new_stubs.append( fname )
 
-            if sc.has_key("asm-thumb") and 'arm' in all_archs:
+            if sc.has_key("asm-thumb") and 'arm' == arch:
                 fname = "arch-arm/syscalls/%s.S" % sc["func"]
                 D2( ">>> generating "+fname )
                 fp = create_file( fname )
@@ -469,7 +469,7 @@ class State:
                 fp.close()
                 self.new_stubs.append( fname )
 
-            if sc.has_key("asm-x86") and 'x86' in all_archs:
+            if sc.has_key("asm-x86") and 'x86' == arch:
                 fname = "arch-x86/syscalls/%s.S" % sc["func"]
                 D2( ">>> generating "+fname )
                 fp = create_file( fname )
@@ -505,46 +505,12 @@ class State:
 
         self.gen_linux_syscalls_h()
         self.gen_arch_syscalls_mk(arch)
-        self.gen_syscall_stubs()
-
-        D( "comparing files" )
-        adds    = []
-        edits   = []
+        self.gen_syscall_stubs(arch)
 
         for stub in self.new_stubs + self.other_files:
             if not os.path.exists( bionic_root + stub ):
-                # new file, git add it
                 D( "new file:     " + stub)
-                adds.append( bionic_root + stub )
                 shutil.copyfile( bionic_temp + stub, bionic_root + stub )
-
-            elif not filecmp.cmp( bionic_temp + stub, bionic_root + stub ):
-                D( "changed file: " + stub)
-                edits.append( stub )
-
-        deletes = []
-        for stub in self.old_stubs:
-            if not stub in self.new_stubs:
-                D( "deleted file: " + stub)
-                deletes.append( bionic_root + stub )
-
-
-        if adds:
-            commands.getoutput("git add " + " ".join(adds))
-        if deletes:
-            commands.getoutput("git rm " + " ".join(deletes))
-        if edits:
-            for file in edits:
-                shutil.copyfile( bionic_temp + file, bionic_root + file )
-            commands.getoutput("git add " +
-                               " ".join((bionic_root + file) for file in edits))
-
-        commands.getoutput("git add %s%s" % (bionic_root,"SYSCALLS.TXT"))
-
-        if (not adds) and (not deletes) and (not edits):
-            D("no changes detected!")
-        else:
-            D("ready to go!!")
 
 D_setlevel(0)
 

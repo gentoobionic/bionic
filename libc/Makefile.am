@@ -4,11 +4,13 @@ define compiler-include-path
 $(shell echo | @CC@ -v -x c -E - 2>&1 | grep -A 1 "^#include" | tail -n 1)
 endef
 
-BUILT_SOURCES = $(top_builddir)/syscalls.stamp
+BUILT_SOURCES = $(top_builddir)/syscalls.stamp $(top_srcdir)/libc/include/sys/linux-syscalls.h $(top_srcdir)/libc/arch-@TARGET_ARCH@/syscalls.mk
 
 $(top_builddir)/syscalls.stamp: $(top_srcdir)/libc/SYSCALLS.TXT
 	echo "CFRIEDT GENERATING SYSCALLS.STAMP"
 	python $(top_srcdir)/libc/tools/gensyscalls.py $(TARGET_ARCH) > $@
+
+$(top_srcdir)/libc/include/sys/linux-syscalls.h: $(top_builddir)/syscalls.stamp
 
 # ========================================================
 # custom make rules
@@ -811,6 +813,15 @@ libc_la_SOURCES = \
 	bionic/pthread_debug.c \
 	bionic/libc_init_dynamic.c
 libc_la_DEPENDENCIES = $(top_builddir)/syscalls.stamp
+
+# ========================================================
+#  CLEAN
+# ========================================================
+
+clean-local:
+	rm -Rf $(BUILT_SOURCES) \
+	  $(top_srcdir)/libc/arch-@TARGET_ARCH@/syscalls.mk \
+	  $(cat $(top_builddir)/syscalls.stamp 2>&1)
 
 # WARNING: The only library libc.so should depend on is libdl.so!  If you add other libraries,
 # make sure to add -Wl,--exclude-libs=libgcc.a to the LOCAL_LDFLAGS for those libraries.  This
