@@ -4,43 +4,45 @@ define compiler-include-path
 $(shell echo | @CC@ -v -x c -E - 2>&1 | grep -A 1 "^#include" | tail -n 1)
 endef
 
-BUILT_SOURCES = $(top_builddir)/syscalls.stamp $(top_srcdir)/libc/include/sys/linux-syscalls.h $(top_srcdir)/libc/arch-@TARGET_ARCH@/syscalls.mk
+BUILT_SOURCES = syscalls.stamp $(top_srcdir)/libc/include/sys/linux-syscalls.h $(top_srcdir)/libc/arch-@TARGET_ARCH@/syscalls.mk
 
-$(top_builddir)/syscalls.stamp: $(top_srcdir)/libc/SYSCALLS.TXT
-	echo "CFRIEDT GENERATING SYSCALLS.STAMP"
+syscalls.stamp: $(top_srcdir)/libc/SYSCALLS.TXT
 	python $(top_srcdir)/libc/tools/gensyscalls.py $(TARGET_ARCH) > $@
 
-$(top_srcdir)/libc/include/sys/linux-syscalls.h: $(top_builddir)/syscalls.stamp
+$(top_srcdir)/libc/include/sys/linux-syscalls.h: syscalls.stamp
 
 # ========================================================
 # custom make rules
 # ========================================================
 
 define transform-c-to-o
-$(eval _lib := $(strip $(1)))
-$(eval _src := $(strip $(2)))
+$(eval _flg := $(strip $(1)))
+$(eval _lib := $(strip $(2)))
+$(eval _src := $(strip $(3)))
 $(eval _tgt := $(addprefix $(_lib)_la-,$(subst /,_,$(_src:.c=.lo))))
 $(_tgt): $(_src)
-		$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_$(_lib)_la_CFLAGS) $(CFLAGS) -MT $$@ -MD -MP -MF $(DEPDIR)/$$(@:.lo=.Tpo) -c -o $(builddir)/.libs/$$@ `test -f '$$<' || echo '$(srcdir)/'`$$<
+		$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_flg) $(CFLAGS) -MT $$@ -MD -MP -MF $(DEPDIR)/$$(@:.lo=.Tpo) -c -o $(builddir)/.libs/$$@ `test -f '$$<' || echo '$(srcdir)/'`$$<
 		$(am__mv) $(DEPDIR)/$$(@:.lo=.Tpo) $(DEPDIR)/$$(@:.lo=.Plo)
 endef
 
 define transform-cpp-to-o
-$(eval _lib := $(strip $(1)))
-$(eval _src := $(strip $(2)))
-$(eval _ext := $(strip $(3)))
+$(eval _flg := $(strip $(1)))
+$(eval _lib := $(strip $(2)))
+$(eval _src := $(strip $(3)))
+$(eval _ext := $(strip $(4)))
 $(eval _tgt := $(addprefix $(_lib)_la-,$(subst /,_,$(_src:$(_ext)=.lo))))
 $(_tgt): $(_src)
-		$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_$(_lib)_la_CFLAGS) $(CXXFLAGS) -MT $$@ -MD -MP -MF $(DEPDIR)/$$(@:.lo=.Tpo) -c -o $(builddir)/.libs/$$@ `test -f '$$<' || echo '$(srcdir)/'`$$<
+		$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_flg) $(CXXFLAGS) -MT $$@ -MD -MP -MF $(DEPDIR)/$$(@:.lo=.Tpo) -c -o $(builddir)/.libs/$$@ `test -f '$$<' || echo '$(srcdir)/'`$$<
 		$(am__mv) $(DEPDIR)/$$(@:.lo=.Tpo) $(DEPDIR)/$$(@:.lo=.Plo)
 endef
 
 define transform-S-to-o
-$(eval _lib := $(strip $(1)))
-$(eval _src := $(strip $(2)))
+$(eval _flg := $(strip $(1)))
+$(eval _lib := $(strip $(2)))
+$(eval _src := $(strip $(3)))
 $(eval _tgt := $(addprefix $(_lib)_la-,$(subst /,_,$(_src:.S=.lo))))
 $(_tgt): $(_src)
-		$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_$(_lib)_la_CFLAGS) $(CFLAGS) -MT $$@ -MD -MP -MF $(DEPDIR)/$$(@:.lo=.Tpo) -c -o $(builddir)/.libs/$$@ `test -f '$$<' || echo '$(srcdir)/'`$$<
+		$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_flg) $(CFLAGS) -MT $$@ -MD -MP -MF $(DEPDIR)/$$(@:.lo=.Tpo) -c -o $(builddir)/.libs/$$@ `test -f '$$<' || echo '$(srcdir)/'`$$<
 		$(am__mv) $(DEPDIR)/$$(@:.lo=.Tpo) $(DEPDIR)/$$(@:.lo=.Plo)
 endef
 
@@ -62,8 +64,8 @@ libc_crt_target_cflags =
 
 AM_CPFLAGS = -fPIC
 
-lib_LTLIBRARIES = libc.la libc_static.la
-noinst_LTLIBRARIES = libc_common.la 
+lib_LTLIBRARIES = libc.la
+noinst_LTLIBRARIES = libc_common.la libc_static.la
 
 # Define the common source files for all the libc instances
 # =========================================================
@@ -696,10 +698,10 @@ BUILT_SOURCES += $(top_builddir)/crtend_android.o
 # xxx: we only want an .a file, not a .so, so hijack libtool
 
 define generated-sources
-$(shell cat $(top_builddir)/syscalls.stamp 2>/dev/null)
+$(shell cat syscalls.stamp 2>/dev/null)
 endef
 
-_libc_common_la_DEPENDENCIES = $(top_builddir)/syscalls.stamp
+_libc_common_la_DEPENDENCIES = syscalls.stamp
 _libc_common_la_SOURCES = $(libc_common_src_files) $(call generated-sources)
 _libc_common_la_CFLAGS = $(libc_common_cflags)
 _libc_common_la_LDFLAGS = @COMMON_LDFLAGS@ -L$(top_builddir)/libdl/.libs -L$(top_builddir)/libthread_db/.libs
@@ -731,10 +733,10 @@ libc_common.la: $(_libc_common_la_OBJECTS) $(_libc_common_la_DEPENDENCIES) $(_EX
 	$(AM_V_CCLD)$(LINK) $(addprefix .libs/,$(_libc_common_la_OBJECTS)) $(_libc_common_la_LIBADD) $(LIBS)
 	sed -e 's|installed=no|installed=yes|' $@ > .libs/$(@)i
 
-$(foreach st,$(filter %.c,$(_libc_common_la_SOURCES)), $(eval $(call transform-c-to-o, libc_common, $(st))))
-$(foreach st,$(filter %.cc,$(_libc_common_la_SOURCES)), $(eval $(call transform-cpp-to-o, libc_common, $(st), .cc)))
-$(foreach st,$(filter %.cpp,$(_libc_common_la_SOURCES)), $(eval $(call transform-cpp-to-o, libc_common, $(st), .cpp)))
-$(foreach st,$(filter %.S,$(_libc_common_la_SOURCES)), $(eval $(call transform-S-to-o, libc_common, $(st))))
+$(foreach st,$(filter %.c,$(_libc_common_la_SOURCES)), $(eval $(call transform-c-to-o, $(_libc_common_la_CFLAGS), libc_common, $(st))))
+$(foreach st,$(filter %.cc,$(_libc_common_la_SOURCES)), $(eval $(call transform-cpp-to-o, $(_libc_common_la_CFLAGS), libc_common, $(st), .cc)))
+$(foreach st,$(filter %.cpp,$(_libc_common_la_SOURCES)), $(eval $(call transform-cpp-to-o, $(_libc_common_la_CFLAGS), libc_common, $(st), .cpp)))
+$(foreach st,$(filter %.S,$(_libc_common_la_SOURCES)), $(eval $(call transform-S-to-o, $(_libc_common_la_CFLAGS), libc_common, $(st))))
 
 # ========================================================
 # libc.a
@@ -751,7 +753,7 @@ _libc_static_la_SOURCES = \
 
 _libc_static_la_LDFLAGS = @COMMON_LDFLAGS@
 _libc_static_la_CFLAGS = $(libc_common_cflags) -DLIBC_STATIC
-_libc_static_la_CFLAGS = $(addprefix -I,$(libc_common_c_includes))
+_libc_static_la_CFLAGS += $(addprefix -I,$(libc_common_c_includes))
 _libc_static_la_LIBADD = libc_common.la
 _libc_static_la_DEPENDENCIES = libc_common.la
 
@@ -778,10 +780,10 @@ libc_static.la: $(_libc_static_la_OBJECTS) $(_libc_static_la_DEPENDENCIES) $(_EX
 	$(AM_V_CCLD)$(LINK) $(addprefix .libs/,$(_libc_static_la_OBJECTS)) $(_libc_static_la_LIBADD) $(LIBS)
 	sed -e 's|installed=no|installed=yes|' $@ > .libs/$(@)i
 
-$(foreach st,$(filter %.c,$(_libc_static_la_SOURCES)), $(eval $(call transform-c-to-o, libc_static, $(st))))
-$(foreach st,$(filter %.cc,$(_libc_static_la_SOURCES)), $(eval $(call transform-cpp-to-o, libc_static, $(st), .cc)))
-$(foreach st,$(filter %.cpp,$(_libc_static_la_SOURCES)), $(eval $(call transform-cpp-to-o, libc_static, $(st), .cpp)))
-$(foreach st,$(filter %.S,$(_libc_static_la_SOURCES)), $(eval $(call transform-S-to-o, libc_static, $(st))))
+$(foreach st,$(filter %.c,$(_libc_static_la_SOURCES)), $(eval $(call transform-c-to-o, $(_libc_static_la_CFLAGS), libc_static, $(st))))
+$(foreach st,$(filter %.cc,$(_libc_static_la_SOURCES)), $(eval $(call transform-cpp-to-o, $(_libc_static_la_CFLAGS), libc_static, $(st), .cc)))
+$(foreach st,$(filter %.cpp,$(_libc_static_la_SOURCES)), $(eval $(call transform-cpp-to-o, $(_libc_static_la_CFLAGS), libc_static, $(st), .cpp)))
+$(foreach st,$(filter %.S,$(_libc_static_la_SOURCES)), $(eval $(call transform-S-to-o, $(_libc_static_la_CFLAGS), libc_static, $(st))))
 
 
 # ========================================================
@@ -797,6 +799,7 @@ $(foreach st,$(filter %.S,$(_libc_static_la_SOURCES)), $(eval $(call transform-S
 libc_la_CFLAGS = $(libc_common_cflags) -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=0
 libc_la_LIBADD = libc_common.la -ldl -lgcc
 libc_la_LDFLAGS = @COMMON_LDFLAGS@
+libc_la_DEPENDENCIES = libc_common.la
 
 if TARGET_ARCH_IS_ARM
 # TODO: At some point, we need to remove this custom linker script.
@@ -812,7 +815,19 @@ libc_la_SOURCES = \
 	bionic/malloc_debug_common.c \
 	bionic/pthread_debug.c \
 	bionic/libc_init_dynamic.c
-libc_la_DEPENDENCIES = $(top_builddir)/syscalls.stamp
+
+# ========================================================
+#  EXTRA
+# ========================================================
+
+# xxx: replace the (actually dynamic-init) libc.a with libc_static.a 
+libc.a.stamp: libc_static.la libc.la
+	cp .libs/libc_static.a .libs/libc.a
+	touch $@
+
+BUILT_SOURCES += libc.a.stamp
+
+all-local: libc.a.stamp
 
 # ========================================================
 #  CLEAN
@@ -821,7 +836,7 @@ libc_la_DEPENDENCIES = $(top_builddir)/syscalls.stamp
 clean-local:
 	rm -Rf $(BUILT_SOURCES) \
 	  $(top_srcdir)/libc/arch-@TARGET_ARCH@/syscalls.mk \
-	  $(cat $(top_builddir)/syscalls.stamp 2>&1)
+	  $(cat syscalls.stamp 2>&1)
 
 # WARNING: The only library libc.so should depend on is libdl.so!  If you add other libraries,
 # make sure to add -Wl,--exclude-libs=libgcc.a to the LOCAL_LDFLAGS for those libraries.  This

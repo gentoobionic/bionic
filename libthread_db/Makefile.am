@@ -2,12 +2,14 @@ define compiler-include-path
 $(shell echo | @CC@ -v -x c -E - 2>&1 | grep -A 1 "^#include" | tail -n 1)
 endef
 
+common_ldflags = @COMMON_LDFLAGS@
+my_ldflags = $(common_ldflags:-Wl,-no-undefined=)
 
 lib_LTLIBRARIES = libthread_db.la
 libthread_db_la_SOURCES = libthread_db.c
 libthread_db_la_CFLAGS = -nostdinc -include $(top_srcdir)/libc/arch-@TARGET_ARCH@/AndroidConfig.h
 libthread_db_la_CFLAGS += -I$(call compiler-include-path)
-libthread_db_la_LDFLAGS = @COMMON_LDFLAGS@ -L$(top_builddir)/libdl/.libs -L$(top_builddir)/libc/.libs
+libthread_db_la_LDFLAGS = $(my_ldflags) -L$(top_builddir)/libdl/.libs -L$(top_builddir)/libc/.libs
 libthread_db_la_LIBADD = -ldl -lc
 
 if TARGET_ARCH_IS_X86

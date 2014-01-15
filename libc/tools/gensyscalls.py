@@ -447,7 +447,7 @@ class State:
 
         for sc in self.syscalls:
             if arch_test[arch](sc):
-                print "arch-%s/syscalls/%s.S\n" % (arch,sc["func"])
+                print "arch-%s/syscalls/%s.S" % (arch,sc["func"])
         #self.other_files.append( path )
 
     # now generate each syscall stub
