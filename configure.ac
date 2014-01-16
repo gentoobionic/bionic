@@ -79,7 +79,6 @@ AC_SUBST(PLUSPLUS)
 
 AC_CONFIG_FILES(
     Makefile
-    libgcc_shared_fake/Makefile
     libc/Makefile
     libc/zoneinfo/Makefile
     libdl/Makefile
