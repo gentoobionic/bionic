@@ -1,0 +1,53 @@
+The Bionic C Library
+=-=-=-=-=-=-=-=-=-=-
+
+This is a fork of the Bionic C Library from the Android Open Source Project.
+
+The original code can be found here[1].
+
+Purpose
+=-=-=-=
+
+The purpose of this fork is to allow 3rd party developers to use bionic as
+their primary system C library.
+
+The initial port, Gentoo-Bionic[2], mostly focused on Gentoo Linux[3] although
+the migration to autotools minimizes that tight coupling. This codebase is
+now Linux-distribution-agnostic and therefore can be used (in theory) with any
+Linux distribution.
+
+License
+=-=-=-=
+
+One of the advantages of using bionic is that it is BSD-licensed (see the file
+COPYING). This provides greater flexibility for hardware and software product
+vendors when compared with other free-as-in-speach licenses. Indeed, bionic
+allows you to have your free-as-in-beer software and use it too.
+
+Since the BSD license has more permissive licensing constraints for API
+consumers, people can freely write both open and proprietary software which
+links to bionic without much concern of licensing restrictions. However,
+please keep in mind, that if Program A links to bionic and Library B,
+regardless of whether Library B links to bionic, then Program A still must
+abide by the terms and conditions of the Library B software license.
+
+Modifications
+=-=-=-=-=-=-=
+
+1) Use autotools to build rather than the Android build system
+2) Use common prefixes for the runtime (e.g. /usr instead of /system)
+3) Remove any dependencies on the Android runtime and revert to more
+   traditional UNIX practices (e.g. use /etc/resolv.conf instead of
+   Android's properties for DNS servers)
+4) Add more system calls and libc functions, as appropriate
+
+More information can be found from the original ELC2013 presentation [4].
+
+
+Happy hacking!
+
+
+[1] https://android.googlesource.com/platform/bionic.git
+[2] https://plus.google.com/113359270067626599390
+[3] http://www.gentoo.org
+[4] http://elinux.org/images/2/25/2013_elc_gentoo_bionic.pdf
