@@ -1,0 +1,29 @@
+Gentoo-Bionic is a project that has successfully integrated Android's Bionic C library with the Gentoo Portage build infrastructure. The git repository is organized as a Portage Overlay suitable for use with layman(8).
+
+The benefits are 1) BSD licensed system libraries better facilitate closed-and-open-source software cohabitation, 2) a very minimal footprint suitable for embedded systems, and 3) a simpler way of compiling and linking additional software against Bionic, when compared to the android build system which opens the door for virtually all autotools-compatible software packages.
+
+Although the target of this project is the #gentoo-embedded Linux community, there is now theoretically nothing preventing anyone from making a desktop Linux distribution based on the Bionic libc.
+
+While Bionic is not (and will like not be) a POSIX-compliant C library, it is very close in most aspects to make it practical enough to run managed code. For that reason, a JamVM ebuild, along with dependency ebuilds, are provided as a reference.
+
+Beta-ready-ish
+
+Some items on the TODO list:
+
+1) gensyscalls.py is getting called more than it needs to in the build
+process. Fix make's dependencies.
+
+2) It compiles (with some complaining)
+   NOT TESTED!
+   NOT READY FOR USERS!
+   LINKING NOT VERIFIED! (i.e. maybe dangling @GLIBC symvers)
+
+3) Need to isolate any toolchain-related items
+   * Bionic toolchain requires correct linker location (/sbin/linker)
+   * Anyone wishing to cross-compile using the Bionic libc
+     will be unable to do so without custom linker steps, until -mbionic
+     is upstreamed in GCC
+   * GCC's standard linker (even for -mandroid) does not know the
+     correct linker location or CRT files to insert in what order
+     (maybe symlinking could fix this if -mandroid was used)
+   * my solution was always to roll my own compiler
