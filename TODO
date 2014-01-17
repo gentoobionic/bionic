@@ -1,0 +1,44 @@
+TODO
+=-=-
+
+1) build without any interruptions
+   - delete syscalls/*.S but not syscalls/
+   - should not complain about any undefined references with e.g. make -j7
+   - build things in proper order. create dependencies
+2) make sure that gensyscalls is only done iff SYSCALLS.TXT is updated
+   - add rules (perhaps eval'd) so that dependency tracking is done properly
+3) delete dynamically generated syscalls/*.S, sys/linux-syscalls.h  in repository
+4) verify linkage is free of @GLIBC symvers (-nostdlib?)
+5) verify linkage entirely, using custom linker rules in Makefile.am if necessary
+   - see http://dev.gentoo.org/~vapier/crt.txt
+   - that means, I should be able to drop it in my /usr/i686-pc-linux-bionic chroot
+     and it should Just Work (TM)
+6) Add headers to install targets (note: gentoo-bionic had a separate 
+   bionic-kernel-headers package)
+7) maybe block arm build right now, until .arm file extension is sorted out
+   - identify and properly compile .thumb / .arm compilation targets
+   - generate rules
+8) maybe block x86_64 build right now - .S files only support 32-bit anyway
+   - build will probably die if anyone tries x86_64
+   - just a head's up, I'm using i686-pc-linux-gnu to test out with for the time being
+9) change the behaviour of /sbin/linker - I want this to be more like ld-linux.so
+   - this means it should work as a drop-in replacement with ldd(1)
+   - also a rename to /lib/ld-linux.so would be awesome
+   - net result is that people can use the same semantics as a -gnu* toolchain
+10) modify the crt*.o, possibly, so that we don't need an -mbionic 
+   - rename crt*.o to be compatible with crti.o, crt1.o, crtn.o, etc
+   - net result is that people can use the same semantics as a -gnu* toolchain
+11) get rid of Android.mk and other cruft that isn't used at all in the build
+12) work out any PITA's with headers; inclusion order, conditional defines, etc
+13) add a testsuite
+
+FEATURE REQUESTS
+=-=-=-=-=-=-=-=-
+
+1) a more padded-out libc - lots of those random libc funcs that ever 139th package requires
+2) possibly wchar.h support with a shim-layer to icu4c
+   - dlopen? - automatically pulling in that library would be serious heavy lifting
+3) additional syscall support
+4) SELF-HOSTING: LLVM / Clang is where I'm leaning
+   - get GCC running on top of bionic
+5) should we require python as a build tool? ... gensyscalls in C with BUILDCC?
