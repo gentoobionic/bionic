@@ -1,3 +1,7 @@
-2014-01-16  Steev Klimaszewski	<steev@gentoo.org>
-    * Remove unused directory from configure.ac
-    * Updated AUTHORS
+2014-01-15	Christopher Friedt	<chrisfriedt@gmail.com>
+	* merge all changes from gentoo-bionic
+	* convert bionic to autotools (*.am, *.ac, COPYING, etc)
+	* update AUTHORS
+2014-01-16	Steev Klimaszewski	<steev@gentoo.org>
+	* Remove unused directory from configure.ac
+	* Updated AUTHORS

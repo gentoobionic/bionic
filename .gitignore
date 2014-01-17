@@ -33,3 +33,4 @@ libc/kernel/original
 libc/include/sys/linux-syscalls.h
 libc/arch-x86/syscalls/
 libc/arch-arm/syscalls/
+linker/linker
