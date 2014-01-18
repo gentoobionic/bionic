@@ -179,7 +179,7 @@ libm_la_CFLAGS =
 libm_common_flags = -nostdinc -include $(top_srcdir)/libc/arch-@TARGET_ARCH@/AndroidConfig.h
 libm_common_flags += -I$(call compiler-include-path)
 
-libm_la_LDFLAGS = @COMMON_LDFLAGS@
+libm_la_LDFLAGS = @COMMON_LDFLAGS@ -Wl,-soname,"libm.so" -L$(top_builddir)/libc/.libs
 libm_la_LIBADD = -lc
 
 if TARGET_ARCH_IS_X86
@@ -187,7 +187,6 @@ libm_la_CFLAGS += -march=i686 -m32
 libm_common_flags += -I$(top_srcdir)/libc/arch-x86/include
 libm_common_flags += -I$(top_srcdir)/libc/kernel/arch-x86
 libm_common_flags += -I$(top_srcdir)/libm/i386 -I$(top_srcdir)/libm/include/i387
-libm_la_LDFLAGS += @COMMON_LDFLAGS_X86@
 endif
 
 if TARGET_ARCH_IS_ARM
@@ -199,4 +198,3 @@ libm_common_flags += -I$(top_srcdir)/libc/include
 libm_common_flags += -I$(top_srcdir)/libc/kernel/common/linux -I$(top_srcdir)/libc/kernel/common
 
 AM_CPPFLAGS = $(libm_common_flags)
-

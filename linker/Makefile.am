@@ -13,6 +13,7 @@ linker_CFLAGS += -fno-stack-protector -Wstrict-overflow=5 -fvisibility=hidden
 linker_CFLAGS += -I$(call compiler-include-path)
 linker_CFLAGS += -I$(top_srcdir)/libc/include
 linker_LDFLAGS = -Wl,-no-undefined -nodefaultlibs -L$(top_builddir) -L$(top_builddir)/libc/.libs
+# would be nice to have -Wl,-soname,"ld-linux.so"
 linker_LDADD = -lc_static -lgcc
 
 linker_CFLAGS += -I$(top_srcdir)/libc/arch-@TARGET_ARCH@/include

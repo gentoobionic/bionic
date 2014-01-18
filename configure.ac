@@ -14,10 +14,9 @@ AC_PROG_LIBTOOL
 
 # -Wl,-no-undefined 
 # -L$(top_builddir)/libc/.libs -L$(top_builddir)/libthread_db/.libs -L$(top_builddir)/libdl/.libs
-COMMON_LDFLAGS='-Wl,-no-undefined -nodefaultlibs -Wl,--exclude-libs=libgcc.a -L$(top_builddir)'
+COMMON_LDFLAGS='-Wl,-no-undefined -nostdlib -nodefaultlibs -Wl,--exclude-libs=libgcc.a -L$(top_builddir)'
 
 COMMON_LDFLAGS_X86="-Wl,--exclude-libs=libgcc_eh.a"
-AC_SUBST(COMMON_LDFLAGS_X86)
 
 case $host_os in
   *linux*)
@@ -70,7 +69,7 @@ AC_SUBST(ARCH_ARM_HAVE_TLS_REGISTER)
 AM_CONDITIONAL([ARCH_ARM_USE_NON_NEON_MEMCPY],[test x$ARCH_ARM_USE_NON_NEON_MEMCPY = xtrue])
 AC_SUBST(ARCH_ARM_USE_NON_NEON_MEMCPY)
 
-AM_CONDITIONAL([TARGET_ARCH_IS_X86_OR_ARM],[test x$TARGET_ARCH = arm || test x$TARGET_ARCH = xx86])
+AM_CONDITIONAL([TARGET_ARCH_IS_X86_OR_ARM],[test x$TARGET_ARCH = xarm || test x$TARGET_ARCH = xx86])
 AC_SUBST(TARGET_ARCH_IS_X86_OR_ARM)
 
 dnl autotools is a bit dumb about this

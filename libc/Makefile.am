@@ -7,7 +7,8 @@ endef
 BUILT_SOURCES = syscalls.stamp $(top_srcdir)/libc/include/sys/linux-syscalls.h $(top_srcdir)/libc/arch-@TARGET_ARCH@/syscalls.mk
 
 syscalls.stamp: $(top_srcdir)/libc/SYSCALLS.TXT
-	python $(top_srcdir)/libc/tools/gensyscalls.py $(TARGET_ARCH) > $@
+	mkdir -p arch/@TARGET_ARCH@/syscalls/
+	python $(top_srcdir)/libc/tools/gensyscalls.py @TARGET_ARCH@ > $@
 
 $(top_srcdir)/libc/include/sys/linux-syscalls.h: syscalls.stamp
 
@@ -632,7 +633,7 @@ libc_common_c_includes = \
 # crtbegin_xxx.S and crtend_xxx.S
 # and machine/asm.h
 #
-libc_crt_target_cflags += -I$(top_srcdir)/libc/private -I$(top_srcdir)/libc/arch-$(TARGET_ARCH)/include
+libc_crt_target_cflags += -I$(top_srcdir)/libc/private -I$(top_srcdir)/libc/arch-@TARGET_ARCH@/include
 
 # Define the libc run-time (crt) support object files that must be built,
 # which are needed to build all other objects (shared/static libs and
@@ -656,24 +657,24 @@ if TARGET_ARCH_IS_X86
     # This flag must be added for x86 targets, but not for ARM
     libc_crt_target_so_cflags += -fPIC
 endif
-$(top_builddir)/crtbegin_so.o: $(top_srcdir)/libc/arch-$(TARGET_ARCH)/bionic/crtbegin_so.S
+$(top_builddir)/crtbegin_so.o: $(top_srcdir)/libc/arch-@TARGET_ARCH@/bionic/crtbegin_so.S
 	@mkdir -p $(dir $@)
 	@CC@ $(libc_crt_target_so_cflags) -o $@ -c $<
 BUILT_SOURCES += $(top_builddir)/crtbegin_so.o
 
-$(top_builddir)/crtend_so.o: $(top_srcdir)/libc/arch-$(TARGET_ARCH)/bionic/crtend_so.S
+$(top_builddir)/crtend_so.o: $(top_srcdir)/libc/arch-@TARGET_ARCH@/bionic/crtend_so.S
 	@mkdir -p $(dir $@)
 	@CC@ $(libc_crt_target_so_cflags) -o $@ -c $<
 BUILT_SOURCES += $(top_builddir)/crtend_so.o
 endif # TARGET_ARCH == x86 || TARGET_ARCH == arm
 
 
-$(top_builddir)/crtbegin_static.o: $(top_srcdir)/libc/arch-$(TARGET_ARCH)/bionic/crtbegin_static.S
+$(top_builddir)/crtbegin_static.o: $(top_srcdir)/libc/arch-@TARGET_ARCH@/bionic/crtbegin_static.S
 	@mkdir -p $(dir $@)
 	@CC@ $(libc_crt_target_cflags) -o $@ -c $<
 BUILT_SOURCES += $(top_builddir)/crtbegin_static.o
 
-$(top_builddir)/crtbegin_dynamic.o: $(top_srcdir)/libc/arch-$(TARGET_ARCH)/bionic/crtbegin_dynamic.S
+$(top_builddir)/crtbegin_dynamic.o: $(top_srcdir)/libc/arch-@TARGET_ARCH@/bionic/crtbegin_dynamic.S
 	@mkdir -p $(dir $@)
 	@CC@ $(libc_crt_target_cflags) -o $@ -c $<
 BUILT_SOURCES += $(top_builddir)/crtbegin_dynamic.o
@@ -681,7 +682,7 @@ BUILT_SOURCES += $(top_builddir)/crtbegin_dynamic.o
 
 # We rename crtend.o to crtend_android.o to avoid a
 # name clash between gcc and bionic.
-$(top_builddir)/crtend_android.o: $(top_srcdir)/libc/arch-$(TARGET_ARCH)/bionic/crtend.S
+$(top_builddir)/crtend_android.o: $(top_srcdir)/libc/arch-@TARGET_ARCH@/bionic/crtend.S
 	@mkdir -p $(dir $@)
 	@CC@ $(libc_crt_target_cflags) -o $@ -c $<
 BUILT_SOURCES += $(top_builddir)/crtend_android.o
@@ -798,7 +799,7 @@ $(foreach st,$(filter %.S,$(_libc_static_la_SOURCES)), $(eval $(call transform-S
 
 libc_la_CFLAGS = $(libc_common_cflags) -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=0
 libc_la_LIBADD = libc_common.la -ldl -lgcc
-libc_la_LDFLAGS = @COMMON_LDFLAGS@
+libc_la_LDFLAGS = @COMMON_LDFLAGS@ -Wl,-soname,"libc.so" -L$(top_builddir)/libdl/.libs
 libc_la_DEPENDENCIES = libc_common.la
 
 if TARGET_ARCH_IS_ARM

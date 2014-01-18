@@ -1,6 +1,18 @@
 TODO
 =-=-
 
+-2) build order is crucial
+	- gensyscalls (do this first)
+    - libdl (no dependencies, not even libc), undefined ok
+    - libc (depends on libdl)
+    - libm (depends on libc)
+    - libstdc++ (depends on libc, libm??)
+    - linker
+    - libthread_db (depends on libc, only used for debugging)
+-1) build properly in a different build directory (maybe works already?)
+0) avoid the libc_static.a / libc.la hack - avoid libc.la
+   - whittle libtool cruft that's necessary to just build libc.a and libc.so targets in separate steps
+   - they include different staic / dynamic init sources (hence the hack)
 1) build without any interruptions
    - delete syscalls/*.S but not syscalls/
    - should not complain about any undefined references with e.g. make -j7

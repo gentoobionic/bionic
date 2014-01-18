@@ -4,6 +4,7 @@ endef
 
 common_ldflags = @COMMON_LDFLAGS@
 my_ldflags = $(common_ldflags:-Wl,-no-undefined=)
+my_ldflags += -Wl,-soname,"libthread_db.so"
 
 lib_LTLIBRARIES = libthread_db.la
 libthread_db_la_SOURCES = libthread_db.c
