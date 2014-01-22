@@ -28,8 +28,8 @@ endef
 # $2 tag (e.g. 'libc_common')
 # $3 other dependencies e.g. $(SYSCALLS_STAMP)
 define compile-one-file
-$(eval _src = $(top_srcdir)/$(strip $(1)))
-$(eval _tgt = $(top_builddir)/$(dir $(1))/$(strip $(call subst-src-ext,$(_src))))
+$(eval _src = $(strip $(1)))
+$(eval _tgt = $(top_builddir)/$(dir $(1))/$(strip $(call subst-src-ext,$(notdir $(1)))))
 $(eval _tag = $(strip $(2)))
 $(eval $(_tag)_obj += $(_tgt))
 $(eval $(foreach f,$(filter %.c,$(_src)) $(filter %.S,$(_src)),$(call transform-c-or-S-to-o,$(f),$(_tgt),$($(_tag)_cflags))))

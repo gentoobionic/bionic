@@ -621,7 +621,7 @@ $(top_builddir)/libc/libc.a: $(libc_static_obj) $(libc_common_obj)
 $(top_builddir)/libc/libc.so: $(libc_dynamic_obj) $(libc_common_obj)
 	@CC@ $(libc_ldflags) -o $@ $(libc_dynamic_obj) $(libc_common_obj) $(libc_ldlibs)
 
-.PHONY: libc-all-local libc-clean-local
+.PHONY: libc-all libc-clean
 
 libc-all: $(top_builddir)/libc/libc.a $(top_builddir)/libc/libc.so
 

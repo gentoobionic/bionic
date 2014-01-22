@@ -8,7 +8,7 @@ include libdl/Makefile.am
 include libthread_db/Makefile.am
 include libc/Makefile.am
 include libm/Makefile.am
-include libstdc@PLUSPLUS@/Makefile.am
+include libstdc++/Makefile.am
 #include linker/Makefile.am
 
 all-local: $(ALL_LOCAL)
