@@ -2,12 +2,13 @@
 
 ALL_LOCAL =
 CLEAN_LOCAL =
-CRTFILES =
-lib_LTLIBRARIES =
 
 include mk/rules.mk
-include libc/Makefile.am
+include libc/Makefile.syscalls.am
+include libc/Makefile.crt.am
 include libdl/Makefile.am
+include libthread_db/Makefile.am
+include libc/Makefile.am
 
 all-local: $(ALL_LOCAL)
 

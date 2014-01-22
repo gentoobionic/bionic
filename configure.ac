@@ -9,15 +9,19 @@ AM_INIT_AUTOMAKE([subdir-objects -Wno-portability])
 AM_PROG_AS
 AM_PROG_AR
 
-LT_INIT
-
-AC_PROG_LIBTOOL
-
+dnl LT_INIT
+dnl AC_PROG_LIBTOOL
+ 
 # -Wl,-no-undefined 
 # -L$(top_builddir)/libc/.libs -L$(top_builddir)/libthread_db/.libs -L$(top_builddir)/libdl/.libs
 COMMON_LDFLAGS='-Wl,-no-undefined -nostdlib -nodefaultlibs -nostartfiles -Wl,--exclude-libs=libgcc.a -L$(top_builddir)'
 
 COMMON_LDFLAGS_X86="-Wl,--exclude-libs=libgcc_eh.a"
+
+COMMON_CFLAGS='-Wall -fno-exceptions -Wno-multichar -fmessage-length=0 -Wno-unused -Winit-self -Wpointer-arith -Werror=return-type -Werror=non-virtual-dtor -Werror=address -Werror=sequence-point -fno-strict-aliasing '
+COMMON_CFLAGS_X86="-march=i686 -m32"
+
+COMMON_INCLUDES='-nostdinc -I$(call compiler-include-path) -include $(top_srcdir)/libc/arch-$(TARGET_ARCH)/AndroidConfig.h -I$(top_srcdir)/libc/arch-$(TARGET_ARCH)/include -I$(top_srcdir)/libc/include -I$(top_srcdir)/libc/kernel/arch-$(TARGET_ARCH) -I$(top_srcdir)/libc/arch-$(TARGET_ARCH)/include -I$(top_srcdir)/libc/include -I$(top_srcdir)/libc/kernel/common -I$(top_srcdir)/libc/kernel/arch-$(TARGET_ARCH) -I$(top_srcdir)/libm/include -I$(top_srcdir)/libthread_db/include'
 
 case $host_os in
   *linux*)
@@ -34,6 +38,7 @@ case $host_cpu in
     ARCH_X86_HAVE_SSSE3=true;
     TARGET_CPU_SMP=true;
     COMMON_LDFLAGS="${COMMON_LDFLAGS} ${COMMON_LDFLAGS_X86}";
+    COMMON_CFLAGS="${COMMON_CFLAGS} ${COMMON_CFLAGS_X86}"
   ;;
   *arm*)
     TARGET_ARCH=arm;
@@ -46,8 +51,10 @@ case $host_cpu in
   ;;
 esac
 
-AC_SUBST(TARGET_ARCH)
+COMMON_CFLAGS="${COMMON_CFLAGS} ${COMMON_INCLUDES}"
 
+AC_SUBST(TARGET_ARCH)
+AC_SUBST(COMMON_CFLAGS)
 AC_SUBST(COMMON_LDFLAGS)
 
 AM_CONDITIONAL([TARGET_CPU_SMP],[test x$TARGET_CPU_SMP = xtrue])

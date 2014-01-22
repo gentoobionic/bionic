@@ -1,0 +1,81 @@
+CRTFILES =
+
+libc_crt_target_cflags = @COMMON_CFLAGS@
+libc_crt_target_so_cflags = @COMMON_CFLAGS@
+
+if TARGET_ARCH_IS_ARM
+libc_crt_target_cflags += -DCRT_LEGACY_WORKAROUND
+endif
+
+if TARGET_ARCH_IS_X86
+if ARCH_X86_HAVE_SSE2
+    libc_crt_target_cflags += -DUSE_SSE2=1
+endif
+if ARCH_X86_HAVE_SSSE3
+    libc_crt_target_cflags += -DUSE_SSSE3=1
+endif
+endif
+
+libc_crt_target_cflags += -I$(top_srcdir)/libc/private
+
+libc_crt_target_cflags += -I$(top_srcdir)/libc/private -I$(top_srcdir)/libc/arch-@TARGET_ARCH@/include
+
+# Define the libc run-time (crt) support object files that must be built,
+# which are needed to build all other objects (shared/static libs and
+# executables)
+# ==========================================================================
+
+if TARGET_ARCH_IS_X86_OR_ARM
+
+# ARM and x86 need crtbegin_so/crtend_so.
+#
+# For x86, the .init section must point to a function that calls all
+# entries in the .ctors section. (on ARM this is done through the
+# .init_array section instead).
+#
+# For both platforms, the .fini_array section must point to a function
+# that will call __cxa_finalize(&__dso_handle) in order to ensure that
+# static C++ destructors are properly called on dlclose().
+#
+
+libc_crt_target_so_cflags += $(libc_crt_target_cflags)
+if TARGET_ARCH_IS_X86
+    # This flag must be added for x86 targets, but not for ARM
+    libc_crt_target_so_cflags += -fPIC
+endif
+crtbegin_so_obj =
+crtbegin_so_cflags = $(libc_crt_target_so_cflags)
+$(eval $(call compile-one-file,libc/arch-@TARGET_ARCH@/bionic/crtbegin_so.S,crtbegin_so))
+CRTFILES += $(crtbegin_so_obj)
+
+crtend_so_obj =
+crtend_so_cflags = $(libc_crt_target_so_cflags)
+$(eval $(call compile-one-file,libc/arch-@TARGET_ARCH@/bionic/crtend_so.S,crtend_so))
+CRTFILES += $(crtend_so_obj)
+
+endif # TARGET_ARCH == x86 || TARGET_ARCH == arm
+
+crtbegin_static_obj =
+crtbegin_static_cflags = $(libc_crt_target_so_cflags)
+$(eval $(call compile-one-file,libc/arch-@TARGET_ARCH@/bionic/crtbegin_static.S,crtbegin_static))
+CRTFILES += $(crtbegin_static_obj)
+
+crtbegin_dynamic_obj =
+crtbegin_dynamic_cflags = $(libc_crt_target_so_cflags)
+$(eval $(call compile-one-file,libc/arch-@TARGET_ARCH@/bionic/crtbegin_dynamic.S,crtbegin_dynamic))
+CRTFILES += $(crtbegin_dynamic_obj)
+
+crtend_android_obj =
+crtend_android_cflags = $(libc_crt_target_so_cflags)
+$(eval $(call compile-one-file,libc/arch-@TARGET_ARCH@/bionic/crtend_android.S,crtend_android))
+CRTFILES += $(crtend_android_obj)
+
+.PHONY: crtfiles-all crtfiles-clean
+
+crtfiles-all: $(CRTFILES)
+
+crtfiles-clean:
+	rm -f $(CRTFILES)
+
+ALL_LOCAL += crtfiles-all
+CLEAN_LOCAL += crtfiles-clean
