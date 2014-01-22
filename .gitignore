@@ -33,3 +33,7 @@ libc/kernel/original
 libc/include/sys/linux-syscalls.h
 libc/arch-*/syscalls/*.S
 linker/linker
+ar-lib
+*_orig
+*.orig
+*.rej

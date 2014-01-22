@@ -5,8 +5,9 @@ AC_PROG_CXX
 
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects -Wno-portability])
 AM_PROG_AS
+AM_PROG_AR
 
 LT_INIT
 
@@ -14,7 +15,7 @@ AC_PROG_LIBTOOL
 
 # -Wl,-no-undefined 
 # -L$(top_builddir)/libc/.libs -L$(top_builddir)/libthread_db/.libs -L$(top_builddir)/libdl/.libs
-COMMON_LDFLAGS='-Wl,-no-undefined -nostdlib -nodefaultlibs -Wl,--exclude-libs=libgcc.a -L$(top_builddir)'
+COMMON_LDFLAGS='-Wl,-no-undefined -nostdlib -nodefaultlibs -nostartfiles -Wl,--exclude-libs=libgcc.a -L$(top_builddir)'
 
 COMMON_LDFLAGS_X86="-Wl,--exclude-libs=libgcc_eh.a"
 
@@ -27,7 +28,7 @@ case $host_os in
 esac
 
 case $host_cpu in
-  *86*)
+  *i?86*)
     TARGET_ARCH=x86;
     ARCH_X86_HAVE_SSE2=true;
     ARCH_X86_HAVE_SSSE3=true;
@@ -78,12 +79,12 @@ AC_SUBST(PLUSPLUS)
 
 AC_CONFIG_FILES(
     Makefile
-    libc/Makefile
-    libc/zoneinfo/Makefile
-    libdl/Makefile
-    libm/Makefile
-    libstdc++/Makefile
-    libthread_db/Makefile
-    linker/Makefile
+dnl    libc/Makefile
+dnl    libc/zoneinfo/Makefile
+dnl    libdl/Makefile
+dnl    libm/Makefile
+dnl    libstdc++/Makefile
+dnl    libthread_db/Makefile
+dnl    linker/Makefile
 )
 AC_OUTPUT
