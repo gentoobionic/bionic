@@ -1,7 +1,3 @@
-define compiler-include-path
-$(shell echo | @CC@ -v -x c -E - 2>&1 | grep -A 1 "^#include" | tail -n 1)
-endef
-
 .deps/linker.Plo:
 	mkdir -p $(dir $@)
 	touch $@

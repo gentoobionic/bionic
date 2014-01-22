@@ -9,19 +9,15 @@ AM_INIT_AUTOMAKE([subdir-objects -Wno-portability])
 AM_PROG_AS
 AM_PROG_AR
 
-dnl LT_INIT
-dnl AC_PROG_LIBTOOL
- 
-# -Wl,-no-undefined 
-# -L$(top_builddir)/libc/.libs -L$(top_builddir)/libthread_db/.libs -L$(top_builddir)/libdl/.libs
 COMMON_LDFLAGS='-Wl,-no-undefined -nostdlib -nodefaultlibs -nostartfiles -Wl,--exclude-libs=libgcc.a -L$(top_builddir)'
-
 COMMON_LDFLAGS_X86="-Wl,--exclude-libs=libgcc_eh.a"
 
-COMMON_CFLAGS='-Wall -fno-exceptions -Wno-multichar -fmessage-length=0 -Wno-unused -Winit-self -Wpointer-arith -Werror=return-type -Werror=non-virtual-dtor -Werror=address -Werror=sequence-point -fno-strict-aliasing '
+COMMON_CFLAGS='-Wall -fPIC -fno-exceptions -Wno-multichar -fmessage-length=0 -Wno-unused -Winit-self -Wpointer-arith -Werror=return-type -Werror=non-virtual-dtor -Werror=address -Werror=sequence-point -fno-strict-aliasing '
 COMMON_CFLAGS_X86="-march=i686 -m32"
 
 COMMON_INCLUDES='-nostdinc -I$(call compiler-include-path) -include $(top_srcdir)/libc/arch-$(TARGET_ARCH)/AndroidConfig.h -I$(top_srcdir)/libc/arch-$(TARGET_ARCH)/include -I$(top_srcdir)/libc/include -I$(top_srcdir)/libc/kernel/arch-$(TARGET_ARCH) -I$(top_srcdir)/libc/arch-$(TARGET_ARCH)/include -I$(top_srcdir)/libc/include -I$(top_srcdir)/libc/kernel/common -I$(top_srcdir)/libc/kernel/arch-$(TARGET_ARCH) -I$(top_srcdir)/libm/include -I$(top_srcdir)/libthread_db/include'
+COMMON_INCLUDES_X86='-I$(top_srcdir)/libm/include/i387'
+COMMON_INCLUDES_ARM='-I$(top_srcdir)/libm/include/arm'
 
 case $host_os in
   *linux*)
@@ -39,12 +35,14 @@ case $host_cpu in
     TARGET_CPU_SMP=true;
     COMMON_LDFLAGS="${COMMON_LDFLAGS} ${COMMON_LDFLAGS_X86}";
     COMMON_CFLAGS="${COMMON_CFLAGS} ${COMMON_CFLAGS_X86}"
+    COMMON_INCLUDES="${COMMON_INCLUDES} ${COMMON_INCLUDES_X86}"
   ;;
   *arm*)
     TARGET_ARCH=arm;
     ARCH_ARM_HAVE_TLS_REGISTER=true;
     ARCH_ARM_USE_NON_NEON_MEMCPY=true;
     TARGET_CPU_SMP=true;
+    COMMON_INCLUDES="${COMMON_INCLUDES} ${COMMON_INCLUDES_ARM}"
   ;;
   *)
   AC_MSG_ERROR([unsupported host cpu $host_cpu])

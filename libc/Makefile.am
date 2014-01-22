@@ -579,9 +579,23 @@ libc_static_obj =
 libc_static_cflags = $(libc_common_cflags) -DLIBC_STATIC
 libc_static_cflags += $(addprefix -I,$(libc_common_c_includes))
 
-$(foreach f,$(libc_static_src), $(eval $(call compile-one-file,$(f),libc_static,$(libc_static_dep))))
+$(foreach f,$(libc_static_src), $(eval $(call compile-one-file,$(f),libc_static,$(libc_common_dep))))
 
-libc_dynamic_src = $(addprefix $(top_srcdir)/libc/, bionic/dlmalloc.c bionic/malloc_debug_common.c bionic/pthread_debug.c bionic/libc_init_dynamic.c $(libc_static_common_src_files))
+$(top_builddir)/libc/unistd/sysconf-dynamic.c: $(top_srcdir)/libc/unistd/sysconf.c
+	mkdir -p $(dir $@)
+	cp $< $@
+
+$(top_builddir)/libc/bionic/__errno-dynamic.c: $(top_srcdir)/libc/bionic/__errno.c
+	mkdir -p $(dir $@)
+	cp $< $@
+
+$(top_builddir)/libc/bionic/pthread-dynamic.c: $(top_srcdir)/libc/bionic/pthread.c
+	mkdir -p $(dir $@)
+	cp $< $@
+
+libc_dynamic_common_src_files = $(top_builddir)/libc/unistd/sysconf-dynamic.c $(top_builddir)/libc/bionic/__errno-dynamic.c $(top_builddir)/libc/bionic/pthread-dynamic.c
+libc_dymamic_dep = $(libc_common_dep) $(libc_dynamic_common_src_files)
+libc_dynamic_src = $(addprefix $(top_srcdir)/libc/, bionic/dlmalloc.c bionic/malloc_debug_common.c bionic/pthread_debug.c bionic/libc_init_dynamic.c) $(libc_dynamic_common_src_files)
 libc_dynamic_obj =
 libc_dynamic_cflags = $(libc_common_cflags) -static-libgcc
 libc_dynamic_cflags += -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=0
@@ -614,7 +628,8 @@ libc-all: $(top_builddir)/libc/libc.a $(top_builddir)/libc/libc.so
 libc-clean:
 	rm -f $(libc_common_obj) $(top_builddir)/libc/libc_common.a \
 		$(libc_static_obj) $(top_builddir)/libc/libc.a \
-		$(libc_dynamic_obj) $(top_builddir)/libc/libc.so
+		$(libc_dynamic_obj) $(top_builddir)/libc/libc.so \
+		$(libc_dynamic_src_files)
 
 ALL_LOCAL += libc-all
 CLEAN_LOCAL += libc-clean

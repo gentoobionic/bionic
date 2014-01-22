@@ -2,9 +2,9 @@ libdl_src = libdl/libdl.c
 libdl_obj = 
 libdl_cflags = @COMMON_CFLAGS@ -I$(top_srcdir)/libc/include
 libdl_ldflags = @COMMON_LDFLAGS@ -shared -Wl,-soname,libdl.so
-libdl_dependencies = $(CRTFILES)
+libdl_dep = $(CRTFILES)
 
-$(foreach f,$(libdl_src), $(eval $(call compile-one-file,$(f),libdl)))
+$(foreach f,$(libdl_src), $(eval $(call compile-one-file,$(f),libdl,$(libdl_dep))))
 
 .PHONY: libdl-all-local libdl-clean-local
 

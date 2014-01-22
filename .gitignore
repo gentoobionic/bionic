@@ -37,3 +37,6 @@ ar-lib
 *_orig
 *.orig
 *.rej
+libc/unistd/sysconf-dynamic.c
+libc/bionic/__errno-dynamic.c
+libc/bionic/pthread-dynamic.c

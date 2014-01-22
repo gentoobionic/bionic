@@ -1,5 +1,3 @@
-#SUBDIRS = libdl libm libc libthread_db linker libstdc++
-
 ALL_LOCAL =
 CLEAN_LOCAL =
 
@@ -9,6 +7,9 @@ include libc/Makefile.crt.am
 include libdl/Makefile.am
 include libthread_db/Makefile.am
 include libc/Makefile.am
+include libm/Makefile.am
+include libstdc@PLUSPLUS@/Makefile.am
+#include linker/Makefile.am
 
 all-local: $(ALL_LOCAL)
 
