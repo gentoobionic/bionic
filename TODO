@@ -1,48 +1,33 @@
 TODO
 =-=-
 
--2) build order is crucial
-	- gensyscalls (do this first)
-    - libdl (no dependencies, not even libc), undefined ok
-    - libc (depends on libdl)
-    - libm (depends on libc)
-    - libstdc++ (depends on libc, libm??)
-    - linker
-    - libthread_db (depends on libc, only used for debugging)
+-2) change gensyscalls.py to output into build directory
 -1) build properly in a different build directory (maybe works already?)
-0) avoid the libc_static.a / libc.la hack - avoid libc.la
-   - whittle libtool cruft that's necessary to just build libc.a and libc.so targets in separate steps
-   - they include different staic / dynamic init sources (hence the hack)
-1) build without any interruptions
-   - delete syscalls/*.S but not syscalls/
+   - this did work, it might be broken now
+0) build without any interruptions
    - should not complain about any undefined references with e.g. make -j7
-   - build things in proper order. create dependencies
-2) make sure that gensyscalls is only done iff SYSCALLS.TXT is updated
-   - add rules (perhaps eval'd) so that dependency tracking is done properly
-3) delete dynamically generated syscalls/*.S, sys/linux-syscalls.h  in repository
-4) verify linkage is free of @GLIBC symvers (-nostdlib?)
-5) verify linkage entirely, using custom linker rules in Makefile.am if necessary
+1) gensyscalls.py should actually generate all the syscalls
+   - currently 'make' has to be run twice for everything to successfully compile
+   - need to debug that make step
+2) verify linkage entirely, using custom linker rules in Makefile.am
    - see http://dev.gentoo.org/~vapier/crt.txt
    - that means, I should be able to drop it in my /usr/i686-pc-linux-bionic chroot
      and it should Just Work (TM)
-6) Add headers to install targets (note: gentoo-bionic had a separate 
+3) Add install targets
+4) Add headers to install targets (note: gentoo-bionic had a separate 
    bionic-kernel-headers package)
-7) maybe block arm build right now, until .arm file extension is sorted out
+5) maybe block arm build right now, until .arm file extension is sorted out
    - identify and properly compile .thumb / .arm compilation targets
    - generate rules
-8) maybe block x86_64 build right now - .S files only support 32-bit anyway
-   - build will probably die if anyone tries x86_64
-   - just a head's up, I'm using i686-pc-linux-gnu to test out with for the time being
-9) change the behaviour of /sbin/linker - I want this to be more like ld-linux.so
+6) change the behaviour of /sbin/linker - I want this to be more like ld-linux.so
    - this means it should work as a drop-in replacement with ldd(1)
    - also a rename to /lib/ld-linux.so would be awesome
    - net result is that people can use the same semantics as a -gnu* toolchain
-10) modify the crt*.o, possibly, so that we don't need an -mbionic 
+7) modify the crt*.o, possibly, so that we don't need an -mbionic 
    - rename crt*.o to be compatible with crti.o, crt1.o, crtn.o, etc
    - net result is that people can use the same semantics as a -gnu* toolchain
-11) get rid of Android.mk and other cruft that isn't used at all in the build
-12) work out any PITA's with headers; inclusion order, conditional defines, etc
-13) add a testsuite
+8) add a testsuite
+   - or use an existing one, e.g. http://posixtest.sourceforge.net/
 
 FEATURE REQUESTS
 =-=-=-=-=-=-=-=-

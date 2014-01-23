@@ -1,2 +1,2 @@
 zoneinfodir = $(datadir)/bionic
-zoneinfo_DATA = zoneinfo.dat zoneinfo.idx zoneinfo.version
+zoneinfo_DATA = $(addprefix libc/zoneinfo/,zoneinfo.dat zoneinfo.idx zoneinfo.version)

@@ -11,6 +11,7 @@ include libc/Makefile.am
 include libm/Makefile.am
 include libstdc++/Makefile.am
 include linker/Makefile.am
+include libc/zoneinfo/Makefile.am
 
 all-local: $(ALL_LOCAL)
 clean-local: $(CLEAN_LOCAL)
