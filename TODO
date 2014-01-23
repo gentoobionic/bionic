@@ -32,6 +32,7 @@ TODO
 FEATURE REQUESTS
 =-=-=-=-=-=-=-=-
 
+0) update to bionic-4.4 (kitkat)
 1) a more padded-out libc - lots of those random libc funcs that ever 139th package requires
 2) possibly wchar.h support with a shim-layer to icu4c
    - dlopen? - automatically pulling in that library would be serious heavy lifting
