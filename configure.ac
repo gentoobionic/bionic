@@ -5,19 +5,19 @@ AC_PROG_CXX
 
 AC_CANONICAL_SYSTEM
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects -Wno-portability])
 AM_PROG_AS
+AM_PROG_AR
 
-LT_INIT
-
-AC_PROG_LIBTOOL
-
-# -Wl,-no-undefined 
-# -L$(top_builddir)/libc/.libs -L$(top_builddir)/libthread_db/.libs -L$(top_builddir)/libdl/.libs
-COMMON_LDFLAGS='-Wl,-no-undefined -nodefaultlibs -Wl,--exclude-libs=libgcc.a -L$(top_builddir)'
-
+COMMON_LDFLAGS='-Wl,-no-undefined -nostdlib -nodefaultlibs -nostartfiles -Wl,--exclude-libs=libgcc.a -L$(top_builddir)'
 COMMON_LDFLAGS_X86="-Wl,--exclude-libs=libgcc_eh.a"
-AC_SUBST(COMMON_LDFLAGS_X86)
+
+COMMON_CFLAGS='-Wall -fPIC -fno-exceptions -Wno-multichar -fmessage-length=0 -Wno-unused -Winit-self -Wpointer-arith -Werror=return-type -Werror=non-virtual-dtor -Werror=address -Werror=sequence-point -fno-strict-aliasing '
+COMMON_CFLAGS_X86="-march=i686 -m32"
+
+COMMON_INCLUDES='-nostdinc -I$(call compiler-include-path) -include $(top_srcdir)/libc/arch-$(TARGET_ARCH)/AndroidConfig.h -I$(top_srcdir)/libc/arch-$(TARGET_ARCH)/include -I$(top_srcdir)/libc/include -I$(top_srcdir)/libc/kernel/arch-$(TARGET_ARCH) -I$(top_srcdir)/libc/arch-$(TARGET_ARCH)/include -I$(top_srcdir)/libc/include -I$(top_srcdir)/libc/kernel/common -I$(top_srcdir)/libc/kernel/arch-$(TARGET_ARCH) -I$(top_srcdir)/libm/include -I$(top_srcdir)/libthread_db/include'
+COMMON_INCLUDES_X86='-I$(top_srcdir)/libm/include/i387'
+COMMON_INCLUDES_ARM='-I$(top_srcdir)/libm/include/arm'
 
 case $host_os in
   *linux*)
@@ -28,26 +28,31 @@ case $host_os in
 esac
 
 case $host_cpu in
-  *86*)
+  *i?86*)
     TARGET_ARCH=x86;
     ARCH_X86_HAVE_SSE2=true;
     ARCH_X86_HAVE_SSSE3=true;
     TARGET_CPU_SMP=true;
     COMMON_LDFLAGS="${COMMON_LDFLAGS} ${COMMON_LDFLAGS_X86}";
+    COMMON_CFLAGS="${COMMON_CFLAGS} ${COMMON_CFLAGS_X86}"
+    COMMON_INCLUDES="${COMMON_INCLUDES} ${COMMON_INCLUDES_X86}"
   ;;
   *arm*)
     TARGET_ARCH=arm;
     ARCH_ARM_HAVE_TLS_REGISTER=true;
     ARCH_ARM_USE_NON_NEON_MEMCPY=true;
     TARGET_CPU_SMP=true;
+    COMMON_INCLUDES="${COMMON_INCLUDES} ${COMMON_INCLUDES_ARM}"
   ;;
   *)
   AC_MSG_ERROR([unsupported host cpu $host_cpu])
   ;;
 esac
 
-AC_SUBST(TARGET_ARCH)
+COMMON_CFLAGS="${COMMON_CFLAGS} ${COMMON_INCLUDES}"
 
+AC_SUBST(TARGET_ARCH)
+AC_SUBST(COMMON_CFLAGS)
 AC_SUBST(COMMON_LDFLAGS)
 
 AM_CONDITIONAL([TARGET_CPU_SMP],[test x$TARGET_CPU_SMP = xtrue])
@@ -70,7 +75,7 @@ AC_SUBST(ARCH_ARM_HAVE_TLS_REGISTER)
 AM_CONDITIONAL([ARCH_ARM_USE_NON_NEON_MEMCPY],[test x$ARCH_ARM_USE_NON_NEON_MEMCPY = xtrue])
 AC_SUBST(ARCH_ARM_USE_NON_NEON_MEMCPY)
 
-AM_CONDITIONAL([TARGET_ARCH_IS_X86_OR_ARM],[test x$TARGET_ARCH = arm || test x$TARGET_ARCH = xx86])
+AM_CONDITIONAL([TARGET_ARCH_IS_X86_OR_ARM],[test x$TARGET_ARCH = xarm || test x$TARGET_ARCH = xx86])
 AC_SUBST(TARGET_ARCH_IS_X86_OR_ARM)
 
 dnl autotools is a bit dumb about this
@@ -79,12 +84,12 @@ AC_SUBST(PLUSPLUS)
 
 AC_CONFIG_FILES(
     Makefile
-    libc/Makefile
-    libc/zoneinfo/Makefile
-    libdl/Makefile
-    libm/Makefile
-    libstdc++/Makefile
-    libthread_db/Makefile
-    linker/Makefile
+dnl    libc/Makefile
+dnl    libc/zoneinfo/Makefile
+dnl    libdl/Makefile
+dnl    libm/Makefile
+dnl    libstdc++/Makefile
+dnl    libthread_db/Makefile
+dnl    linker/Makefile
 )
 AC_OUTPUT

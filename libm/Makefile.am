@@ -1,4 +1,4 @@
-libm_common_src_files = \
+libm_src_files = \
 	isinf.c  \
 	fpclassify.c \
 	sincos.c \
@@ -151,7 +151,7 @@ libm_common_src_files = \
 	src/s_modf.c
 
 if TARGET_ARCH_IS_X86
-libm_common_src_files += \
+libm_src_files += \
 	i387/x86-fenv.c \
 	i387/s_scalbnl.S \
 	i387/s_scalbn.S \
@@ -159,7 +159,7 @@ libm_common_src_files += \
 endif
 
 if TARGET_ARCH_IS_ARM
-libm_common_src_files += \
+libm_src_files += \
 	arm/arm-fenv.c \
 	src/e_ldexpf.c \
 	src/s_scalbln.c \
@@ -167,36 +167,36 @@ libm_common_src_files += \
 	src/s_scalbnf.c
 endif
 
-define compiler-include-path
-$(shell echo | @CC@ -v -x c -E - 2>&1 | grep -A 1 "^#include" | tail -n 1)
-endef
-
-lib_LTLIBRARIES = libm.la
-libm_la_SOURCES = $(libm_common_src_files)
-
-libm_la_CFLAGS =
-
-libm_common_flags = -nostdinc -include $(top_srcdir)/libc/arch-@TARGET_ARCH@/AndroidConfig.h
-libm_common_flags += -I$(call compiler-include-path)
-
-libm_la_LDFLAGS = @COMMON_LDFLAGS@
-libm_la_LIBADD = -lc
+libm_src = $(addprefix $(top_srcdir)/libm/,$(libm_src_files))
+libm_obj =
+libm_cflags = @COMMON_CFLAGS@
+libm_ldflags = @COMMON_LDFLAGS@ -shared -Wl,-soname,libm.so -L$(top_builddir)/libc
+libm_ldlibs = -lc
+libm_dep = $(CRTFILES) libc-all
 
 if TARGET_ARCH_IS_X86
-libm_la_CFLAGS += -march=i686 -m32
-libm_common_flags += -I$(top_srcdir)/libc/arch-x86/include
-libm_common_flags += -I$(top_srcdir)/libc/kernel/arch-x86
-libm_common_flags += -I$(top_srcdir)/libm/i386 -I$(top_srcdir)/libm/include/i387
-libm_la_LDFLAGS += @COMMON_LDFLAGS_X86@
+libm_cflags += -I$(top_srcdir)/libm/i386
 endif
 
 if TARGET_ARCH_IS_ARM
-libm_common_flags += -I$(top_srcdir)/libm/arm
+libm_cflags += -I$(top_srcdir)/libm/arm
 endif
 
-libm_common_flags += -I$(top_srcdir)/libm/include
-libm_common_flags += -I$(top_srcdir)/libc/include
-libm_common_flags += -I$(top_srcdir)/libc/kernel/common/linux -I$(top_srcdir)/libc/kernel/common
+$(foreach f,$(libm_src), $(eval $(call compile-one-file,$(f),libm,$(libm_dep))))
 
-AM_CPPFLAGS = $(libm_common_flags)
+$(top_builddir)/libm/libm.a: $(libm_obj)
+	mkdir -p $(dir $@)
+	@AR@ crsP $@ $^
 
+$(top_builddir)/libm/libm.so: $(libm_obj) $(libm_dependencies)
+	@CC@ $(libm_ldflags) -o $@ $(libm_obj) $(libm_ldlibs)
+
+.PHONY: libm-all-local libm-clean-local
+
+libm-all: $(top_builddir)/libm/libm.a $(top_builddir)/libm/libm.so
+
+libm-clean:
+	rm -f $(libm_obj) $(top_builddir)/libm/libm.a $(top_builddir)/libm/libm.so
+
+ALL_LOCAL += libm-all
+CLEAN_LOCAL += libm-clean

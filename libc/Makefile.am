@@ -1,72 +1,3 @@
-SUBDIRS = zoneinfo
-
-define compiler-include-path
-$(shell echo | @CC@ -v -x c -E - 2>&1 | grep -A 1 "^#include" | tail -n 1)
-endef
-
-BUILT_SOURCES = syscalls.stamp $(top_srcdir)/libc/include/sys/linux-syscalls.h $(top_srcdir)/libc/arch-@TARGET_ARCH@/syscalls.mk
-
-syscalls.stamp: $(top_srcdir)/libc/SYSCALLS.TXT
-	python $(top_srcdir)/libc/tools/gensyscalls.py $(TARGET_ARCH) > $@
-
-$(top_srcdir)/libc/include/sys/linux-syscalls.h: syscalls.stamp
-
-# ========================================================
-# custom make rules
-# ========================================================
-
-define transform-c-to-o
-$(eval _flg := $(strip $(1)))
-$(eval _lib := $(strip $(2)))
-$(eval _src := $(strip $(3)))
-$(eval _tgt := $(addprefix $(_lib)_la-,$(subst /,_,$(_src:.c=.lo))))
-$(_tgt): $(_src)
-		$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_flg) $(CFLAGS) -MT $$@ -MD -MP -MF $(DEPDIR)/$$(@:.lo=.Tpo) -c -o $(builddir)/.libs/$$@ `test -f '$$<' || echo '$(srcdir)/'`$$<
-		$(am__mv) $(DEPDIR)/$$(@:.lo=.Tpo) $(DEPDIR)/$$(@:.lo=.Plo)
-endef
-
-define transform-cpp-to-o
-$(eval _flg := $(strip $(1)))
-$(eval _lib := $(strip $(2)))
-$(eval _src := $(strip $(3)))
-$(eval _ext := $(strip $(4)))
-$(eval _tgt := $(addprefix $(_lib)_la-,$(subst /,_,$(_src:$(_ext)=.lo))))
-$(_tgt): $(_src)
-		$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_flg) $(CXXFLAGS) -MT $$@ -MD -MP -MF $(DEPDIR)/$$(@:.lo=.Tpo) -c -o $(builddir)/.libs/$$@ `test -f '$$<' || echo '$(srcdir)/'`$$<
-		$(am__mv) $(DEPDIR)/$$(@:.lo=.Tpo) $(DEPDIR)/$$(@:.lo=.Plo)
-endef
-
-define transform-S-to-o
-$(eval _flg := $(strip $(1)))
-$(eval _lib := $(strip $(2)))
-$(eval _src := $(strip $(3)))
-$(eval _tgt := $(addprefix $(_lib)_la-,$(subst /,_,$(_src:.S=.lo))))
-$(_tgt): $(_src)
-		$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(_flg) $(CFLAGS) -MT $$@ -MD -MP -MF $(DEPDIR)/$$(@:.lo=.Tpo) -c -o $(builddir)/.libs/$$@ `test -f '$$<' || echo '$(srcdir)/'`$$<
-		$(am__mv) $(DEPDIR)/$$(@:.lo=.Tpo) $(DEPDIR)/$$(@:.lo=.Plo)
-endef
-
-
-BUILT_SOURCES =
-
-common_cppflags =
-common_cppflags += -nostdinc -include $(top_srcdir)/libc/arch-@TARGET_ARCH@/AndroidConfig.h
-common_cppflags += -I$(top_srcdir)/libc/arch-@TARGET_ARCH@/include
-common_cppflags += -I$(call compiler-include-path)
-
-common_cppflags += -I$(top_srcdir)/libc/arch-@TARGET_ARCH@/include
-common_cppflags += -I$(top_srcdir)/libc/kernel/arch-@TARGET_ARCH@
-
-common_cppflags += -I$(top_srcdir)/libc/include
-common_cppflags += -I$(top_srcdir)/libc/kernel/common/linux -I$(top_srcdir)/libc/kernel/common
-
-libc_crt_target_cflags =
-
-AM_CPFLAGS = -fPIC
-
-lib_LTLIBRARIES = libc.la
-noinst_LTLIBRARIES = libc_common.la libc_static.la
-
 # Define the common source files for all the libc instances
 # =========================================================
 libc_common_src_files = \
@@ -547,6 +478,8 @@ endif # !arm
 # Define some common cflags
 # ========================================================
 
+common_cppflags = @COMMON_CFLAGS@
+
 libc_common_cflags = $(common_cppflags)
 
 libc_common_cflags += \
@@ -610,15 +543,6 @@ else
     libc_common_cflags += -DANDROID_SMP=0
 endif
 
-# Needed to access private/__dso_handle.S from
-# crtbegin_xxx.S and crtend_xxx.S
-#
-libc_crt_target_cflags += -I$(top_srcdir)/libc/private
-
-if TARGET_ARCH_IS_ARM
-libc_crt_target_cflags += -DCRT_LEGACY_WORKAROUND
-endif
-
 # Define some common includes
 # ========================================================
 libc_common_c_includes = \
@@ -628,65 +552,6 @@ libc_common_c_includes = \
 		$(top_srcdir)/libc/stdio   \
 		$(top_srcdir)/libm/include
 
-# Needed to access private/__dso_handle.S from
-# crtbegin_xxx.S and crtend_xxx.S
-# and machine/asm.h
-#
-libc_crt_target_cflags += -I$(top_srcdir)/libc/private -I$(top_srcdir)/libc/arch-$(TARGET_ARCH)/include
-
-# Define the libc run-time (crt) support object files that must be built,
-# which are needed to build all other objects (shared/static libs and
-# executables)
-# ==========================================================================
-
-if TARGET_ARCH_IS_X86_OR_ARM
-# ARM and x86 need crtbegin_so/crtend_so.
-#
-# For x86, the .init section must point to a function that calls all
-# entries in the .ctors section. (on ARM this is done through the
-# .init_array section instead).
-#
-# For both platforms, the .fini_array section must point to a function
-# that will call __cxa_finalize(&__dso_handle) in order to ensure that
-# static C++ destructors are properly called on dlclose().
-#
-
-libc_crt_target_so_cflags = $(libc_crt_target_cflags)
-if TARGET_ARCH_IS_X86
-    # This flag must be added for x86 targets, but not for ARM
-    libc_crt_target_so_cflags += -fPIC
-endif
-$(top_builddir)/crtbegin_so.o: $(top_srcdir)/libc/arch-$(TARGET_ARCH)/bionic/crtbegin_so.S
-	@mkdir -p $(dir $@)
-	@CC@ $(libc_crt_target_so_cflags) -o $@ -c $<
-BUILT_SOURCES += $(top_builddir)/crtbegin_so.o
-
-$(top_builddir)/crtend_so.o: $(top_srcdir)/libc/arch-$(TARGET_ARCH)/bionic/crtend_so.S
-	@mkdir -p $(dir $@)
-	@CC@ $(libc_crt_target_so_cflags) -o $@ -c $<
-BUILT_SOURCES += $(top_builddir)/crtend_so.o
-endif # TARGET_ARCH == x86 || TARGET_ARCH == arm
-
-
-$(top_builddir)/crtbegin_static.o: $(top_srcdir)/libc/arch-$(TARGET_ARCH)/bionic/crtbegin_static.S
-	@mkdir -p $(dir $@)
-	@CC@ $(libc_crt_target_cflags) -o $@ -c $<
-BUILT_SOURCES += $(top_builddir)/crtbegin_static.o
-
-$(top_builddir)/crtbegin_dynamic.o: $(top_srcdir)/libc/arch-$(TARGET_ARCH)/bionic/crtbegin_dynamic.S
-	@mkdir -p $(dir $@)
-	@CC@ $(libc_crt_target_cflags) -o $@ -c $<
-BUILT_SOURCES += $(top_builddir)/crtbegin_dynamic.o
-
-
-# We rename crtend.o to crtend_android.o to avoid a
-# name clash between gcc and bionic.
-$(top_builddir)/crtend_android.o: $(top_srcdir)/libc/arch-$(TARGET_ARCH)/bionic/crtend.S
-	@mkdir -p $(dir $@)
-	@CC@ $(libc_crt_target_cflags) -o $@ -c $<
-BUILT_SOURCES += $(top_builddir)/crtend_android.o
-
-
 # To enable malloc leak check for statically linked programs, add
 # "WITH_MALLOC_CHECK_LIBC_A = true" to buildspec.mk
 #WITH_MALLOC_CHECK_LIBC_A = $(strip $(WITH_MALLOC_CHECK_LIBC_A))
@@ -695,184 +560,76 @@ BUILT_SOURCES += $(top_builddir)/crtend_android.o
 # libc_common.a
 # ========================================================
 
-# xxx: we only want an .a file, not a .so, so hijack libtool
-
 define generated-sources
-$(shell cat syscalls.stamp 2>/dev/null)
+$(shell cat $(top_builddir)/syscalls.stamp 2>/dev/null)
 endef
 
-_libc_common_la_DEPENDENCIES = syscalls.stamp
-_libc_common_la_SOURCES = $(libc_common_src_files) $(call generated-sources)
-_libc_common_la_CFLAGS = $(libc_common_cflags)
-_libc_common_la_LDFLAGS = @COMMON_LDFLAGS@ -L$(top_builddir)/libdl/.libs -L$(top_builddir)/libthread_db/.libs
+libc_common_dep = $(SYSCALLS_STAMP) libthread_db-all
+libc_common_src = $(addprefix $(top_srcdir)/libc/,$(libc_common_src_files)) $(addprefix $(top_srcdir)/libc/,$(call generated-sources))
 if TARGET_ARCH_IS_ARM
-_libc_common_la_CFLAGS += -DCRT_LEGACY_WORKAROUND
+libc_common_cflags += -DCRT_LEGACY_WORKAROUND
 endif
-_libc_common_la_CFLAGS += $(addprefix -I,$(libc_common_c_includes))
+libc_common_cflags += $(addprefix -I,$(libc_common_c_includes))
+libc_common_obj =
 
-_libc_common_la_OBJECTS = \
-  $(subst /,_, \
-  	$(addprefix libc_common_la-, \ 
-      $(patsubst %.S, %.lo, $(filter %.S, $(_libc_common_la_SOURCES))) \
-      $(patsubst %.c, %.lo, $(filter %.c, $(_libc_common_la_SOURCES))) \
-      $(patsubst %.cpp, %.lo, $(filter %.cpp, $(_libc_common_la_SOURCES))) \
-      $(patsubst %.cc, %.lo, $(filter %.cc, $(_libc_common_la_SOURCES))) \
-      $(patsubst %.s, %.lo, $(filter %.s, $(_libc_common_la_SOURCES))) \
-    ) \
-  )
+$(foreach f,$(libc_common_src), $(eval $(call compile-one-file,$(f),libc_common,$(libc_common_dep))))
 
-#_libc_common_la_LINK = \
-#	$(LIBTOOL) -static --tag=CC $(AM_LIBTOOLFLAGS) \
-#	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(_libc_common_la_CFLAGS) \
-#	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+libc_static_src = $(addprefix $(top_srcdir)/libc/,$(libc_static_common_src_files) $(libc_arch_static_src_files))
+libc_static_obj =
+libc_static_cflags = $(libc_common_cflags) -DLIBC_STATIC
+libc_static_cflags += $(addprefix -I,$(libc_common_c_includes))
+libc_static_dep = $(SYSCALLS_STAMP)
 
-libc_common.Plo:
-	touch .deps/$@
+$(foreach f,$(libc_static_src), $(eval $(call compile-one-file,$(f),libc_static,$(libc_common_dep))))
 
-libc_common.la: $(_libc_common_la_OBJECTS) $(_libc_common_la_DEPENDENCIES) $(_EXTRA_libc_common_la_DEPENDENCIES)
-	$(AM_V_CCLD)$(LINK) $(addprefix .libs/,$(_libc_common_la_OBJECTS)) $(_libc_common_la_LIBADD) $(LIBS)
-	sed -e 's|installed=no|installed=yes|' $@ > .libs/$(@)i
+$(top_builddir)/libc/unistd/sysconf-dynamic.c: $(top_srcdir)/libc/unistd/sysconf.c
+	mkdir -p $(dir $@)
+	cp $< $@
 
-$(foreach st,$(filter %.c,$(_libc_common_la_SOURCES)), $(eval $(call transform-c-to-o, $(_libc_common_la_CFLAGS), libc_common, $(st))))
-$(foreach st,$(filter %.cc,$(_libc_common_la_SOURCES)), $(eval $(call transform-cpp-to-o, $(_libc_common_la_CFLAGS), libc_common, $(st), .cc)))
-$(foreach st,$(filter %.cpp,$(_libc_common_la_SOURCES)), $(eval $(call transform-cpp-to-o, $(_libc_common_la_CFLAGS), libc_common, $(st), .cpp)))
-$(foreach st,$(filter %.S,$(_libc_common_la_SOURCES)), $(eval $(call transform-S-to-o, $(_libc_common_la_CFLAGS), libc_common, $(st))))
+$(top_builddir)/libc/bionic/__errno-dynamic.c: $(top_srcdir)/libc/bionic/__errno.c
+	mkdir -p $(dir $@)
+	cp $< $@
 
-# ========================================================
-# libc.a
-# ========================================================
+$(top_builddir)/libc/bionic/pthread-dynamic.c: $(top_srcdir)/libc/bionic/pthread.c
+	mkdir -p $(dir $@)
+	cp $< $@
 
-# xxx: we only want an .a file, not a .so, so hijack libtool
-
-_libc_static_la_SOURCES = \
-	$(libc_arch_static_src_files) \
-	$(libc_static_common_src_files) \
-	bionic/dlmalloc.c \
-	bionic/malloc_debug_common.c \
-	bionic/libc_init_static.c
-
-_libc_static_la_LDFLAGS = @COMMON_LDFLAGS@
-_libc_static_la_CFLAGS = $(libc_common_cflags) -DLIBC_STATIC
-_libc_static_la_CFLAGS += $(addprefix -I,$(libc_common_c_includes))
-_libc_static_la_LIBADD = libc_common.la
-_libc_static_la_DEPENDENCIES = libc_common.la
-
-_libc_static_la_OBJECTS = \
-  $(subst /,_, \
-  	$(addprefix libc_static_la-, \ 
-      $(patsubst %.S, %.lo, $(filter %.S, $(_libc_static_la_SOURCES))) \
-      $(patsubst %.c, %.lo, $(filter %.c, $(_libc_static_la_SOURCES))) \
-      $(patsubst %.cpp, %.lo, $(filter %.cpp, $(_libc_static_la_SOURCES))) \
-      $(patsubst %.cc, %.lo, $(filter %.cc, $(_libc_static_la_SOURCES))) \
-      $(patsubst %.s, %.lo, $(filter %.s, $(_libc_static_la_SOURCES))) \
-    ) \
-  )
-
-#_libc_common_la_LINK = \
-#	$(LIBTOOL) -static --tag=CC $(AM_LIBTOOLFLAGS) \
-#	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(_libc_common_la_CFLAGS) \
-#	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-
-libc_static.Plo:
-	touch .deps/$@
-
-libc_static.la: $(_libc_static_la_OBJECTS) $(_libc_static_la_DEPENDENCIES) $(_EXTRA_libc_static_la_DEPENDENCIES)
-	$(AM_V_CCLD)$(LINK) $(addprefix .libs/,$(_libc_static_la_OBJECTS)) $(_libc_static_la_LIBADD) $(LIBS)
-	sed -e 's|installed=no|installed=yes|' $@ > .libs/$(@)i
-
-$(foreach st,$(filter %.c,$(_libc_static_la_SOURCES)), $(eval $(call transform-c-to-o, $(_libc_static_la_CFLAGS), libc_static, $(st))))
-$(foreach st,$(filter %.cc,$(_libc_static_la_SOURCES)), $(eval $(call transform-cpp-to-o, $(_libc_static_la_CFLAGS), libc_static, $(st), .cc)))
-$(foreach st,$(filter %.cpp,$(_libc_static_la_SOURCES)), $(eval $(call transform-cpp-to-o, $(_libc_static_la_CFLAGS), libc_static, $(st), .cpp)))
-$(foreach st,$(filter %.S,$(_libc_static_la_SOURCES)), $(eval $(call transform-S-to-o, $(_libc_static_la_CFLAGS), libc_static, $(st))))
-
-
-# ========================================================
-# libc.so
-# ========================================================
-
-# pthread deadlock prediction:
-# set -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=1 to enable support for
-# pthread deadlock prediction.
-# Since this code is experimental it is disabled by default.
-# see libc/bionic/pthread_debug.c for details
-
-libc_la_CFLAGS = $(libc_common_cflags) -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=0
-libc_la_LIBADD = libc_common.la -ldl -lgcc
-libc_la_LDFLAGS = @COMMON_LDFLAGS@
-libc_la_DEPENDENCIES = libc_common.la
-
-if TARGET_ARCH_IS_ARM
-# TODO: At some point, we need to remove this custom linker script.
-#libc_la_LDFLAGS = -Wl,-T,$(BUILD_SYSTEM)/armelf.xsc
+libc_dynamic_common_src_files = $(top_builddir)/libc/unistd/sysconf-dynamic.c $(top_builddir)/libc/bionic/__errno-dynamic.c $(top_builddir)/libc/bionic/pthread-dynamic.c
+libc_dymamic_dep = $(libc_common_dep) $(libc_dynamic_common_src_files) $(SYSCALLS_STAMP) $(CRTFILES) libdl-all
+libc_dynamic_src = $(addprefix $(top_srcdir)/libc/, bionic/dlmalloc.c bionic/malloc_debug_common.c bionic/pthread_debug.c bionic/libc_init_dynamic.c) $(libc_dynamic_common_src_files)
+libc_dynamic_obj =
+libc_dynamic_cflags = $(libc_common_cflags) -static-libgcc
+libc_dynamic_cflags += -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=0
+libc_dynamic_cflags += $(addprefix -I,$(libc_common_c_includes))
+my_libc_ldflags = @COMMON_LDFLAGS@
+my_libc_ldflags2 = $(subst -Wl$(COMMA)--exclude-libs=libgcc.a,,$(my_libc_ldflags))
+if TARGET_ARCH_IS_X86
+my_libc_ldflags3 = $(subst -Wl$(COMMA)--exclude-libs=libgcc_eh.a,,$(my_libc_ldflags2))
+else
+my_libc_ldflags3 = $(my_libc_ldflags2)
 endif
+libc_ldflags = $(my_libc_ldflags3)
+libc_ldflags += -static-libgcc -shared -Wl,-soname,libc.so -L$(top_builddir)/libdl -L$(top_builddir)/libthread_db
+libc_ldlibs = -ldl -lgcc
 
-libc_la_CPPFLAGS = $(addprefix -I,$(libc_common_c_includes))
+$(foreach f,$(libc_dynamic_src), $(eval $(call compile-one-file,$(f),libc_dynamic,$(libc_dynamic_dep))))
 
-libc_la_SOURCES = \
-	$(libc_arch_dynamic_src_files) \
-	$(libc_static_common_src_files) \
-	bionic/dlmalloc.c \
-	bionic/malloc_debug_common.c \
-	bionic/pthread_debug.c \
-	bionic/libc_init_dynamic.c
+$(top_builddir)/libc/libc.a: $(libc_static_obj) $(libc_common_obj) $(SYSCALLS_STAMP) 
+	mkdir -p $(dir $@)
+	@AR@ crsP $@ $^
 
-# ========================================================
-#  EXTRA
-# ========================================================
+$(top_builddir)/libc/libc.so: $(libc_dynamic_obj) $(libc_common_obj)
+	@CC@ $(libc_ldflags) -o $@ $(libc_dynamic_obj) $(libc_common_obj) $(libc_ldlibs)
 
-# xxx: replace the (actually dynamic-init) libc.a with libc_static.a 
-libc.a.stamp: libc_static.la libc.la
-	cp .libs/libc_static.a .libs/libc.a
-	touch $@
+.PHONY: libc-all libc-clean
 
-BUILT_SOURCES += libc.a.stamp
+libc-all: $(SYSCALLS_STAMP) $(top_builddir)/libc/libc.a $(top_builddir)/libc/libc.so
 
-all-local: libc.a.stamp
+libc-clean:
+	rm -f $(libc_common_obj) $(top_builddir)/libc/libc_common.a \
+		$(libc_static_obj) $(top_builddir)/libc/libc.a \
+		$(libc_dynamic_obj) $(top_builddir)/libc/libc.so \
+		$(libc_dynamic_src_files)
 
-# ========================================================
-#  CLEAN
-# ========================================================
-
-clean-local:
-	rm -Rf $(BUILT_SOURCES) \
-	  $(top_srcdir)/libc/arch-@TARGET_ARCH@/syscalls.mk \
-	  $(cat syscalls.stamp 2>&1)
-
-# WARNING: The only library libc.so should depend on is libdl.so!  If you add other libraries,
-# make sure to add -Wl,--exclude-libs=libgcc.a to the LOCAL_LDFLAGS for those libraries.  This
-# ensures that symbols that are pulled into those new libraries from libgcc.a are not declared
-# external; if that were the case, then libc would not pull those symbols from libgcc.a as it
-# should, instead relying on the external symbols from the dependent libraries.  That would
-# create an "cloaked" dependency on libgcc.a in libc though the libraries, which is not what
-# you wanted!
-
-# For all builds, except for the -user build we will enable memory
-# allocation checking (including memory leaks, buffer overwrites, etc.)
-# Note that all these checks are also controlled by env. settings
-# that can enable, or disable specific checks. Note also that some of
-# the checks are available only in emulator and are implemeted in
-# libc_malloc_qemu_instrumented.so.
-#if 0
-
-# ========================================================
-# libc_malloc_debug_leak.so
-# ========================================================
-
-#LOCAL_CFLAGS = \
-#	$(libc_common_cflags) \
-#	-DMALLOC_LEAK_CHECK
-
-#LOCAL_C_INCLUDES = $(libc_common_c_includes)
-
-#LOCAL_SRC_FILES = \
-#	bionic/malloc_debug_leak.c \
-#	bionic/malloc_debug_check.c \
-#	bionic/malloc_debug_check_mapinfo.c \
-#	bionic/malloc_debug_stacktrace.c
-
-#LOCAL_MODULE= libc_malloc_debug_leak
-
-#LOCAL_SHARED_LIBRARIES = libc
-#LOCAL_WHOLE_STATIC_LIBRARIES = libc_common
-#LOCAL_SYSTEM_SHARED_LIBRARIES =
-#LOCAL_ALLOW_UNDEFINED_SYMBOLS = true
+ALL_LOCAL += libc-all
+CLEAN_LOCAL += libc-clean

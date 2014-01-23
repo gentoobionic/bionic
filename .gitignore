@@ -31,6 +31,12 @@ compile
 libc/kernel/original
 *.stamp
 libc/include/sys/linux-syscalls.h
-libc/arch-x86/syscalls/
-libc/arch-arm/syscalls/
+libc/arch-*/syscalls/*.S
 linker/linker
+ar-lib
+*_orig
+*.orig
+*.rej
+libc/unistd/sysconf-dynamic.c
+libc/bionic/__errno-dynamic.c
+libc/bionic/pthread-dynamic.c

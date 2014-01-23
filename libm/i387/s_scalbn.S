@@ -43,3 +43,6 @@ ENTRY(scalbn)
 	fscale
 	fstp	%st(1)
 	ret
+
+.globl CNAME(ldexp)
+.set   CNAME(ldexp),CNAME(scalbn)

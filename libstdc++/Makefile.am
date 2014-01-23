@@ -1,24 +1,34 @@
-define compiler-include-path
-$(shell echo | @CC@ -v -x c -E - 2>&1 | grep -A 1 "^#include" | tail -n 1)
-endef
+libstdc++_src = \
+	$(addprefix $(top_srcdir)/libstdc++/, \
+		src/new.cpp \
+		src/one_time_construction.cpp \
+		src/pure_virtual.cpp \
+		src/typeinfo.cpp \
+	)
+libstdc++_cxxflags = @COMMON_CFLAGS@
+libstdc++_cxxflags += -fno-exceptions -fno-rtti
+libstdc++_cxxflags += -I$(top_srcdir)/libstdc++/include
+libstdc++_cxxflags += -I$(top_srcdir)/libc/private
+libstdc++_ldflags = @COMMON_LDFLAGS@ -shared -Wl,-soname,libstdc++.so -L$(top_builddir)/libc/
+libstdc++_ldlibs  = -lc
+libstdc++_dep = $(CRTFILES) libc-all
+libstdc++_obj = 
 
-lib_LTLIBRARIES = libstdc@PLUSPLUS@.la
-libstdc@PLUSPLUS@_la_SOURCES = src/new.cpp src/one_time_construction.cpp src/pure_virtual.cpp src/typeinfo.cpp
-libstdc@PLUSPLUS@_la_CXXFLAGS = -nostdinc -include $(top_srcdir)/libc/arch-@TARGET_ARCH@/AndroidConfig.h
-libstdc@PLUSPLUS@_la_CXXFLAGS += -fno-exceptions -fno-rtti
-libstdc@PLUSPLUS@_la_CPPFLAGS = -I$(call compiler-include-path)
-libstdc@PLUSPLUS@_la_LDFLAGS = @COMMON_LDFLAGS@ -L$(top_builddir)/libc/.libs
-libstdc@PLUSPLUS@_la_LIBADD  = -lc
+$(foreach f,$(libstdc++_src), $(eval $(call compile-one-file,$(f),libstdc++,$(libstdc++_dep))))
 
-if TARGET_ARCH_IS_X86
-libstdc@PLUSPLUS@_la_CXXFLAGS += -march=i686 -m32
-libstdc@PLUSPLUS@_la_CPPFLAGS += -I$(top_srcdir)/libc/arch-x86/include
-libstdc@PLUSPLUS@_la_CPPFLAGS += -I$(top_srcdir)/libc/kernel/arch-x86
-endif
+.PHONY: libstdc++-all-local libstdc++-clean-local
 
-libstdc@PLUSPLUS@_la_CPPFLAGS += -I$(top_srcdir)/libm/include
-libstdc@PLUSPLUS@_la_CPPFLAGS += -I$(top_srcdir)/libc/include
-libstdc@PLUSPLUS@_la_CPPFLAGS += -I$(top_srcdir)/libc/kernel/common/linux -I$(top_srcdir)/libc/kernel/common
-libstdc@PLUSPLUS@_la_CPPFLAGS += -I$(top_srcdir)/libthread_db/include
-libstdc@PLUSPLUS@_la_CPPFLAGS += -I$(top_srcdir)/libstdc@PLUSPLUS@/include
-libstdc@PLUSPLUS@_la_CPPFLAGS += -I$(top_srcdir)/libc/private
+$(top_builddir)/libstdc++/libstdc++.a: $(libstdc++_obj)
+	mkdir -p $(dir $@)
+	@AR@ crsP $@ $^
+
+$(top_builddir)/libstdc++/libstdc++.so: $(libstdc++_obj) $(libstdc++_dependencies)
+	@CC@ $(libstdc++_ldflags) -o $@ $(libstdc++_obj) $(libstdc++_ldlibs)
+
+libstdc++-all: $(SYSCALLS_STAMP) $(top_builddir)/libstdc++/libstdc++.a $(top_builddir)/libstdc++/libstdc++.so
+
+libstdc++-clean:
+	rm -f $(libstdc++_obj) $(top_builddir)/libstdc++/libstdc++.a $(top_builddir)/libstdc++/libstdc++.so
+
+ALL_LOCAL += libstdc++-all
+CLEAN_LOCAL += libstdc++-clean
