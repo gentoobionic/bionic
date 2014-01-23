@@ -19,9 +19,9 @@ libthread_db_cflags += -I$(top_srcdir)/libthread_db/include
 
 libthread_db_src = libthread_db/libthread_db.c
 libthread_db_obj = 
-libthread_db_dependencies = $(CRTFILES)
+libthread_db_dep = $(CRTFILES) libc-all
 
-$(foreach f,$(libthread_db_src), $(eval $(call compile-one-file,$(f),libthread_db,$(libthread_db_dependencies))))
+$(foreach f,$(libthread_db_src), $(eval $(call compile-one-file,$(f),libthread_db,$(libthread_db_dep))))
 
 .PHONY: libthread_db-all-local libthread_db-clean-local
 
@@ -29,7 +29,7 @@ $(top_builddir)/libthread_db/libthread_db.a: $(libthread_db_obj)
 	mkdir -p $(dir $@)
 	@AR@ crsP $@ $^
 
-$(top_builddir)/libthread_db/libthread_db.so: $(libthread_db_obj) $(libthread_db_dependencies)
+$(top_builddir)/libthread_db/libthread_db.so: $(libthread_db_obj) $(libthread_db_dep)
 	@CC@ $(libthread_db_ldflags) -o $@ $(libthread_db_obj) $(libthread_db_ldlibs)
 
 libthread_db-all: $(top_builddir)/libthread_db/libthread_db.a $(top_builddir)/libthread_db/libthread_db.so

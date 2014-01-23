@@ -25,7 +25,7 @@ $(top_builddir)/libstdc++/libstdc++.a: $(libstdc++_obj)
 $(top_builddir)/libstdc++/libstdc++.so: $(libstdc++_obj) $(libstdc++_dependencies)
 	@CC@ $(libstdc++_ldflags) -o $@ $(libstdc++_obj) $(libstdc++_ldlibs)
 
-libstdc++-all: $(top_builddir)/libstdc++/libstdc++.a $(top_builddir)/libstdc++/libstdc++.so
+libstdc++-all: $(SYSCALLS_STAMP) $(top_builddir)/libstdc++/libstdc++.a $(top_builddir)/libstdc++/libstdc++.so
 
 libstdc++-clean:
 	rm -f $(libstdc++_obj) $(top_builddir)/libstdc++/libstdc++.a $(top_builddir)/libstdc++/libstdc++.so

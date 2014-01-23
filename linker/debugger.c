@@ -110,7 +110,7 @@ static int socket_abstract_client(const char *name, int type)
 }
 
 #include "linker_format.h"
-#include <../libc/private/logd.h>
+#include "logd.h"
 
 /*
  * Writes a summary of the signal to the log file.

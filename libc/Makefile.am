@@ -578,6 +578,7 @@ libc_static_src = $(addprefix $(top_srcdir)/libc/,$(libc_static_common_src_files
 libc_static_obj =
 libc_static_cflags = $(libc_common_cflags) -DLIBC_STATIC
 libc_static_cflags += $(addprefix -I,$(libc_common_c_includes))
+libc_static_dep = $(SYSCALLS_STAMP)
 
 $(foreach f,$(libc_static_src), $(eval $(call compile-one-file,$(f),libc_static,$(libc_common_dep))))
 
@@ -594,14 +595,13 @@ $(top_builddir)/libc/bionic/pthread-dynamic.c: $(top_srcdir)/libc/bionic/pthread
 	cp $< $@
 
 libc_dynamic_common_src_files = $(top_builddir)/libc/unistd/sysconf-dynamic.c $(top_builddir)/libc/bionic/__errno-dynamic.c $(top_builddir)/libc/bionic/pthread-dynamic.c
-libc_dymamic_dep = $(libc_common_dep) $(libc_dynamic_common_src_files)
+libc_dymamic_dep = $(libc_common_dep) $(libc_dynamic_common_src_files) $(SYSCALLS_STAMP) $(CRTFILES) libdl-all
 libc_dynamic_src = $(addprefix $(top_srcdir)/libc/, bionic/dlmalloc.c bionic/malloc_debug_common.c bionic/pthread_debug.c bionic/libc_init_dynamic.c) $(libc_dynamic_common_src_files)
 libc_dynamic_obj =
 libc_dynamic_cflags = $(libc_common_cflags) -static-libgcc
 libc_dynamic_cflags += -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=0
 libc_dynamic_cflags += $(addprefix -I,$(libc_common_c_includes))
 my_libc_ldflags = @COMMON_LDFLAGS@
-COMMA=,
 my_libc_ldflags2 = $(subst -Wl$(COMMA)--exclude-libs=libgcc.a,,$(my_libc_ldflags))
 if TARGET_ARCH_IS_X86
 my_libc_ldflags3 = $(subst -Wl$(COMMA)--exclude-libs=libgcc_eh.a,,$(my_libc_ldflags2))
@@ -614,7 +614,7 @@ libc_ldlibs = -ldl -lgcc
 
 $(foreach f,$(libc_dynamic_src), $(eval $(call compile-one-file,$(f),libc_dynamic,$(libc_dynamic_dep))))
 
-$(top_builddir)/libc/libc.a: $(libc_static_obj) $(libc_common_obj)
+$(top_builddir)/libc/libc.a: $(libc_static_obj) $(libc_common_obj) $(SYSCALLS_STAMP) 
 	mkdir -p $(dir $@)
 	@AR@ crsP $@ $^
 
@@ -623,7 +623,7 @@ $(top_builddir)/libc/libc.so: $(libc_dynamic_obj) $(libc_common_obj)
 
 .PHONY: libc-all libc-clean
 
-libc-all: $(top_builddir)/libc/libc.a $(top_builddir)/libc/libc.so
+libc-all: $(SYSCALLS_STAMP) $(top_builddir)/libc/libc.a $(top_builddir)/libc/libc.so
 
 libc-clean:
 	rm -f $(libc_common_obj) $(top_builddir)/libc/libc_common.a \
