@@ -1,5 +1,10 @@
 linker_src_files = linker.c linker_format.c linker_environ.c dlfcn.c debugger.c rt.c
-linker_cflags =  @COMMON_CFLAGS@ -DLINKER_DEBUG=0 -static-libgcc
+linker_cflags =  @COMMON_CFLAGS@ -static-libgcc
+if DEBUG_BIONIC_LIBC
+linker_cflags += -DLINKER_DEBUG=1 
+else
+linker_cflags += -DLINKER_DEBUG=0
+endif
 linker_cflags += -fno-stack-protector -Wstrict-overflow=5 -fvisibility=hidden
 linker_cflags += -I$(top_srcdir)/libc/private
 linker_cflags += -I$(top_srcdir)/linker/include

@@ -175,7 +175,7 @@ libm_ldlibs = -lc
 libm_dep = $(CRTFILES) libc-all
 
 if TARGET_ARCH_IS_X86
-libm_cflags += -I$(top_srcdir)/libm/i386
+libm_cflags += -I$(top_srcdir)/libm/i386 -I$(top_srcdir)/libm/include/i387
 endif
 
 if TARGET_ARCH_IS_ARM

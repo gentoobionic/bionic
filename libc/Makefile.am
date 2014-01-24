@@ -357,7 +357,9 @@ libc_common_src_files = \
 	mntent/setmntent.c \
 	pwd/getpwent.c \
 	pwd/getpwnam.c \
-	pwd/getpwuid.c
+	pwd/getpwuid.c \
+	bionic/dlmalloc.c \
+	bionic/malloc_debug_common.c 
 
 # The following files are common, but must be compiled
 # with different C flags when building a static C library.
@@ -373,6 +375,7 @@ libc_common_src_files = \
 #       below.
 #
 libc_static_common_src_files = \
+		bionic/libc_init_static.c \
         unistd/sysconf.c \
         bionic/__errno.c
 
@@ -505,10 +508,6 @@ libc_common_cflags += \
     -DTM_GMTOFF=tm_gmtoff \
     -DUSG_COMPAT=1
 
-if DEBUG_BIONIC_LIBC
-  libc_common_cflags += -DDEBUG
-endif
-
 if TARGET_ARCH_IS_ARM
   libc_common_cflags += -fstrict-aliasing
   libc_crt_target_cflags += -mthumb-interwork
@@ -596,10 +595,14 @@ $(top_builddir)/libc/bionic/pthread-dynamic.c: $(top_srcdir)/libc/bionic/pthread
 
 libc_dynamic_common_src_files = $(top_builddir)/libc/unistd/sysconf-dynamic.c $(top_builddir)/libc/bionic/__errno-dynamic.c $(top_builddir)/libc/bionic/pthread-dynamic.c
 libc_dymamic_dep = $(libc_common_dep) $(libc_dynamic_common_src_files) $(SYSCALLS_STAMP) $(CRTFILES) libdl-all
-libc_dynamic_src = $(addprefix $(top_srcdir)/libc/, bionic/dlmalloc.c bionic/malloc_debug_common.c bionic/pthread_debug.c bionic/libc_init_dynamic.c) $(libc_dynamic_common_src_files)
+libc_dynamic_src = $(addprefix $(top_srcdir)/libc/, bionic/pthread_debug.c bionic/libc_init_dynamic.c) $(libc_dynamic_common_src_files)
 libc_dynamic_obj =
 libc_dynamic_cflags = $(libc_common_cflags) -static-libgcc
+if DEBUG_BIONIC_LIBC
+libc_dynamic_cflags += -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=1
+else
 libc_dynamic_cflags += -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=0
+endif
 libc_dynamic_cflags += $(addprefix -I,$(libc_common_c_includes))
 my_libc_ldflags = @COMMON_LDFLAGS@
 my_libc_ldflags2 = $(subst -Wl$(COMMA)--exclude-libs=libgcc.a,,$(my_libc_ldflags))
@@ -618,7 +621,7 @@ $(foreach f,$(libc_dynamic_src), $(eval $(call compile-one-file,$(f),libc_dynami
 
 $(top_builddir)/libc/libc.a: $(libc_static_obj) $(libc_common_obj) $(SYSCALLS_STAMP) 
 	mkdir -p $(dir $@)
-	@AR@ crsP $@ $^
+	@AR@ crsP $@ $(libc_static_obj) $(libc_common_obj)
 
 $(top_builddir)/libc/libc.so: $(libc_dynamic_obj) $(libc_common_obj)
 	@CC@ $(libc_ldflags) -o $@ $(CRTBEGIN_SO) $(libc_dynamic_obj) $(libc_common_obj) $(libc_ldlibs) $(CRTEND_SO)
