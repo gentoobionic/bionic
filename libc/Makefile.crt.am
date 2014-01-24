@@ -47,11 +47,13 @@ crtbegin_so_obj =
 crtbegin_so_cflags = $(libc_crt_target_so_cflags)
 $(eval $(call compile-one-file,libc/arch-@TARGET_ARCH@/bionic/crtbegin_so.S,crtbegin_so))
 CRTFILES += $(crtbegin_so_obj)
+CRTBEGIN_SO = $(crtbegin_so_obj)
 
 crtend_so_obj =
 crtend_so_cflags = $(libc_crt_target_so_cflags)
 $(eval $(call compile-one-file,libc/arch-@TARGET_ARCH@/bionic/crtend_so.S,crtend_so))
 CRTFILES += $(crtend_so_obj)
+CRTEND_SO = $(crtend_so_obj)
 
 endif # TARGET_ARCH == x86 || TARGET_ARCH == arm
 
@@ -59,16 +61,19 @@ crtbegin_static_obj =
 crtbegin_static_cflags = $(libc_crt_target_so_cflags)
 $(eval $(call compile-one-file,libc/arch-@TARGET_ARCH@/bionic/crtbegin_static.S,crtbegin_static))
 CRTFILES += $(crtbegin_static_obj)
+CRTBEGIN_STATIC = $(crtbegin_static_obj)
 
 crtbegin_dynamic_obj =
 crtbegin_dynamic_cflags = $(libc_crt_target_so_cflags)
 $(eval $(call compile-one-file,libc/arch-@TARGET_ARCH@/bionic/crtbegin_dynamic.S,crtbegin_dynamic))
 CRTFILES += $(crtbegin_dynamic_obj)
+CRTBEGIN_DYNAMIC = $(crtbegin_dynamic_obj)
 
 crtend_android_obj =
 crtend_android_cflags = $(libc_crt_target_so_cflags)
 $(eval $(call compile-one-file,libc/arch-@TARGET_ARCH@/bionic/crtend_android.S,crtend_android))
 CRTFILES += $(crtend_android_obj)
+CRTEND_ANDROID = $(crtend_android_obj) 
 
 .PHONY: crtfiles-all crtfiles-clean crtfiles-install-exec-local
 

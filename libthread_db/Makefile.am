@@ -30,7 +30,7 @@ $(top_builddir)/libthread_db/libthread_db.a: $(libthread_db_obj)
 	@AR@ crsP $@ $^
 
 $(top_builddir)/libthread_db/libthread_db.so: $(libthread_db_obj) $(libthread_db_dep)
-	@CC@ $(libthread_db_ldflags) -o $@ $(libthread_db_obj) $(libthread_db_ldlibs)
+	@CC@ $(libthread_db_ldflags) -o $@ $(CRTBEGIN_SO) $(libthread_db_obj) $(libthread_db_ldlibs) $(CRTEND_SO)
 
 libthread_db-all: $(top_builddir)/libthread_db/libthread_db.a $(top_builddir)/libthread_db/libthread_db.so
 

@@ -189,7 +189,7 @@ $(top_builddir)/libm/libm.a: $(libm_obj)
 	@AR@ crsP $@ $^
 
 $(top_builddir)/libm/libm.so: $(libm_obj) $(libm_dependencies)
-	@CC@ $(libm_ldflags) -o $@ $(libm_obj) $(libm_ldlibs)
+	@CC@ $(libm_ldflags) -o $@ $(CRTBEGIN_SO) $(libm_obj) $(libm_ldlibs) $(CRTEND_SO)
 
 .PHONY: libm-all-local libm-clean-local libm-install-exec-local
 

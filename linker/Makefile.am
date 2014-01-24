@@ -3,12 +3,8 @@ linker_cflags =  @COMMON_CFLAGS@ -DLINKER_DEBUG=0 -static-libgcc
 linker_cflags += -fno-stack-protector -Wstrict-overflow=5 -fvisibility=hidden
 linker_cflags += -I$(top_srcdir)/libc/private
 linker_cflags += -I$(top_srcdir)/linker/include
-my_linker_ldflags = @COMMON_LDFLAGS@
-my_linker_ldflags2 = $(subst -Wl$(COMMA)--exclude-libs=libgcc_eh.a,,$(subst -Wl$(COMMA)--exclude-libs=libgcc.a,,$(mylinker_ldflags)))
-linker_ldflags = $(my_linker_ldflags2)
-linker_ldflags += -Bstatic -shared
-linker_ldflags += -Wl,--start-group $(top_builddir)/libc/libc.a -Wl,--end-group 
-# would be nice to have -Wl,-soname,"ld-linux.so"
+linker_ldflags = $(subst -Wl$(COMMA)--exclude-libs=libgcc_eh.a,,$(subst -Wl$(COMMA)--exclude-libs=libgcc.a,,@COMMON_LDFLAGS@))
+linker_ldflags += -Bstatic -shared 
 linker_ldlibs = -lgcc
 linker_dep = libc-all
 
@@ -37,7 +33,7 @@ linker_obj =
 $(foreach f,$(linker_src), $(eval $(call compile-one-file,$(f),linker,$(linker_dep))))
 
 $(top_builddir)/linker/linker: $(begin_obj) $(linker_obj) libc-all
-	@CC@ -o $@ $(linker_ldflags) $(begin_obj) $(linker_obj) $(linker_ldlibs)
+	@CC@ -o $@ -Wl,--start-group $(begin_obj) $(linker_ldflags) $(linker_obj) $(top_builddir)/libc/libc.a $(linker_ldlibs) -Wl,--end-group
 
 .PHONY: linker-all linker-clean linker-install linker-install-exec-local
 
