@@ -614,14 +614,14 @@ libc_ldlibs = -ldl -lgcc
 
 $(foreach f,$(libc_dynamic_src), $(eval $(call compile-one-file,$(f),libc_dynamic,$(libc_dynamic_dep))))
 
+.PHONY: libc-all libc-clean libc-install-exec-local
+
 $(top_builddir)/libc/libc.a: $(libc_static_obj) $(libc_common_obj) $(SYSCALLS_STAMP) 
 	mkdir -p $(dir $@)
 	@AR@ crsP $@ $^
 
 $(top_builddir)/libc/libc.so: $(libc_dynamic_obj) $(libc_common_obj)
 	@CC@ $(libc_ldflags) -o $@ $(libc_dynamic_obj) $(libc_common_obj) $(libc_ldlibs)
-
-.PHONY: libc-all libc-clean
 
 libc-all: $(SYSCALLS_STAMP) $(top_builddir)/libc/libc.a $(top_builddir)/libc/libc.so
 
@@ -631,5 +631,10 @@ libc-clean:
 		$(libc_dynamic_obj) $(top_builddir)/libc/libc.so \
 		$(libc_dynamic_src_files)
 
+libc-install-exec-local: libc-all
+	$(INSTALL) -D $(top_builddir)/libc/libc.a $(DESTDIR)$(libdir)/libc.a
+	$(INSTALL) -D $(top_builddir)/libc/libc.so $(DESTDIR)$(libdir)/libc.so
+
 ALL_LOCAL += libc-all
 CLEAN_LOCAL += libc-clean
+INSTALL_EXEC_LOCAL += libc-install-exec-local

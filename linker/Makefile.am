@@ -39,7 +39,7 @@ $(foreach f,$(linker_src), $(eval $(call compile-one-file,$(f),linker,$(linker_d
 $(top_builddir)/linker/linker: $(begin_obj) $(linker_obj) libc-all
 	@CC@ -o $@ $(linker_ldflags) $(begin_obj) $(linker_obj) $(linker_ldlibs)
 
-.PHONY: linker-all linker-clean linker-install
+.PHONY: linker-all linker-clean linker-install linker-install-exec-local
 
 linker-all: $(top_builddir)/linker/linker
 
@@ -48,5 +48,9 @@ linker-clean:
 		$(linker_obj) \
 		$(begin_obj)
 
+linker-install-exec-local: linker-all
+	$(INSTALL) -D $(top_builddir)/linker/linker $(DESTDIR)/$(bindir)/linker
+
 ALL_LOCAL += linker-all
 CLEAN_LOCAL += linker-clean
+INSTALL_EXEC_LOCAL += linker-install-exec-local

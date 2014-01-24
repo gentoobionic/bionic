@@ -191,12 +191,17 @@ $(top_builddir)/libm/libm.a: $(libm_obj)
 $(top_builddir)/libm/libm.so: $(libm_obj) $(libm_dependencies)
 	@CC@ $(libm_ldflags) -o $@ $(libm_obj) $(libm_ldlibs)
 
-.PHONY: libm-all-local libm-clean-local
+.PHONY: libm-all-local libm-clean-local libm-install-exec-local
 
 libm-all: $(top_builddir)/libm/libm.a $(top_builddir)/libm/libm.so
 
 libm-clean:
 	rm -f $(libm_obj) $(top_builddir)/libm/libm.a $(top_builddir)/libm/libm.so
 
+libm-install-exec-local: libm-all
+	$(INSTALL) -D $(top_builddir)/libm/libm.a $(DESTDIR)$(libdir)/libm.a
+	$(INSTALL) -D $(top_builddir)/libm/libm.so $(DESTDIR)$(libdir)/libm.so
+
 ALL_LOCAL += libm-all
 CLEAN_LOCAL += libm-clean
+INSTALL_EXEC_LOCAL += libm-install-exec-local
