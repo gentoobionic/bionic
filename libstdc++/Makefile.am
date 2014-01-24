@@ -16,7 +16,7 @@ libstdc++_obj =
 
 $(foreach f,$(libstdc++_src), $(eval $(call compile-one-file,$(f),libstdc++,$(libstdc++_dep))))
 
-.PHONY: libstdc++-all-local libstdc++-clean-local
+.PHONY: libstdc++-all-local libstdc++-clean-local libstdc++-install-exec-local
 
 $(top_builddir)/libstdc++/libstdc++.a: $(libstdc++_obj)
 	mkdir -p $(dir $@)
@@ -30,5 +30,10 @@ libstdc++-all: $(SYSCALLS_STAMP) $(top_builddir)/libstdc++/libstdc++.a $(top_bui
 libstdc++-clean:
 	rm -f $(libstdc++_obj) $(top_builddir)/libstdc++/libstdc++.a $(top_builddir)/libstdc++/libstdc++.so
 
+libstdc++-install-exec-local: libstdc++-all
+	$(INSTALL) -D $(top_builddir)/libstdc++/libstdc++.a $(DESTDIR)$(libdir)/libstdc++.a
+	$(INSTALL) -D $(top_builddir)/libstdc++/libstdc++.so $(DESTDIR)$(libdir)/libstdc++.so
+
 ALL_LOCAL += libstdc++-all
 CLEAN_LOCAL += libstdc++-clean
+INSTALL_EXEC_LOCAL += libstdc++-install-exec-local

@@ -70,15 +70,17 @@ crtend_android_cflags = $(libc_crt_target_so_cflags)
 $(eval $(call compile-one-file,libc/arch-@TARGET_ARCH@/bionic/crtend_android.S,crtend_android))
 CRTFILES += $(crtend_android_obj)
 
-.PHONY: crtfiles-all crtfiles-clean crtfiles-install
+.PHONY: crtfiles-all crtfiles-clean crtfiles-install-exec-local
 
 crtfiles-all: $(CRTFILES)
 
 crtfiles-clean:
 	rm -f $(CRTFILES)
 
-crtfiles-install:
-	mkdir -p $(DESTDIR)
+crtfiles-install-exec-local: crtfiles-all
+	$(INSTALL) -d $(DESTDIR)$(libdir)
+	$(INSTALL) -t $(DESTDIR)$(libdir) $(CRTFILES)
 
 ALL_LOCAL += crtfiles-all
 CLEAN_LOCAL += crtfiles-clean
+INSTALL_EXEC_LOCAL += crtfiles-install-exec-local

@@ -1,6 +1,6 @@
 ALL_LOCAL =
 CLEAN_LOCAL =
-INSTALL_LOCAL =
+INSTALL_EXEC_LOCAL =
 
 include mk/rules.mk
 include libc/Makefile.syscalls.am
@@ -15,4 +15,4 @@ include libc/zoneinfo/Makefile.am
 
 all-local: $(ALL_LOCAL)
 clean-local: $(CLEAN_LOCAL)
-#install-local: $(INSTALL_LOCAL)
+install-exec-local: $(INSTALL_EXEC_LOCAL)

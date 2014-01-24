@@ -23,7 +23,7 @@ libthread_db_dep = $(CRTFILES) libc-all
 
 $(foreach f,$(libthread_db_src), $(eval $(call compile-one-file,$(f),libthread_db,$(libthread_db_dep))))
 
-.PHONY: libthread_db-all-local libthread_db-clean-local
+.PHONY: libthread_db-all-local libthread_db-clean-local libthread_db-install-exec-local
 
 $(top_builddir)/libthread_db/libthread_db.a: $(libthread_db_obj)
 	mkdir -p $(dir $@)
@@ -37,5 +37,10 @@ libthread_db-all: $(top_builddir)/libthread_db/libthread_db.a $(top_builddir)/li
 libthread_db-clean:
 	rm -f $(libthread_db_obj) $(top_builddir)/libthread_db/libthread_db.a $(top_builddir)/libthread_db/libthread_db.so
 
+libthread_db-install-exec-local: libthread_db-all
+	$(INSTALL) -D $(top_builddir)/libthread_db/libthread_db.a $(DESTDIR)$(libdir)/libthread_db.a
+	$(INSTALL) -D $(top_builddir)/libthread_db/libthread_db.so $(DESTDIR)$(libdir)/libthread_db.so
+
 ALL_LOCAL += libthread_db-all
 CLEAN_LOCAL += libthread_db-clean
+INSTALL_EXEC_LOCAL += libthread_db-install-exec-local
