@@ -51,6 +51,8 @@
 #include "linker_environ.h"
 #include "linker_format.h"
 
+#define CDBG(s) write(0,s,strlen(s))
+
 #define ALLOW_SYMBOLS_FROM_MAIN 1
 #define SO_MAX 128
 
@@ -109,7 +111,7 @@ static const char *ldpreload_names[LDPRELOAD_MAX + 1];
 static soinfo *preloads[LDPRELOAD_MAX + 1];
 
 #if LINKER_DEBUG
-int debug_verbosity;
+int debug_verbosity = 5;
 #endif
 
 static int pid;
@@ -2077,10 +2079,10 @@ sanitize:
     /* Get a few environment variables */
     {
 #if LINKER_DEBUG
-        const char* env;
-        env = linker_env_get("DEBUG"); /* XXX: TODO: Change to LD_DEBUG */
-        if (env)
-            debug_verbosity = atoi(env);
+//        const char* env;
+//        env = linker_env_get("DEBUG"); /* XXX: TODO: Change to LD_DEBUG */
+//        if (env)
+//            debug_verbosity = atoi(env);
 #endif
 
         /* Normally, these are cleaned by linker_env_secure, but the test
