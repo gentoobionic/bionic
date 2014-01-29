@@ -24,10 +24,7 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-	.text
-	.align 4
-	.type _start, @function
-	.globl _start
+#include <machine/asm.h>
 
 # this is the small startup code that is first run when
 # any executable that is statically-linked with Bionic
@@ -49,7 +46,7 @@
 #
 #    - address of the constructor list
 #
-_start:	
+ENTRY(_start)
         mov     %esp, %eax
         # before push arguments, align the stack to a 16 byte boundary
         andl    $~15, %esp
@@ -132,6 +129,7 @@ frame_dummy:
 	.comm	object.4466,24,4
 	.weak	__register_frame_info_bases
 	.weak	__deregister_frame_info_bases
+END(_start)
 
 #include "__dso_handle.S"
 #include "atexit.S"

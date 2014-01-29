@@ -97,7 +97,7 @@
 
 /* let kernels and others override entrypoint alignment */
 #ifndef _ALIGN_TEXT
-# define _ALIGN_TEXT .align 2, 0x90
+# define _ALIGN_TEXT .align 4
 #endif
 
 #define _ENTRY(x) \

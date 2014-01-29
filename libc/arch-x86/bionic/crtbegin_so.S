@@ -26,6 +26,8 @@
  * SUCH DAMAGE.
  */
 
+#include <machine/asm.h>
+
 .section .init_array, "aw"
 .align 4
 .type __INIT_ARRAY__, @object
@@ -48,8 +50,7 @@ __FINI_ARRAY__:
 __EH_FRAME_BEGIN__:
 	.text
 	.p2align 4,,15
-	.type	__do_global_dtors_aux, @function
-__do_global_dtors_aux:
+ENTRY(__do_global_dtors_aux)
 	pushl	%ebp
 	movl	%esp, %ebp
 	pushl	%ebx
@@ -74,10 +75,12 @@ __do_global_dtors_aux:
 	popl	%ebx
 	popl	%ebp
 	ret
+END(__do_global_dtors_aux)
+
 	.text
 	.p2align 4,,15
-	.type	frame_dummy, @function
-frame_dummy:
+
+ENTRY(frame_dummy)
 	pushl	%ebp
 	movl	%esp, %ebp
 	pushl	%ebx
@@ -99,6 +102,7 @@ frame_dummy:
 	popl	%ebx
 	popl	%ebp
 	ret
+END(frame_dummy)
 	.local	completed.4454
 	.comm	completed.4454,1,1
 	.local	object.4469

@@ -27,3 +27,8 @@ L2:
 	jnz	L1
 	popl	%ebx
 	ret
+#ifdef STRRCHR
+END(strrchr)
+#else
+END(rindex)
+#endif

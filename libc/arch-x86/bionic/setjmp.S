@@ -46,7 +46,7 @@
 ENTRY(setjmp)
 	PIC_PROLOGUE
 	pushl	$0
-#ifdef PIC
+#ifdef __PIC__
 	call	PIC_PLT(_C_LABEL(sigblock))
 #else
 	call	_C_LABEL(sigblock)
@@ -65,12 +65,13 @@ ENTRY(setjmp)
 	movl	%eax,24(%ecx)
 	xorl	%eax,%eax
 	ret
+END(setjmp)
 
 ENTRY(longjmp)
 	movl	4(%esp),%edx
 	PIC_PROLOGUE
 	pushl	24(%edx)
-#ifdef PIC
+#ifdef __PIC__
 	call	PIC_PLT(_C_LABEL(sigsetmask))
 #else
 	call	_C_LABEL(sigsetmask)
@@ -91,3 +92,4 @@ ENTRY(longjmp)
 	incl	%eax
 1:	movl	%ecx,0(%esp)
 	ret
+END(longjmp)
