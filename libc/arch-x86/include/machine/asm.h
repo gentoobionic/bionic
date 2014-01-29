@@ -49,7 +49,7 @@
 #define CNAME(csym)             csym
 #define HIDENAME(asmsym)        .asmsym
 
-#ifdef PIC
+#ifdef __PIC__
 #define PIC_PROLOGUE	\
 	pushl	%ebx;	\
 	call	666f;	\
@@ -106,7 +106,6 @@
 #define _ASM_SIZE(x)    .size x, .-x;
 
 #define _END(x) \
-	.fnend; \
 	_ASM_SIZE(x)
 
 #ifdef GPROF

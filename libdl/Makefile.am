@@ -1,8 +1,9 @@
-libdl_src = libdl/libdl.c
+libdl_src_files = libdl.c
+libdl_src = $(addprefix $(top_srcdir)/libdl/,$(libdl_src_files))
 libdl_obj = 
 libdl_cflags = @COMMON_CFLAGS@ -I$(top_srcdir)/libc/include
 libdl_ldflags = $(subst -Wl$(COMMA)-no-undefined,,@COMMON_LDFLAGS@)
-libdl_ldflags += -shared -Wl,-soname,libdl.so -Wl,--exclude-libs=libgcc.a
+libdl_ldflags += -shared -Wl,-soname,libdl.so
 if TARGET_ARCH_IS_X86
 libdl_ldflags += -Wl,--exclude-libs=libgcc_eh.a
 endif

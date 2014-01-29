@@ -1,16 +1,17 @@
-libstdc++_src = \
-	$(addprefix $(top_srcdir)/libstdc++/, \
-		src/new.cpp \
-		src/one_time_construction.cpp \
-		src/pure_virtual.cpp \
-		src/typeinfo.cpp \
-	)
+libstdc++_src_files = \
+	src/new.cpp \
+	src/one_time_construction.cpp \
+	src/pure_virtual.cpp \
+	src/typeinfo.cpp
+
+libstdc++_src = $(addprefix $(top_srcdir)/libstdc++/,$(libstdc++_src_files)) 
 libstdc++_cxxflags = @COMMON_CFLAGS@
 libstdc++_cxxflags += -fno-exceptions -fno-rtti
 libstdc++_cxxflags += -fno-use-cxa-atexit
 libstdc++_cxxflags += -I$(top_srcdir)/libstdc++/include
 libstdc++_cxxflags += -I$(top_srcdir)/libc/private
-libstdc++_ldflags = @COMMON_LDFLAGS@ -shared -Wl,-soname,libstdc++.so -L$(top_builddir)/libc/
+libstdc++_ldflags = @COMMON_LDFLAGS@
+libstdc++_ldflags += -shared -Wl,-soname,libstdc++.so
 libstdc++_ldlibs  = -lc
 libstdc++_dep = $(CRTFILES) libc-all
 libstdc++_obj = 

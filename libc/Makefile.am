@@ -377,7 +377,6 @@ libc_common_src_files = \
 #       below.
 #
 libc_static_common_src_files = \
-		bionic/libc_init_static.c \
         unistd/sysconf.c \
         bionic/__errno.c
 
@@ -573,9 +572,17 @@ libc_common_cflags += -DCRT_LEGACY_WORKAROUND
 endif
 libc_common_cflags += $(addprefix -I,$(libc_common_c_includes))
 
+define dep-one-file
+$(1): $(2)
+endef
+
+$(foreach f,$(libc_common_src), $(eval $(call dep-one-file,$(f),$(SYSCALLS_STAMP))))
 $(foreach f,$(libc_common_src), $(eval $(call compile-one-file,$(f),libc_common,$(libc_common_dep))))
 
-#dont really need to create libc_common.a
+$(top_builddir)/libc/libc_common.a: $(libc_common_obj) $(SYSCALLS_STAMP) 
+	mkdir -p $(dir $@)
+	rm -f $@
+	@AR@ crsP $@ $(libc_common_obj)
 
 # ========================================================
 # libc_nomalloc.a
@@ -587,7 +594,7 @@ $(foreach f,$(libc_common_src), $(eval $(call compile-one-file,$(f),libc_common,
 # or wants to explicitly disallow the use of the use of malloc,
 # like the dynamic loader.
 
-libc_nomalloc_src_files = $(libc_arch_static_src_files) $(libc_static_common_src_files)
+libc_nomalloc_src_files = $(libc_arch_static_src_files) $(libc_static_common_src_files) bionic/libc_init_static.c
 
 libc_nomalloc_cflags = $(libc_common_cflags) -DLIBC_STATIC
 
@@ -596,39 +603,48 @@ libc_nomalloc_obj =
 libc_nomalloc_dep = $(SYSCALLS_STAMP)
 $(foreach f,$(libc_nomalloc_src), $(eval $(call compile-one-file,$(f),libc_nomalloc,$(libc_nomalloc_dep))))
 
-$(top_builddir)/libc/libc_nomalloc.a: $(libc_nomalloc_obj) $(libc_common_obj) $(SYSCALLS_STAMP) 
+$(eval libc_nomalloc_obj += $(libc_common_obj)) 
+
+$(top_builddir)/libc/libc_nomalloc.a: $(libc_nomalloc_obj) $(SYSCALLS_STAMP) 
 	mkdir -p $(dir $@)
-	@AR@ crsP $@ $(libc_static_obj) $(libc_common_obj)
+	rm -f $@
+	@AR@ crsP $@ $(libc_nomalloc_obj)
 
 # ========================================================
 # libc.a
 # ========================================================
 
-libc_static_obj = $(libc_nomalloc_obj) $(libc_common_obj)
+libc_static_src_files = \
+	bionic/dlmalloc.c \
+	bionic/malloc_debug_common.c
 
-$(top_builddir)/libc/libc.a: $(libc_nomalloc_obj) $(libc_common_obj) $(SYSCALLS_STAMP) 
+libc_static_src = $(addprefix $(top_srcdir)/libc/,$(libc_static_src_files))
+libc_static_obj =
+libc_static_cflags = $(libc_common_cflags) -DLIBC_STATIC
+libc_static_dep = $(SYSCALLS_STAMP)
+
+$(foreach f,$(libc_static_src), $(eval $(call compile-one-file,$(f),libc_static,$(libc_static_dep))))
+
+$(eval libc_static_obj += $(libc_nomalloc_obj))
+
+$(top_builddir)/libc/libc.a: $(libc_static_obj) $(SYSCALLS_STAMP) 
 	mkdir -p $(dir $@)
-	@AR@ crsP $@ $(libc_nomalloc_obj) $(libc_common_obj)
+	rm -f $@
+	@AR@ crsP $@ $(libc_static_obj)
 
 # ========================================================
 # libc.so
 # ========================================================
 
-$(top_builddir)/libc/unistd/sysconf-dynamic.c: $(top_srcdir)/libc/unistd/sysconf.c
-	mkdir -p $(dir $@)
-	cp $< $@
+libc_dynamic_src_files = \
+	unistd/sysconf.c \
+	bionic/__errno.c \
+	bionic/pthread.c \
+	bionic/pthread_debug.c \
+	bionic/libc_init_dynamic.c
 
-$(top_builddir)/libc/bionic/__errno-dynamic.c: $(top_srcdir)/libc/bionic/__errno.c
-	mkdir -p $(dir $@)
-	cp $< $@
-
-$(top_builddir)/libc/bionic/pthread-dynamic.c: $(top_srcdir)/libc/bionic/pthread.c
-	mkdir -p $(dir $@)
-	cp $< $@
-
-libc_dynamic_common_src_files = $(top_builddir)/libc/unistd/sysconf-dynamic.c $(top_builddir)/libc/bionic/__errno-dynamic.c $(top_builddir)/libc/bionic/pthread-dynamic.c
-libc_dymamic_dep = $(libc_common_dep) $(libc_dynamic_common_src_files) $(SYSCALLS_STAMP) $(CRTFILES) libdl-all
-libc_dynamic_src = $(addprefix $(top_srcdir)/libc/, bionic/pthread_debug.c bionic/libc_init_dynamic.c) $(libc_dynamic_common_src_files)
+libc_dynamic_src = $(addprefix $(top_srcdir)/libc/,$(libc_dynamic_src_files))
+libc_dymamic_dep = $(libc_common_dep) $(SYSCALLS_STAMP) $(CRTFILES) libdl-all
 libc_dynamic_obj =
 libc_dynamic_cflags = $(libc_common_cflags)
 if PTHREAD_DEBUG
@@ -638,13 +654,13 @@ libc_dynamic_cflags += -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=0
 endif
 libc_dynamic_cflags += $(addprefix -I,$(libc_common_c_includes))
 libc_ldflags = @COMMON_LDFLAGS@
-libc_ldflags += -static-libgcc -shared -Wl,-soname,libc.so -L$(top_builddir)/libdl -L$(top_builddir)/libthread_db
+libc_ldflags += -shared -Wl,-soname,libc.so
 libc_ldlibs = -ldl -lgcc
 
 $(foreach f,$(libc_dynamic_src), $(eval $(call compile-one-file,$(f),libc_dynamic,$(libc_dynamic_dep))))
 
-$(top_builddir)/libc/libc.so: $(libc_dynamic_obj) $(libc_common_obj)
-	@CC@ $(libc_ldflags) -o $@ $(CRTBEGIN_SO) $(libc_dynamic_obj) $(libc_common_obj) $(libc_ldlibs) $(CRTEND_SO)
+$(top_builddir)/libc/libc.so: $(libc_dynamic_obj) $(top_builddir)/libc/libc_common.a
+	@CC@ $(libc_ldflags) -o $@ $(CRTBEGIN_SO) $(libc_dynamic_obj) -Wl,--whole-archive $(top_builddir)/libc/libc_common.a -Wl,--no-whole-archive $(libc_ldlibs) $(CRTEND_SO)
 
 # ========================================================
 # common targets
@@ -652,12 +668,15 @@ $(top_builddir)/libc/libc.so: $(libc_dynamic_obj) $(libc_common_obj)
 
 libc-all: \
   $(SYSCALLS_STAMP) \
+  $(top_builddir)/libc/libc_common.a \
   $(top_builddir)/libc/libc_nomalloc.a \
   $(top_builddir)/libc/libc.a \
   $(top_builddir)/libc/libc.so
 
 libc-clean:
-	rm -f $(libc_common_obj) $(top_builddir)/libc/libc_nomalloc.a \
+	rm -f \
+		$(top_builddir)/libc/libc_common.a \
+		$(top_builddir)/libc/libc_nomalloc.a \
 		$(libc_static_obj) $(top_builddir)/libc/libc.a \
 		$(libc_dynamic_obj) $(top_builddir)/libc/libc.so \
 		$(libc_dynamic_src_files)

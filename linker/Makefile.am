@@ -29,7 +29,6 @@ linker_cflags = $(linker_common_cflags)
 
 linker_ldflags = @COMMON_LDFLAGS@
 linker_ldflags += -Bstatic -shared
-linker_ldflags += -L$(top_builddir)/libc
 linker_ldlibs = -lc_nomalloc -lgcc
 
 linker_src = $(addprefix $(top_srcdir)/linker/,$(linker_src_files))

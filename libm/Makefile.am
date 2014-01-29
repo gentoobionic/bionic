@@ -170,7 +170,8 @@ endif
 libm_src = $(addprefix $(top_srcdir)/libm/,$(libm_src_files))
 libm_obj =
 libm_cflags = @COMMON_CFLAGS@
-libm_ldflags = @COMMON_LDFLAGS@ -shared -Wl,-soname,libm.so -L$(top_builddir)/libc
+libm_ldflags = @COMMON_LDFLAGS@
+libm_ldflags += -shared -Wl,-soname,libm.so
 libm_ldlibs = -lc
 libm_dep = $(CRTFILES) libc-all
 

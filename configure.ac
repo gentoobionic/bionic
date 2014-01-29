@@ -44,11 +44,6 @@ AC_ARG_ENABLE([linker-debug],
 esac],[LINKER_DEBUG=false])
 AM_CONDITIONAL([LINKER_DEBUG], [test x$LINKER_DEBUG = xtrue])
 AC_SUBST(LINKER_DEBUG)
-if test x"${LINKER_DEBUG}" = xtrue ; then
-  COMMON_CFLAGS="${COMMON_CFLAGS} -DLINKER_DEBUG=1"
-else
-  COMMON_CFLAGS="${COMMON_CFLAGS} -DLINKER_DEBUG=0"
-fi
 
 AC_ARG_ENABLE([pthread-debug],
 [  --enable-pthread-debug    Enable pthread debugging],
@@ -73,7 +68,7 @@ COMMON_INCLUDES='-nostdinc -I$(call compiler-include-path) -include $(top_srcdir
 COMMON_INCLUDES_X86='-I$(top_srcdir)/libm/include/i387'
 COMMON_INCLUDES_ARM='-I$(top_srcdir)/libm/include/arm'
 
-COMMON_LDFLAGS='-Wl,--warn-shared-textrel -Wl,--fatal-warnings -Wl,-no-undefined -nostdlib -nodefaultlibs -nostartfiles -L$(top_builddir)'
+COMMON_LDFLAGS='-Wl,--warn-shared-textrel -Wl,--fatal-warnings -Wl,-no-undefined -nostdlib -nodefaultlibs -nostartfiles -Wl,--exclude-libs=libgcc.a -L$(top_builddir)/libc -L$(top_builddir)/libdl -L$(top_builddir)/libm -L$(top_builddir)/libthread_db'
 COMMON_LDFLAGS_X86=""
 COMMON_LDFLAGS_ARM=""
 
