@@ -125,13 +125,13 @@ ENTRY(frame_dummy)
 .L7:
 	leave
 	ret
-END(frame_dummy)
 	.local	completed.4454
 	.comm	completed.4454,1,1
 	.local	object.4466
 	.comm	object.4466,24,4
 	.weak	__register_frame_info_bases
 	.weak	__deregister_frame_info_bases
+END(frame_dummy)
 
 #include "__dso_handle.S"
 #include "atexit.S"

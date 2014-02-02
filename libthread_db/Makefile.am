@@ -1,11 +1,14 @@
 libthread_db_cflags = @COMMON_CFLAGS@
 libthread_db_ldflags = $(subst -Wl$(COMMA)-no-undefined,,@COMMON_LDFLAGS@)
-libthread_db_ldflags += -shared -Wl,-soname,libthread_db.so
-libthread_db_ldlibs = -ldl -lc
+libthread_db_ldflags += -Wl,--print-map
+libthread_db_ldflags += -Bsymbolic -shared -Wl,-soname,libthread_db.so
+libthread_db_ldlibs = -lc -ldl
 
-libthread_db_src = libthread_db/libthread_db.c
+libthread_db_src_files = libthread_db/libthread_db.c
+
+libthread_db_src = $(addprefix $(top_srcdir)/,$(libthread_db_src_files))
 libthread_db_obj = 
-libthread_db_dep = $(CRTFILES) libc-all
+libthread_db_dep = $(CRTFILES) libc-all libdl-all
 
 $(foreach f,$(libthread_db_src), $(eval $(call compile-one-file,$(f),libthread_db,$(libthread_db_dep))))
 
@@ -15,8 +18,9 @@ $(top_builddir)/libthread_db/libthread_db.a: $(libthread_db_obj)
 	mkdir -p $(dir $@)
 	@AR@ crsP $@ $^
 
-$(top_builddir)/libthread_db/libthread_db.so: $(libthread_db_obj) $(libthread_db_dep)
-	@CC@ $(libthread_db_ldflags) -o $@ $(CRTBEGIN_SO) $(libthread_db_obj) $(libthread_db_ldlibs) $(CRTEND_SO)
+$(top_builddir)/libthread_db/libthread_db.so: $(libthread_db_obj) $(libthread_db_dep) $(top_builddir)/libc/libc.so $(top_builddir)/libdl/libdl.so
+	mkdir -p $(dir $@)
+	@CC@ $(libthread_db_ldflags) -o $@ $(CRTBEGIN_SO) $(libthread_db_obj) $(libthread_db_ldlibs) $(CRTEND_SO) > $@.map
 
 libthread_db-all: $(top_builddir)/libthread_db/libthread_db.a $(top_builddir)/libthread_db/libthread_db.so
 

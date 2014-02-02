@@ -240,9 +240,7 @@ void* memalign(size_t alignment, size_t bytes) {
  * must be excluded if we compile this file for static libc.a
  */
 #ifndef LIBC_STATIC
-#include <sys/system_properties.h>
 #include <dlfcn.h>
-#include "logd.h"
 
 /* Table for dispatching malloc calls, depending on environment. */
 static MallocDebug gMallocUse __attribute__((aligned(32))) = {

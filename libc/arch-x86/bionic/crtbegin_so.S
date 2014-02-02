@@ -102,13 +102,13 @@ ENTRY(frame_dummy)
 	popl	%ebx
 	popl	%ebp
 	ret
-END(frame_dummy)
 	.local	completed.4454
 	.comm	completed.4454,1,1
 	.local	object.4469
 	.comm	object.4469,24,4
 	.weak	__register_frame_info_bases
 	.weak	__deregister_frame_info_bases
+END(frame_dummy)
 
 #include "__dso_handle_so.S"
 #include "atexit.S"

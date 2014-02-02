@@ -197,6 +197,9 @@ int           __timer_settime:timer_settime(timer_t, int, const struct itimerspe
 int           __timer_gettime:timer_gettime(timer_t, struct itimerspec*)                                259,261
 int           __timer_getoverrun:timer_getoverrun(timer_t)                                              260,262
 int           __timer_delete:timer_delete(timer_t)                                                      261,263
+int           timerfd_create(clockid_t, int) 350,283,321
+int           timerfd_gettime(int, struct itimerspec *) 354,287,323
+int           timerfd_settime(int, int, const struct itimerspec *, struct itimerspec *) 353,286,322
 int           utimes(const char*, const struct timeval tvp[2])                          269, 271
 int           utimensat(int, const char *, const struct timespec times[2], int)         348, 320, 320
 int           stime(time_t *) 25
@@ -210,6 +213,7 @@ int     __rt_sigaction:rt_sigaction (int sig, const struct sigaction *act, struc
 int     __rt_sigprocmask:rt_sigprocmask (int  how, const sigset_t *set, sigset_t *oset, size_t sigsetsize)  175
 int     __rt_sigtimedwait:rt_sigtimedwait(const sigset_t *set, struct siginfo_t  *info, struct timespec_t  *timeout, size_t  sigset_size)  177
 int     sigpending(sigset_t *)  73
+int     signalfd4(int, const sigset_t *, size_t, int)  355,289,324
 
 # sockets
 int           socket(int, int, int)              281,-1

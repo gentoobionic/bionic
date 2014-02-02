@@ -1,6 +1,11 @@
 CRTFILES =
 
-libc_crt_target_cflags = -I$(top_srcdir)/libc/private -I$(top_srcdir)/libc/arch-@TARGET_ARCH@/include
+libc_crt_target_cflags = 
+if DEBUG_BIONIC_LIBC
+libc_crt_target_cflags += -DDEBUG -g -O0
+endif
+
+libc_crt_target_cflags += -I$(top_srcdir)/libc/private -I$(top_srcdir)/libc/arch-@TARGET_ARCH@/include
 libc_crt_target_so_cflags = $(libc_crt_target_cflags)
 
 if TARGET_ARCH_IS_ARM

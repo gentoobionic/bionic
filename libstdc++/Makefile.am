@@ -11,10 +11,11 @@ libstdc++_cxxflags += -fno-use-cxa-atexit
 libstdc++_cxxflags += -I$(top_srcdir)/libstdc++/include
 libstdc++_cxxflags += -I$(top_srcdir)/libc/private
 libstdc++_ldflags = @COMMON_LDFLAGS@
-libstdc++_ldflags += -shared -Wl,-soname,libstdc++.so
-libstdc++_ldlibs  = -lc
+libstdc++_ldflags += -Wl,--print-map
+libstdc++_ldflags += -Bsymbolic -shared -Wl,-soname,libstdc++.so
+libstdc++_ldlibs  = -lc -lgcc_s
 libstdc++_dep = $(CRTFILES) libc-all
-libstdc++_obj = 
+libstdc++_obj =
 
 $(foreach f,$(libstdc++_src), $(eval $(call compile-one-file,$(f),libstdc++,$(libstdc++_dep))))
 
@@ -24,8 +25,9 @@ $(top_builddir)/libstdc++/libstdc++.a: $(libstdc++_obj)
 	mkdir -p $(dir $@)
 	@AR@ crsP $@ $^
 
-$(top_builddir)/libstdc++/libstdc++.so: $(libstdc++_obj) $(libstdc++_dependencies)
-	@CC@ $(libstdc++_ldflags) -o $@ $(CRTBEGIN_SO) $(libstdc++_obj) $(libstdc++_ldlibs) $(CRTEND_SO)
+$(top_builddir)/libstdc++/libstdc++.so: $(libstdc++_obj)  $(top_builddir)/libc/libc.so
+	mkdir -p $(dir $@)
+	@CC@ $(libstdc++_ldflags) -o $@ $(CRTBEGIN_SO) $(libstdc++_obj) $(libstdc++_ldlibs) $(CRTEND_SO) > $@.map
 
 libstdc++-all: $(SYSCALLS_STAMP) $(top_builddir)/libstdc++/libstdc++.a $(top_builddir)/libstdc++/libstdc++.so
 

@@ -113,6 +113,7 @@ libc_common_src_files = \
 	stdio/getdelim.c \
 	stdio/getline.c \
 	stdio/gets.c \
+	stdio/glob.c \
 	stdio/makebuf.c \
 	stdio/mktemp.c \
 	stdio/printf.c \
@@ -275,7 +276,6 @@ libc_common_src_files = \
 	bionic/ioctl.c \
 	bionic/ldexp.c \
 	bionic/libc_init_common.c \
-	bionic/logd_write.c \
 	bionic/md5.c \
 	bionic/memmove_words.c \
 	bionic/pututline.c \
@@ -287,7 +287,6 @@ libc_common_src_files = \
 	bionic/semaphore.c \
 	bionic/sha1.c \
 	bionic/ssp.c \
-	bionic/system_properties.c \
 	bionic/tdelete.c \
 	bionic/tdestroy.c \
 	bionic/time64.c \
@@ -360,8 +359,7 @@ libc_common_src_files = \
 	pwd/getpwent.c \
 	pwd/getpwnam.c \
 	pwd/getpwuid.c \
-	bionic/dlmalloc.c \
-	bionic/malloc_debug_common.c 
+	bionic/signalfd.c
 
 # The following files are common, but must be compiled
 # with different C flags when building a static C library.
@@ -488,7 +486,6 @@ libc_common_cflags = $(common_cppflags)
 
 libc_common_cflags += \
 		-DWITH_ERRLIST			\
-		-DANDROID_CHANGES		\
 		-DUSE_LOCKS 			\
 		-DREALLOC_ZERO_BYTES_FREES 	\
 		-D_LIBC=1 			\
@@ -497,9 +494,7 @@ libc_common_cflags += \
 		-DINET6 \
 		-I$(top_srcdir)/libc \
 		-I$(top_srcdir)/libc/private \
-		-DUSE_DL_PREFIX \
-		-DPOSIX_MISTAKE \
-        -DLOG_ON_HEAP_ERROR
+		-DPOSIX_MISTAKE
 
 # these macro definitions are required to implement the
 # 'timezone' and 'daylight' global variables, as well as
@@ -560,23 +555,26 @@ libc_common_c_includes = \
 # libc_common.a
 # ========================================================
 
-define generated-sources
-$(shell cat $(top_builddir)/syscalls.stamp 2>/dev/null)
-endef
+# XXX: this seems to be the only way to include generated sources reliably
+libc_common_gen_files =
+$(top_builddir)/libc/libc_generated_sources.mk: $(SYSCALLS_STAMP)
+	mkdir -p $(dir $@)
+	cat $< | sed -e 's|\(.*\)|libc_common_gen_files\ +=\ \1|g' > $@
+-include $(top_builddir)/libc/libc_generated_sources.mk
 
-libc_common_dep = $(SYSCALLS_STAMP) libthread_db-all
-libc_common_src = $(addprefix $(top_srcdir)/libc/,$(libc_common_src_files)) $(addprefix $(top_srcdir)/libc/,$(call generated-sources))
+libc_common_dep = $(top_builddir)/libc_generated_sources.mk
+libc_common_src = $(addprefix $(top_srcdir)/libc/,$(libc_common_src_files)) $(addprefix $(top_builddir)/,$(libc_common_gen_files))
 libc_common_obj =
 if TARGET_ARCH_IS_ARM
 libc_common_cflags += -DCRT_LEGACY_WORKAROUND
 endif
 libc_common_cflags += $(addprefix -I,$(libc_common_c_includes))
 
-define dep-one-file
-$(1): $(2)
-endef
+#define dep-one-file
+#$(1): $(2)
+#endef
 
-$(foreach f,$(libc_common_src), $(eval $(call dep-one-file,$(f),$(SYSCALLS_STAMP))))
+#$(foreach f,$(libc_common_src), $(eval $(call dep-one-file,$(f),$(SYSCALLS_STAMP))))
 $(foreach f,$(libc_common_src), $(eval $(call compile-one-file,$(f),libc_common,$(libc_common_dep))))
 
 $(top_builddir)/libc/libc_common.a: $(libc_common_obj) $(SYSCALLS_STAMP) 
@@ -615,8 +613,7 @@ $(top_builddir)/libc/libc_nomalloc.a: $(libc_nomalloc_obj) $(SYSCALLS_STAMP)
 # ========================================================
 
 libc_static_src_files = \
-	bionic/dlmalloc.c \
-	bionic/malloc_debug_common.c
+	bionic/dlmalloc.c
 
 libc_static_src = $(addprefix $(top_srcdir)/libc/,$(libc_static_src_files))
 libc_static_obj =
@@ -637,10 +634,10 @@ $(top_builddir)/libc/libc.a: $(libc_static_obj) $(SYSCALLS_STAMP)
 # ========================================================
 
 libc_dynamic_src_files = \
+	bionic/dlmalloc.c \
 	unistd/sysconf.c \
 	bionic/__errno.c \
 	bionic/pthread.c \
-	bionic/pthread_debug.c \
 	bionic/libc_init_dynamic.c
 
 libc_dynamic_src = $(addprefix $(top_srcdir)/libc/,$(libc_dynamic_src_files))
@@ -654,20 +651,20 @@ libc_dynamic_cflags += -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=0
 endif
 libc_dynamic_cflags += $(addprefix -I,$(libc_common_c_includes))
 libc_ldflags = @COMMON_LDFLAGS@
-libc_ldflags += -shared -Wl,-soname,libc.so
-libc_ldlibs = -ldl -lgcc
+libc_ldflags += -Wl,--print-map -v
+libc_ldflags += -Bsymbolic -shared -Wl,-soname,libc.so
+libc_ldlibs = -ldl -lgcc_s
 
 $(foreach f,$(libc_dynamic_src), $(eval $(call compile-one-file,$(f),libc_dynamic,$(libc_dynamic_dep))))
 
 $(top_builddir)/libc/libc.so: $(libc_dynamic_obj) $(top_builddir)/libc/libc_common.a
-	@CC@ $(libc_ldflags) -o $@ $(CRTBEGIN_SO) $(libc_dynamic_obj) -Wl,--whole-archive $(top_builddir)/libc/libc_common.a -Wl,--no-whole-archive $(libc_ldlibs) $(CRTEND_SO)
+	@CC@ $(libc_ldflags) -o $@ $(CRTBEGIN_SO) $(libc_dynamic_obj) -Wl,--whole-archive $(top_builddir)/libc/libc_common.a -Wl,--no-whole-archive $(libc_ldlibs) $(CRTEND_SO) &> $@.map  
 
 # ========================================================
 # common targets
 # ========================================================
 
 libc-all: \
-  $(SYSCALLS_STAMP) \
   $(top_builddir)/libc/libc_common.a \
   $(top_builddir)/libc/libc_nomalloc.a \
   $(top_builddir)/libc/libc.a \
@@ -679,6 +676,7 @@ libc-clean:
 		$(top_builddir)/libc/libc_nomalloc.a \
 		$(libc_static_obj) $(top_builddir)/libc/libc.a \
 		$(libc_dynamic_obj) $(top_builddir)/libc/libc.so \
+		$(top_builddir)/libc/libc_generated_sources.mk \
 		$(libc_dynamic_src_files)
 
 libc-install-exec-local: libc-all

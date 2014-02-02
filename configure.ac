@@ -12,6 +12,9 @@ AM_INIT_AUTOMAKE([subdir-objects -Wno-portability])
 AM_PROG_AS
 AM_PROG_AR
 
+MKDIRP="mkdir -p"
+AC_SUBST(MKDIRP)
+
 COMMON_CFLAGS="${CFLAGS}"
 COMMON_CFLAGS="${COMMON_CFLAGS} -Wall -fPIC"
 COMMON_CFLAGS="${COMMON_CFLAGS} -fno-exceptions -Wno-multichar -fmessage-length=0 -Wno-unused -Winit-self"
@@ -64,13 +67,18 @@ fi
 COMMON_CFLAGS_X86="-march=i686 -m32"
 COMMON_CFLAGS_ARM=""
 
-COMMON_INCLUDES='-nostdinc -I$(call compiler-include-path) -include $(top_srcdir)/libc/arch-$(TARGET_ARCH)/AndroidConfig.h -I$(top_srcdir)/libc/arch-$(TARGET_ARCH)/include -I$(top_srcdir)/libc/include -I$(top_srcdir)/libc/kernel/arch-$(TARGET_ARCH) -I$(top_srcdir)/libc/arch-$(TARGET_ARCH)/include -I$(top_srcdir)/libc/include -I$(top_srcdir)/libc/kernel/common -I$(top_srcdir)/libc/kernel/arch-$(TARGET_ARCH) -I$(top_srcdir)/libm/include -I$(top_srcdir)/libthread_db/include'
+COMMON_INCLUDES='-nostdinc -I$(call compiler-include-path) -include $(top_srcdir)/libc/arch-$(TARGET_ARCH)/AndroidConfig.h -I$(top_builddir)/include -I$(top_srcdir)/libc/arch-$(TARGET_ARCH)/include -I$(top_srcdir)/libc/include -I$(top_srcdir)/libc/kernel/arch-$(TARGET_ARCH) -I$(top_srcdir)/libc/arch-$(TARGET_ARCH)/include -I$(top_srcdir)/libc/include -I$(top_srcdir)/libc/kernel/common -I$(top_srcdir)/libc/kernel/arch-$(TARGET_ARCH) -I$(top_srcdir)/libm/include -I$(top_srcdir)/libthread_db/include'
 COMMON_INCLUDES_X86='-I$(top_srcdir)/libm/include/i387'
 COMMON_INCLUDES_ARM='-I$(top_srcdir)/libm/include/arm'
 
-COMMON_LDFLAGS='-Wl,--warn-shared-textrel -Wl,--fatal-warnings -Wl,-no-undefined -nostdlib -nodefaultlibs -nostartfiles -Wl,--exclude-libs=libgcc.a -L$(top_builddir)/libc -L$(top_builddir)/libdl -L$(top_builddir)/libm -L$(top_builddir)/libthread_db'
+COMMON_LDFLAGS='-Wl,--warn-shared-textrel -Wl,--fatal-warnings -Wl,-no-undefined -nostdlib -nodefaultlibs -nostartfiles -L$(top_builddir)/libc -L$(top_builddir)/libdl -L$(top_builddir)/libm -L$(top_builddir)/libthread_db'
 COMMON_LDFLAGS_X86=""
 COMMON_LDFLAGS_ARM=""
+
+COMMON_LDLIBS=""
+dnl COMMON_LDLIBS_X86='$(shell $(CC) -print-file-name=libgcc_eh.a)'
+COMMON_LDLIBS_X86=""
+COMMON_LDLIBS_ARM=""
 
 case $host_os in
   *linux*)
@@ -83,15 +91,17 @@ esac
 case $host_cpu in
   *i?86*)
     TARGET_ARCH=x86
-    COMMON_LDFLAGS="${COMMON_LDFLAGS} ${COMMON_LDFLAGS_X86} "
-	COMMON_CFLAGS="${COMMON_CFLAGS} ${COMMON_CFLAGS_X86} "
-    COMMON_INCLUDES="${COMMON_INCLUDES} ${COMMON_INCLUDES_X86} "
+    COMMON_LDFLAGS="${COMMON_LDFLAGS} ${COMMON_LDFLAGS_X86}"
+	COMMON_CFLAGS="${COMMON_CFLAGS} ${COMMON_CFLAGS_X86}"
+    COMMON_INCLUDES="${COMMON_INCLUDES} ${COMMON_INCLUDES_X86}"
+    COMMON_LDLIBS="${COMMON_LDLIBS} ${COMMON_LDLIBS_X86}"
   ;;
   *arm*)
     TARGET_ARCH=arm
-    COMMON_LDFLAGS="${COMMON_LDFLAGS} ${COMMON_LDFLAGS_X86} "
-	COMMON_CFLAGS="${COMMON_CFLAGS} ${COMMON_CFLAGS_X86} "
-    COMMON_INCLUDES="${COMMON_INCLUDES} ${COMMON_INCLUDES_ARM} "
+    COMMON_LDFLAGS="${COMMON_LDFLAGS} ${COMMON_LDFLAGS_ARM}"
+	COMMON_CFLAGS="${COMMON_CFLAGS} ${COMMON_CFLAGS_ARM}"
+    COMMON_INCLUDES="${COMMON_INCLUDES} ${COMMON_INCLUDES_ARM}"
+    COMMON_LDLIBS="${COMMON_LDLIBS} ${COMMON_LDLIBS_ARM}"
   ;;
   *)
   AC_MSG_ERROR([unsupported host cpu $host_cpu])
@@ -178,6 +188,7 @@ COMMON_CFLAGS="${COMMON_CFLAGS} ${COMMON_INCLUDES}"
 
 AC_SUBST(COMMON_CFLAGS)
 AC_SUBST(COMMON_LDFLAGS)
+AC_SUBST(COMMON_LDLIBS)
 
 AC_CONFIG_FILES(
     Makefile

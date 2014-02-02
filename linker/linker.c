@@ -2074,15 +2074,15 @@ sanitize:
     if (program_is_setuid)
         linker_env_secure();
 
-    debugger_init();
+    //debugger_init();
 
     /* Get a few environment variables */
     {
 #if LINKER_DEBUG
-//        const char* env;
-//        env = linker_env_get("DEBUG"); /* XXX: TODO: Change to LD_DEBUG */
-//        if (env)
-//            debug_verbosity = atoi(env);
+        const char* env;
+        env = linker_env_get("DEBUG"); /* XXX: TODO: Change to LD_DEBUG */
+        if (env)
+            debug_verbosity = atoi(env);
 #endif
 
         /* Normally, these are cleaned by linker_env_secure, but the test

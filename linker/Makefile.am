@@ -23,22 +23,27 @@ $(foreach f,$(begin_src), $(eval $(call compile-one-file,$(f),begin,$(begin_dep)
 # linker
 # ========================================================
 
-linker_src_files = linker.c linker_format.c linker_environ.c dlfcn.c debugger.c rt.c
+linker_src_files = linker.c linker_format.c linker_environ.c dlfcn.c rt.c
 
 linker_cflags = $(linker_common_cflags)
 
 linker_ldflags = @COMMON_LDFLAGS@
-linker_ldflags += -Bstatic -shared
-linker_ldlibs = -lc_nomalloc -lgcc
+linker_ldflags += -v -Wl,--print-map
+linker_ldflags += -Bsymbolic -shared
 
 linker_src = $(addprefix $(top_srcdir)/linker/,$(linker_src_files))
 linker_obj =
-linker_dep = libc-all
+linker_dep = $(begin_obj) libc-all
 $(foreach f,$(linker_src), $(eval $(call compile-one-file,$(f),linker,$(linker_dep))))
 
-$(top_builddir)/linker/linker: $(begin_obj) $(linker_obj)
+$(top_builddir)/linker/libgcc_eh/unwind-dw2-fde-dip.o: $(shell @CC@ -print-file-name=libgcc_eh.a)
 	mkdir -p $(dir $@)
-	@CC@ -o $@ $(linker_ldflags) -Wl,--start-group $(begin_obj) $(linker_obj) $(linker_ldlibs) -Wl,--end-group
+	cd $(dir $@) && @AR@ x $(shell @CC@ -print-file-name=libgcc_eh.a)
+
+$(top_builddir)/linker/linker: $(begin_obj) $(linker_obj) $(top_builddir)/libc/libc_nomalloc.a $(top_builddir)/linker/libgcc_eh/unwind-dw2-fde-dip.o
+	mkdir -p $(dir $@)
+	@CC@ -o $@ $(linker_ldflags) $(begin_obj) $(linker_obj) -Wl,--start-group $(top_builddir)/libc/libc_nomalloc.a -Wl,--end-group $(top_builddir)/linker/libgcc_eh/unwind-dw2-fde-dip.o -lgcc &> $@.map
+	@OBJCOPY@ --prefix-symbols=__dl_ $@
 
 #	$(OBJCOPY) --prefix-symbols __dl_ $@.tmp || rm $@.tmp $@ 2&>/dev/null
 #	mv $@.tmp $@  
