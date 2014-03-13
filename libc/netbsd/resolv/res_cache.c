@@ -35,7 +35,6 @@
 
 #include <errno.h>
 #include "arpa_nameser.h"
-#include <sys/system_properties.h>
 #include <net/if.h>
 #include <netdb.h>
 #include <linux/if.h>
@@ -1225,30 +1224,7 @@ _cache_flush_locked( Cache*  cache )
 static int
 _res_cache_get_max_entries( void )
 {
-    int result = -1;
-    char cache_size[PROP_VALUE_MAX];
-
-    const char* cache_mode = getenv("ANDROID_DNS_MODE");
-
-    if (cache_mode == NULL || strcmp(cache_mode, "local") != 0) {
-        // Don't use the cache in local mode.  This is used by the
-        // proxy itself.
-        // TODO - change this to 0 when all dns stuff uses proxy (5918973)
-        XLOG("setup cache for non-cache process. size=1");
-        return 1;
-    }
-
-    if (__system_property_get(DNS_CACHE_SIZE_PROP_NAME, cache_size) > 0) {
-        result = atoi(cache_size);
-    }
-
-    // ro.net.dns_cache_size not set or set to negative value
-    if (result <= 0) {
-        result = CONFIG_MAX_ENTRIES;
-    }
-
-    XLOG("cache size: %d", result);
-    return result;
+	return 1;
 }
 
 static struct resolv_cache*

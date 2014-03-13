@@ -102,11 +102,11 @@ typedef void (*MallocDebugFini)(void);
 // =============================================================================
 
 #define debug_log(format, ...)  \
-    printf ( "malloc_leak_check:" format, ##__VA_ARGS__ )
+    __libc_android_log_print(ANDROID_LOG_DEBUG, "malloc_leak_check", (format), ##__VA_ARGS__ )
 #define error_log(format, ...)  \
-		printf ( "malloc_leak_check:" format, ##__VA_ARGS__ )
+    __libc_android_log_print(ANDROID_LOG_ERROR, "malloc_leak_check", (format), ##__VA_ARGS__ )
 #define info_log(format, ...)  \
-		printf ( "malloc_leak_check:" format, ##__VA_ARGS__ )
+    __libc_android_log_print(ANDROID_LOG_INFO, "malloc_leak_check", (format), ##__VA_ARGS__ )
 
 #ifdef __cplusplus
 };  /* end of extern "C" */

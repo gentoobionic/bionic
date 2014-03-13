@@ -28,8 +28,6 @@
 
 #include <machine/asm.h>
 
-	.text
-	.p2align 4,,15
 ENTRY(atexit)
 	pushl	%ebp
 	movl	%esp, %ebp

@@ -98,3 +98,4 @@ void	globfree(glob_t *);
 __END_DECLS
 
 #endif /* !_GLOB_H_ */
+

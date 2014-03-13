@@ -44,7 +44,7 @@ typedef struct user_fxsr_struct elf_fpxregset_t;
 #define R_386_GOTPC 10
 #define R_386_NUM 11
 #define ELF_CLASS ELFCLASS32
-#define ELF_DATA ELFDATA2LSB
+//#define ELF_DATA ELFDATA2LSB
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
 #define ELF_ARCH EM_386
 #endif

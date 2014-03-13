@@ -24,7 +24,10 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <machine/asm.h>
+	.text
+	.align 4
+	.type _start, @function
+	.globl _start
 
 # this is the small startup code that is first run when
 # any executable that is dynamically-linked with Bionic
@@ -46,7 +49,7 @@
 #
 #    - address of the constructor list
 #
-ENTRY(_start)
+_start:	
         mov     %esp, %eax
         # before push arguments, align the stack to a 16 byte boundary
         andl    $~15, %esp
@@ -57,7 +60,7 @@ ENTRY(_start)
         mov     $0, %edx
         pushl   %edx
         pushl   %eax
-        call    PIC_PLT(__libc_init)
+        call     __libc_init
 
 0:
         jmp   main
@@ -87,10 +90,10 @@ __FINI_ARRAY__:
 	.align 4
 	.type	__EH_FRAME_BEGIN__, @object
 __EH_FRAME_BEGIN__:
-
 	.text
 	.p2align 4,,15
-ENTRY(__do_global_dtors_aux)
+	.type	__do_global_dtors_aux, @function
+__do_global_dtors_aux:
 	pushl	%ebp
 	movl	%esp, %ebp
 	subl	$24, %esp
@@ -100,17 +103,16 @@ ENTRY(__do_global_dtors_aux)
 	testl	%eax, %eax
 	je	.L3
 	movl	$__EH_FRAME_BEGIN__, (%esp)
-	call	PIC_PLT(__deregister_frame_info_bases)
+	call	__deregister_frame_info_bases
 .L3:
 	movb	$1, completed.4454
 .L4:
 	leave
 	ret
-END(__do_global_dtors_aux)
-
 	.text
 	.p2align 4,,15
-ENTRY(frame_dummy)
+	.type	frame_dummy, @function
+frame_dummy:
 	pushl	%ebp
 	movl	$__register_frame_info_bases, %eax
 	movl	%esp, %ebp
@@ -121,7 +123,7 @@ ENTRY(frame_dummy)
 	movl	$0, 8(%esp)
 	movl	$object.4466, 4(%esp)
 	movl	$__EH_FRAME_BEGIN__, (%esp)
-	call	PIC_PLT(__register_frame_info_bases)
+	call	__register_frame_info_bases
 .L7:
 	leave
 	ret
@@ -131,7 +133,6 @@ ENTRY(frame_dummy)
 	.comm	object.4466,24,4
 	.weak	__register_frame_info_bases
 	.weak	__deregister_frame_info_bases
-END(frame_dummy)
 
 #include "__dso_handle.S"
 #include "atexit.S"

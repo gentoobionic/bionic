@@ -15,6 +15,8 @@ AM_PROG_AR
 MKDIRP="mkdir -p"
 AC_SUBST(MKDIRP)
 
+dnl -fno-unwind-tables -fno-asynchronous-unwind-tables 
+
 COMMON_CFLAGS="${CFLAGS}"
 COMMON_CFLAGS="${COMMON_CFLAGS} -Wall -fPIC"
 COMMON_CFLAGS="${COMMON_CFLAGS} -fno-exceptions -Wno-multichar -fmessage-length=0 -Wno-unused -Winit-self"
@@ -71,7 +73,8 @@ COMMON_INCLUDES='-nostdinc -I$(call compiler-include-path) -include $(top_srcdir
 COMMON_INCLUDES_X86='-I$(top_srcdir)/libm/include/i387'
 COMMON_INCLUDES_ARM='-I$(top_srcdir)/libm/include/arm'
 
-COMMON_LDFLAGS='-Wl,--warn-shared-textrel -Wl,--fatal-warnings -Wl,-no-undefined -nostdlib -nodefaultlibs -nostartfiles -L$(top_builddir)/libc -L$(top_builddir)/libdl -L$(top_builddir)/libm -L$(top_builddir)/libthread_db'
+#  -nodefaultlibs -nostartfiles
+COMMON_LDFLAGS='-Wl,-no-undefined -nostdlib -L$(top_builddir)/libc -L$(top_builddir)/libdl -L$(top_builddir)/libm -L$(top_builddir)/libthread_db'
 COMMON_LDFLAGS_X86=""
 COMMON_LDFLAGS_ARM=""
 
@@ -122,12 +125,22 @@ AC_SUBST(TARGET_ARCH_IS_X86_OR_ARM)
 AC_ARG_ENABLE([smp],
 [  --enable-smp    Enable smp-optimizations],
 [case "${enableval}" in
-  yes|"") TARGET_CPU_SMP=true ;;
-  no)     TARGET_CPU_SMP=false ;;
+  yes|"")
+     TARGET_CPU_SMP=true
+     ;;
+  no)
+    TARGET_CPU_SMP=false
+    ;;
   *) AC_MSG_ERROR([bad value ${enableval} for --enable-smp]) ;;
 esac],[TARGET_CPU_SMP=false])
 AM_CONDITIONAL([TARGET_CPU_SMP], [test x$TARGET_CPU_SMP = xtrue])
 AC_SUBST(TARGET_CPU_SMP)
+
+if test x"${TARGET_CPU_SMP}" = xtrue ; then
+  COMMON_CFLAGS="${COMMON_CFLAGS} -DANDROID_SMP=1"
+else
+  COMMON_CFLAGS="${COMMON_CFLAGS} -DANDROID_SMP=0"
+fi
 
 AC_ARG_ENABLE([sse2],
 [  --enable-sse2    Enable sse2-optimizations],

@@ -280,6 +280,7 @@ libc_common_src_files = \
 	bionic/memmove_words.c \
 	bionic/pututline.c \
 	bionic/realpath.c \
+	bionic/__register_frame_info.c \
 	bionic/sched_getaffinity.c \
 	bionic/sched_getcpu.c \
 	bionic/sched_cpualloc.c \
@@ -464,6 +465,18 @@ libc_common_src_files += \
 	bionic/pthread-timers.c \
 	bionic/ptrace.c
 
+# These files are to wean bionic off libgcc
+
+libc_common_src_files += \
+	arch-x86/bionic/__divdi3.S \
+	arch-x86/bionic/__moddi3.S \
+	arch-x86/bionic/__popcountsi2.c \
+	arch-x86/bionic/__udivdi3.S \
+	arch-x86/bionic/__umoddi3.S
+
+#	arch-x86/bionic/__deregister_frame_info_bases.c \
+#	arch-x86/bionic/__register_frame_info_bases.c
+
 libc_static_common_src_files += \
         bionic/pthread.c
 
@@ -530,13 +543,6 @@ if ARCH_X86_HAVE_SSSE3
     libc_crt_target_cflags += -DUSE_SSSE3=1
 endif
 endif # x86
-
-# Define ANDROID_SMP appropriately.
-if TARGET_CPU_SMP
-    libc_common_cflags += -DANDROID_SMP=1
-else
-    libc_common_cflags += -DANDROID_SMP=0
-endif
 
 # Define some common includes
 # ========================================================
@@ -651,14 +657,13 @@ libc_dynamic_cflags += -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=0
 endif
 libc_dynamic_cflags += $(addprefix -I,$(libc_common_c_includes))
 libc_ldflags = @COMMON_LDFLAGS@
-libc_ldflags += -Wl,--print-map -v
 libc_ldflags += -Bsymbolic -shared -Wl,-soname,libc.so
-libc_ldlibs = -ldl -lgcc_s
+libc_ldlibs = -ldl
 
 $(foreach f,$(libc_dynamic_src), $(eval $(call compile-one-file,$(f),libc_dynamic,$(libc_dynamic_dep))))
 
 $(top_builddir)/libc/libc.so: $(libc_dynamic_obj) $(top_builddir)/libc/libc_common.a
-	@CC@ $(libc_ldflags) -o $@ $(CRTBEGIN_SO) $(libc_dynamic_obj) -Wl,--whole-archive $(top_builddir)/libc/libc_common.a -Wl,--no-whole-archive $(libc_ldlibs) $(CRTEND_SO) &> $@.map  
+	@CC@ $(libc_ldflags) -o $@ $(CRTBEGIN_SO) $(libc_dynamic_obj) -Wl,--whole-archive $(top_builddir)/libc/libc_common.a -Wl,--no-whole-archive $(libc_ldlibs) $(CRTEND_SO)
 
 # ========================================================
 # common targets

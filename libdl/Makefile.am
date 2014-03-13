@@ -4,11 +4,6 @@ libdl_obj =
 libdl_cflags = @COMMON_CFLAGS@ -I$(top_srcdir)/libc/include
 libdl_ldflags = $(subst -Wl$(COMMA)-no-undefined,,@COMMON_LDFLAGS@)
 libdl_ldflags += -Bsymbolic -shared -Wl,-soname,libdl.so
-libdl_ldflags += -Wl,--exclude-libs=libgcc.a -Wl,--exclude-libs=libgcc_eh.a
-libdl_ldlibs = -lgcc_s
-#if TARGET_ARCH_IS_X86
-#libdl_ldflags += -Wl,--exclude-libs=libgcc_eh.a
-#endif
 libdl_dep = $(CRTFILES)
 
 $(foreach f,$(libdl_src), $(eval $(call compile-one-file,$(f),libdl,$(libdl_dep))))

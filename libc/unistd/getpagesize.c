@@ -6,3 +6,4 @@ extern unsigned int __page_size;
 int getpagesize() {
   return __page_size;
 }
+

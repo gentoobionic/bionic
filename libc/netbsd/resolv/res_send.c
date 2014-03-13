@@ -101,11 +101,8 @@ __RCSID("$NetBSD: res_send.c,v 1.9 2006/01/24 17:41:25 christos Exp $");
 #include <errno.h>
 #include <fcntl.h>
 #include <netdb.h>
-#ifdef ANDROID_CHANGES
 #include "resolv_private.h"
-#else
 #include <resolv.h>
-#endif
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -1230,7 +1227,7 @@ Aerror(const res_state statp, FILE *file, const char *string, int error,
 	char hbuf[NI_MAXHOST];
 	char sbuf[NI_MAXSERV];
 
-	alen = alen;
+//	alen = alen;
 
 	if ((statp->options & RES_DEBUG) != 0U) {
 		if (getnameinfo(address, (socklen_t)alen, hbuf, sizeof(hbuf),

@@ -3,6 +3,14 @@
 #ifndef res_private_h
 #define res_private_h
 
+#ifndef MAXNS
+#define MAXNS 3
+#endif
+
+#ifndef MAXRESOLVSORT
+#define MAXRESOLVSORT 5
+#endif
+
 struct __res_state_ext {
 	union res_sockaddr_union nsaddrs[MAXNS];
 	struct sort_list {

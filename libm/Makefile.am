@@ -171,9 +171,8 @@ libm_src = $(addprefix $(top_srcdir)/libm/,$(libm_src_files))
 libm_obj =
 libm_cflags = @COMMON_CFLAGS@
 libm_ldflags = @COMMON_LDFLAGS@
-libm_ldflags += -Wl,--print-map
 libm_ldflags += -Bsymbolic -shared -Wl,-soname,libm.so
-libm_ldlibs = -lc -lgcc_s
+libm_ldlibs = -lc
 libm_dep = $(CRTFILES) libc-all
 
 if TARGET_ARCH_IS_X86
@@ -192,7 +191,7 @@ $(top_builddir)/libm/libm.a: $(libm_obj)
 
 $(top_builddir)/libm/libm.so: $(libm_obj) $(libm_dependencies) $(top_builddir)/libc/libc.so
 	mkdir -p $(dir $@)
-	@CC@ $(libm_ldflags) -o $@ $(CRTBEGIN_SO) $(libm_obj) $(libm_ldlibs) $(CRTEND_SO) > $@.map
+	@CC@ $(libm_ldflags) -o $@ $(CRTBEGIN_SO) $(libm_obj) $(libm_ldlibs) $(CRTEND_SO)
 
 .PHONY: libm-all-local libm-clean-local libm-install-exec-local
 

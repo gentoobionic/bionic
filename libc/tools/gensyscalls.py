@@ -67,7 +67,7 @@ x86_call = """    movl    $%(idname)s, %%eax
     jb      1f
     negl    %%eax
     pushl   %%eax
-    call    PIC_PLT(__set_errno)
+    call    __set_errno
     addl    $4, %%esp
     orl     $-1, %%eax
 1:

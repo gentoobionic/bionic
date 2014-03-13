@@ -16,15 +16,11 @@ __indr_reference(__dn_comp,dn_comp)
 
 #include <sys/types.h>
 #include <netinet/in.h>
-#ifdef ANDROID_CHANGES
 #include "resolv_private.h"
-#else
 #include <resolv.h>
-#endif
 
 /* XXX THIS IS A MESS!  SEE <resolv.h> XXX */
-
-#undef dn_comp
+/*
 int	dn_comp(const char *, u_char *, int, u_char **, u_char **);
 
 int
@@ -34,5 +30,5 @@ dn_comp(const char *exp_dn, u_char *comp_dn, u_char **dnptrs,
 
 	return __dn_comp(exp_dn, comp_dn, length, dnptrs, lastdnptr);
 }
-
+*/
 #endif

@@ -190,19 +190,15 @@ void free_malloc_leak_info(uint8_t* info)
     dlfree(info);
 }
 
-#if 0
 struct mallinfo mallinfo()
 {
     return dlmallinfo();
 }
-#endif
 
-#if 0
 void* valloc(size_t bytes) {
     /* assume page size of 4096 bytes */
     return memalign( getpagesize(), bytes );
 }
-#endif
 
 /* Support for malloc debugging.
  * Note that if USE_DL_PREFIX is not defined, it's assumed that memory
@@ -240,7 +236,9 @@ void* memalign(size_t alignment, size_t bytes) {
  * must be excluded if we compile this file for static libc.a
  */
 #ifndef LIBC_STATIC
+#include <sys/system_properties.h>
 #include <dlfcn.h>
+#include "logd.h"
 
 /* Table for dispatching malloc calls, depending on environment. */
 static MallocDebug gMallocUse __attribute__((aligned(32))) = {

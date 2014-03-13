@@ -51,8 +51,6 @@
 #include "linker_environ.h"
 #include "linker_format.h"
 
-#define CDBG(s) write(0,s,strlen(s))
-
 #define ALLOW_SYMBOLS_FROM_MAIN 1
 #define SO_MAX 128
 
@@ -111,7 +109,7 @@ static const char *ldpreload_names[LDPRELOAD_MAX + 1];
 static soinfo *preloads[LDPRELOAD_MAX + 1];
 
 #if LINKER_DEBUG
-int debug_verbosity = 5;
+int debug_verbosity;
 #endif
 
 static int pid;
@@ -671,6 +669,7 @@ is_prelinked(int fd, const char *name)
     }
 
     if (strncmp(info.tag, "PRE ", 4)) {
+        WARN("`%s` is not a prelinked library\n", name);
         return 0;
     }
 
@@ -2074,7 +2073,7 @@ sanitize:
     if (program_is_setuid)
         linker_env_secure();
 
-    //debugger_init();
+    debugger_init();
 
     /* Get a few environment variables */
     {
@@ -2222,6 +2221,7 @@ sanitize:
 
     TRACE("[ %5d Ready to execute '%s' @ 0x%08x ]\n", pid, si->name,
           si->entry);
+
     return si->entry;
 }
 

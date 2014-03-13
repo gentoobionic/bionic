@@ -88,11 +88,8 @@ __RCSID("$NetBSD: res_mkquery.c,v 1.6 2006/01/24 17:40:32 christos Exp $");
 #include <netinet/in.h>
 #include "arpa_nameser.h"
 #include <netdb.h>
-#ifdef ANDROID_CHANGES
 #include "resolv_private.h"
-#else
 #include <resolv.h>
-#endif
 #include <stdio.h>
 #include <string.h>
 
@@ -108,6 +105,8 @@ __RCSID("$NetBSD: res_mkquery.c,v 1.6 2006/01/24 17:40:32 christos Exp $");
 #endif
 
 extern const char *_res_opcodes[];
+
+extern int     dn_comp(const char *, u_char *, int, u_char **, u_char **);
 
 /*
  * Form all types of queries.

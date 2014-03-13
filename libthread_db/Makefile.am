@@ -1,6 +1,5 @@
 libthread_db_cflags = @COMMON_CFLAGS@
 libthread_db_ldflags = $(subst -Wl$(COMMA)-no-undefined,,@COMMON_LDFLAGS@)
-libthread_db_ldflags += -Wl,--print-map
 libthread_db_ldflags += -Bsymbolic -shared -Wl,-soname,libthread_db.so
 libthread_db_ldlibs = -lc -ldl
 
@@ -18,9 +17,9 @@ $(top_builddir)/libthread_db/libthread_db.a: $(libthread_db_obj)
 	mkdir -p $(dir $@)
 	@AR@ crsP $@ $^
 
-$(top_builddir)/libthread_db/libthread_db.so: $(libthread_db_obj) $(libthread_db_dep) $(top_builddir)/libc/libc.so $(top_builddir)/libdl/libdl.so
+$(top_builddir)/libthread_db/libthread_db.so: $(libthread_db_obj) $(libthread_db_dep)
 	mkdir -p $(dir $@)
-	@CC@ $(libthread_db_ldflags) -o $@ $(CRTBEGIN_SO) $(libthread_db_obj) $(libthread_db_ldlibs) $(CRTEND_SO) > $@.map
+	@CC@ $(libthread_db_ldflags) -o $@ $(CRTBEGIN_SO) $(libthread_db_obj) $(libthread_db_ldlibs) $(CRTEND_SO)
 
 libthread_db-all: $(top_builddir)/libthread_db/libthread_db.a $(top_builddir)/libthread_db/libthread_db.so
 

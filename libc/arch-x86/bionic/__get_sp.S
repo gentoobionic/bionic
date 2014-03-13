@@ -30,4 +30,5 @@
 
 ENTRY(__get_sp)
     mov  %esp, %eax
+    ret
 END(__get_sp)

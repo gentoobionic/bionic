@@ -38,11 +38,8 @@ __RCSID("$NetBSD: ns_print.c,v 1.5 2004/11/07 02:19:49 christos Exp $");
 #include <isc/assertions.h>
 #include <isc/dst.h>
 #include <errno.h>
-#ifdef ANDROID_CHANGES
 #include "resolv_private.h"
-#else
 #include <resolv.h>
-#endif
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>

@@ -84,7 +84,6 @@ void __stack_chk_fail(void)
     }
 
     /* Do a best effort at logging. This ends up calling writev(2) */
-    __libc_android_log_print(ANDROID_LOG_FATAL, path, message);
 
     /* Make sure there is no default action for SIGABRT */
     bzero(&sa, sizeof(struct sigaction));

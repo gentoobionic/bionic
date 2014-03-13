@@ -147,7 +147,8 @@ static void logSignalSummary(int signum, const siginfo_t* info)
         "Fatal signal %d (%s) at 0x%08x (code=%d), thread %d (%s)",
         signum, signame, info->si_addr, info->si_code, gettid(), threadname);
 
-    __libc_android_log_write(ANDROID_LOG_FATAL, "libc", buffer);
+    //__libc_android_log_write(ANDROID_LOG_FATAL, "libc", buffer);
+    fprintf(stderr,"%s\n",buffer);
 }
 
 /*
@@ -189,7 +190,8 @@ void debugger_signal_handler(int n, siginfo_t* info, void* unused)
             /* read or write failed -- broken connection? */
             format_buffer(msgbuf, sizeof(msgbuf),
                 "Failed while talking to debuggerd: %s", strerror(errno));
-            __libc_android_log_write(ANDROID_LOG_FATAL, "libc", msgbuf);
+            //__libc_android_log_write(ANDROID_LOG_FATAL, "libc", msgbuf);
+            fprintf(stderr,"%s\n",msgbuf);
         }
 
         close(s);
@@ -197,7 +199,8 @@ void debugger_signal_handler(int n, siginfo_t* info, void* unused)
         /* socket failed; maybe process ran out of fds */
         format_buffer(msgbuf, sizeof(msgbuf),
             "Unable to open connection to debuggerd: %s", strerror(errno));
-        __libc_android_log_write(ANDROID_LOG_FATAL, "libc", msgbuf);
+        //__libc_android_log_write(ANDROID_LOG_FATAL, "libc", msgbuf);
+        fprintf(stderr,"%s\n",msgbuf);
     }
 
     /* remove our net so we fault for real when we return */

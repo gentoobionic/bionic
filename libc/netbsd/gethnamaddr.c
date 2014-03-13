@@ -80,6 +80,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "resolv_private.h"
+
 static const char const AskedForGot[] =
 			  "gethostby*.getanswer: asked for \"%s\", got \"%s\"";
 
@@ -167,6 +169,9 @@ dprintf(const char *msg, res_state res, ...)
 			return NULL; \
 		} \
 	} while (/*CONSTCOND*/0)
+
+extern int res_hnok(const char *dn);
+extern int res_dnok(const char *dn);
 
 static struct hostent *
 getanswer(const querybuf *answer, int anslen, const char *qname, int qtype,
