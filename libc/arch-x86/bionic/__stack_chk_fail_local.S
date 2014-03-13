@@ -29,13 +29,11 @@
  * Contributed by: Intel Corporation
  */
 
+#include <machine/asm.h>
+
 	.text
 	.p2align 4,,15
-	.globl	__stack_chk_fail_local
-	.hidden	__stack_chk_fail_local
-	.type	__stack_chk_fail_local, @function
-
-__stack_chk_fail_local:
+ENTRY_PRIVATE(__stack_chk_fail_local)
 #ifdef __PIC__
 	pushl	%ebx
 	call	__x86.get_pc_thunk.bx
@@ -44,5 +42,4 @@ __stack_chk_fail_local:
 #else /* PIC */
 	jmp   __stack_chk_fail
 #endif /* not PIC */
-
-	.size	__stack_chk_fail_local, .-__stack_chk_fail_local
+END(__stack_chk_fail_local)

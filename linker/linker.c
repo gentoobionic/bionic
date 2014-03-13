@@ -669,6 +669,7 @@ is_prelinked(int fd, const char *name)
     }
 
     if (strncmp(info.tag, "PRE ", 4)) {
+        WARN("`%s` is not a prelinked library\n", name);
         return 0;
     }
 
@@ -2220,6 +2221,7 @@ sanitize:
 
     TRACE("[ %5d Ready to execute '%s' @ 0x%08x ]\n", pid, si->name,
           si->entry);
+
     return si->entry;
 }
 

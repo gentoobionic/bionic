@@ -84,7 +84,7 @@
  *    - multi-core ARMv6         => use the coprocessor
  *    - single core ARMv5TE/6/7  => do not use any hardware barrier
  */
-#if 1
+#if defined(ANDROID_SMP) && ANDROID_SMP == 1
 
 /* Sanity check, multi-core is only supported starting from ARMv6 */
 #  if __ARM_ARCH__ < 6

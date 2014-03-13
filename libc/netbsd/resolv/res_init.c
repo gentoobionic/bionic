@@ -98,30 +98,13 @@ __RCSID("$NetBSD: res_init.c,v 1.8 2006/03/19 03:10:08 christos Exp $");
 #include <unistd.h>
 #include <netdb.h>
 
-#ifdef ANDROID_CHANGES
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/system_properties.h>
-#endif /* ANDROID_CHANGES */
-
 #ifndef MIN
 #define	MIN(x,y)	((x)<(y)?(x):(y))
 #endif
 
 /* ensure that sockaddr_in6 and IN6ADDR_ANY_INIT are declared / defined */
-#ifdef ANDROID_CHANGES
 #include "resolv_private.h"
-#define MAX_DNS_PROPERTIES 8
-#define DNS_PROP_NAME_PREFIX "net.dns"
-#define DNS_CHANGE_PROP_NAME "net.dnschange"
-#define DNS_SEARCH_PROP_NAME "net.dns.search"
-static const prop_info *dns_change_prop;
-static int dns_last_change_counter;
-static int _get_dns_change_count();
-#else
 #include <resolv.h>
-#endif
-
 #include "res_private.h"
 
 /* Options.  Should all be left alone. */
@@ -129,7 +112,7 @@ static int _get_dns_change_count();
 #define DEBUG
 #endif
 
-static void res_setoptions __P((res_state, const char *, const char *));
+static void res_setoptions(res_state, const char *, const char *);
 
 static const char sort_mask[] = "/&";
 #define ISSORTMASK(ch) (strchr(sort_mask, ch) != NULL)

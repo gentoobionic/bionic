@@ -1,19 +1,12 @@
+#include <machine/asm.h>
 #include <sys/linux-syscalls.h>
-
-.text
 
 /*
  * int  __pthread_clone(int (*fn)(void*), void *tls, int flags,
  *                      void *arg);
  */
-.globl __pthread_clone
-.type __pthread_clone, @function
-.align 4
-__pthread_clone:
-        pushl   %ebx
-        pushl   %ecx
-        movl    16(%esp), %ecx
-
+ENTRY(__pthread_clone)
+		PIC_PROLOGUE
         # save tls
         movl    %ecx, %ebx
         # 16-byte alignment on child stack
@@ -35,7 +28,7 @@ __pthread_clone:
 
         # an error occured, set errno and return -1
         negl    %eax
-        call    __set_errno
+        call    PIC_PLT(__set_errno)
         orl     $-1, %eax
         jmp     2f
 
@@ -45,13 +38,14 @@ __pthread_clone:
         # we're in the child thread now, call __thread_entry
         # with the appropriate arguments on the child stack
         # we already placed most of them
-        call    __thread_entry
+        call    PIC_PLT(__thread_entry)
         hlt
 
 2:
         popl    %ecx
-        popl    %ebx
+		PIC_EPILOGUE
         ret
+END(__pthread_clone)
 
 /* XXX: TODO: Add __bionic_clone here
  *            See bionic/bionic_clone.c and arch-arm/bionic/clone.S

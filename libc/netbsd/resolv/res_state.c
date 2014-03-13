@@ -35,9 +35,6 @@
 #include <pthread.h>
 #include <stdlib.h>
 
-#define _REALLY_INCLUDE_SYS__SYSTEM_PROPERTIES_H_
-#include <sys/_system_properties.h>
-
 /* Set to 1 to enable debug traces */
 #define DEBUG 0
 
@@ -56,7 +53,6 @@ typedef struct {
     int                  _h_errno;
     struct __res_state  _nres[1];
     unsigned             _serial;
-    struct prop_info*   _pi;
     struct res_static   _rstatic[1];
 } _res_thread;
 
@@ -64,17 +60,6 @@ static _res_thread*
 _res_thread_alloc(void)
 {
     _res_thread*  rt = calloc(1, sizeof(*rt));
-
-    if (rt) {
-        rt->_h_errno = 0;
-        /* Special system property which tracks any changes to 'net.*'. */
-        rt->_serial = 0;
-        rt->_pi = (struct prop_info*) __system_property_find("net.change");
-        if (rt->_pi) {
-            rt->_serial = rt->_pi->serial;
-        }
-        memset(rt->_rstatic, 0, sizeof rt->_rstatic);
-    }
     return rt;
 }
 
@@ -116,35 +101,6 @@ _res_thread_get(void)
     _res_thread*  rt;
     pthread_once( &_res_once, _res_init_key );
     rt = pthread_getspecific( _res_key );
-
-    if (rt != NULL) {
-        /* We already have one thread-specific DNS state object.
-         * Check the serial value for any changes to net.* properties */
-        D("%s: Called for tid=%d rt=%p rt->pi=%p rt->serial=%d",
-           __FUNCTION__, gettid(), rt, rt->_pi, rt->_serial);
-        if (rt->_pi == NULL) {
-            /* The property wasn't created when _res_thread_get() was
-             * called the last time. This should only happen very
-             * early during the boot sequence. First, let's try to see if it
-             * is here now. */
-            rt->_pi = (struct prop_info*) __system_property_find("net.change");
-            if (rt->_pi == NULL) {
-                /* Still nothing, return current state */
-                D("%s: exiting for tid=%d rt=%d since system property not found",
-                  __FUNCTION__, gettid(), rt);
-                return rt;
-            }
-        }
-        if (rt->_serial == rt->_pi->serial) {
-            /* Nothing changed, so return the current state */
-            D("%s: tid=%d rt=%p nothing changed, returning",
-              __FUNCTION__, gettid(), rt);
-            return rt;
-        }
-        /* Update the recorded serial number, and go reset the state */
-        rt->_serial = rt->_pi->serial;
-        goto RESET_STATE;
-    }
 
     /* It is the first time this function is called in this thread,
      * we need to create a new thread-specific DNS resolver state. */
@@ -213,7 +169,7 @@ void
 __res_put_state(res_state res)
 {
     /* nothing to do */
-    res=res;
+//    res=res;
 }
 
 res_static

@@ -24,3 +24,8 @@ L1:
 	xorl	%eax,%eax
 L2:
 	ret
+#ifdef STRCHR
+END(strchr)
+#else
+END(index)
+#endif

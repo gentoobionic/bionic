@@ -91,11 +91,9 @@
  *	directly -- and assumed always to succeed.
  */
 
-#ifdef ANDROID_CHANGES
 #include <pthread.h>
 #define mutex_lock(x) pthread_mutex_lock(x)
 #define mutex_unlock(x) pthread_mutex_unlock(x)
-#endif
 
 #include <sys/cdefs.h>
 #if defined(LIBC_SCCS) && !defined(lint)
@@ -151,18 +149,11 @@ __RCSID("$NetBSD: strtod.c,v 1.45.2.1 2005/04/19 13:35:54 tron Exp $");
 #ifndef KR_headers
 #include "stdlib.h"
 #include "string.h"
-#ifndef ANDROID_CHANGES
-#include "locale.h"
-#endif /* ANDROID_CHANGES */
 #else
 #include "malloc.h"
 #include "memory.h"
 #endif
 #endif
-#ifndef ANDROID_CHANGES
-#include "extern.h"
-#include "reentrant.h"
-#endif /* ANDROID_CHANGES */
 
 #ifdef MALLOC
 #ifdef KR_headers
@@ -370,13 +361,7 @@ Bigint {
 
  static Bigint *freelist[Kmax+1];
 
-#ifdef ANDROID_CHANGES
  static pthread_mutex_t freelist_mutex = PTHREAD_MUTEX_INITIALIZER;
-#else
-#ifdef _REENTRANT
- static mutex_t freelist_mutex = MUTEX_INITIALIZER;
-#endif
-#endif
 
 /* Special value used to indicate an invalid Bigint value,
  * e.g. when a memory allocation fails. The idea is that we
@@ -1346,16 +1331,7 @@ strtod
 	Bigint *bb1, *bd0;
 	Bigint *bb = NULL, *bd = NULL, *bs = NULL, *delta = NULL;/* pacify gcc */
 
-#ifdef ANDROID_CHANGES
 	CONST char decimal_point = '.';
-#else /* ANDROID_CHANGES */
-#ifndef KR_headers
-	CONST char decimal_point = localeconv()->decimal_point[0];
-#else
-	CONST char decimal_point = '.';
-#endif
-
-#endif /* ANDROID_CHANGES */
 
 	sign = nz0 = nz = 0;
 	value(rv) = 0.;

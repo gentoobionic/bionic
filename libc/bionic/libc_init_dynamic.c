@@ -79,21 +79,23 @@ void __libc_preinit(void)
     /* Setup pthread routines accordingly to the environment.
      * Requires system properties
      */
-    extern void pthread_debug_init(void);
-    pthread_debug_init();
+//    extern void pthread_debug_init(void);
+//    pthread_debug_init();
 
     /* Setup malloc routines accordingly to the environment.
      * Requires system properties
      */
-    extern void malloc_debug_init(void);
-    malloc_debug_init();
+//    extern void malloc_debug_init(void);
+//    malloc_debug_init();
 }
 
 void __libc_postfini(void)
 {
-    extern void malloc_debug_fini(void);
-    malloc_debug_fini();
+//    extern void malloc_debug_fini(void);
+//    malloc_debug_fini();
 }
+
+char** environ = NULL;
 
 /* This function is called from the executable's _start entry point
  * (see arch-$ARCH/bionic/crtbegin_dynamic.S), which is itself
@@ -111,6 +113,9 @@ __noreturn void __libc_init(uintptr_t *elfdata,
     int     argc = (int)*elfdata;
     char**  argv = (char**)(elfdata + 1);
     char**  envp = argv + argc + 1;
+
+    // FIXME: should be set in __libc_init_common()
+    environ = envp;
 
     /* Several Linux ABIs don't pass the onexit pointer, and the ones that
      * do never use it.  Therefore, we ignore it.

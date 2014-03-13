@@ -1,25 +1,13 @@
-common_ldflags = @COMMON_LDFLAGS@
-my_ldflags = $(common_ldflags:-Wl,-no-undefined=)
-my_ldflags += -shared -Wl,-soname,"libthread_db.so"
-
 libthread_db_cflags = @COMMON_CFLAGS@
-libthread_db_ldflags = $(my_ldflags) -L$(top_builddir)/libdl -L$(top_builddir)/libc
-libthread_db_ldlibs = -ldl -lc
+libthread_db_ldflags = $(subst -Wl$(COMMA)-no-undefined,,@COMMON_LDFLAGS@)
+libthread_db_ldflags += -Bsymbolic -shared -Wl,-soname,libthread_db.so
+libthread_db_ldlibs = -lc -ldl
 
-if TARGET_ARCH_IS_X86
-libthread_db_cflags += -march=i686 -m32
-libthread_db_cflags += -I$(top_srcdir)/libc/arch-x86/include
-libthread_db_cflags += -I$(top_srcdir)/libc/kernel/arch-x86
-endif
+libthread_db_src_files = libthread_db/libthread_db.c
 
-libthread_db_cflags += -I$(top_srcdir)/libm/include
-libthread_db_cflags += -I$(top_srcdir)/libc/include
-libthread_db_cflags += -I$(top_srcdir)/libc/kernel/common/linux -I$(top_srcdir)/libc/kernel/common
-libthread_db_cflags += -I$(top_srcdir)/libthread_db/include
-
-libthread_db_src = libthread_db/libthread_db.c
+libthread_db_src = $(addprefix $(top_srcdir)/,$(libthread_db_src_files))
 libthread_db_obj = 
-libthread_db_dep = $(CRTFILES) libc-all
+libthread_db_dep = $(CRTFILES) libc-all libdl-all
 
 $(foreach f,$(libthread_db_src), $(eval $(call compile-one-file,$(f),libthread_db,$(libthread_db_dep))))
 
@@ -30,7 +18,8 @@ $(top_builddir)/libthread_db/libthread_db.a: $(libthread_db_obj)
 	@AR@ crsP $@ $^
 
 $(top_builddir)/libthread_db/libthread_db.so: $(libthread_db_obj) $(libthread_db_dep)
-	@CC@ $(libthread_db_ldflags) -o $@ $(libthread_db_obj) $(libthread_db_ldlibs)
+	mkdir -p $(dir $@)
+	@CC@ $(libthread_db_ldflags) -o $@ $(CRTBEGIN_SO) $(libthread_db_obj) $(libthread_db_ldlibs) $(CRTEND_SO)
 
 libthread_db-all: $(top_builddir)/libthread_db/libthread_db.a $(top_builddir)/libthread_db/libthread_db.so
 

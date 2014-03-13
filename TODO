@@ -19,7 +19,7 @@ TODO
 5) maybe block arm build right now, until .arm file extension is sorted out
    - identify and properly compile .thumb / .arm compilation targets
    - generate rules
-6) change the behaviour of /sbin/linker - I want this to be more like ld-linux.so
+6) change the behaviour of /bin/linker - I want this to be more like ld-linux.so
    - this means it should work as a drop-in replacement with ldd(1)
    - also a rename to /lib/ld-linux.so would be awesome
    - net result is that people can use the same semantics as a -gnu* toolchain

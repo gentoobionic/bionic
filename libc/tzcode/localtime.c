@@ -1267,13 +1267,8 @@ static void
 tzset_locked P((void))
 {
     register const char *   name = NULL;
-    static char buf[PROP_VALUE_MAX];
 
     name = getenv("TZ");
-
-    // try the "persist.sys.timezone" system property first
-    if (name == NULL && __system_property_get("persist.sys.timezone", buf) > 0)
-        name = buf;
 
     if (name == NULL) {
         tzsetwall();

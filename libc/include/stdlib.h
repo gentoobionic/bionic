@@ -27,6 +27,7 @@
  */
 #ifndef _STDLIB_H_
 #define _STDLIB_H_
+#define _STDLIB_H // make bash happy
 
 #include <sys/cdefs.h>
 
@@ -170,7 +171,7 @@ typedef struct {
 
 extern lldiv_t   lldiv(long long, long long);
 
-#ifdef __cplusplus /* MISSING FROM BIONIC - ENABLED FOR STLPort and libstdc++-v3 */
+#if 1 /* MISSING FROM BIONIC - ENABLED FOR STLPort and libstdc++-v3 */
 /* make STLPort happy */
 extern int      mblen(const char *, size_t);
 extern size_t   mbstowcs(wchar_t *, const char *, size_t);

@@ -50,8 +50,6 @@ unsigned int __page_size = PAGE_SIZE;
 unsigned int __page_shift = PAGE_SHIFT;
 
 
-int __system_properties_init(void);
-
 /* Init TLS for the initial thread. Called by the linker _before_ libc is mapped
  * in memory. Beware: all writes to libc globals from this function will
  * apply to linker-private copies and will not be visible from libc later on.
@@ -84,6 +82,8 @@ void __libc_init_tls(unsigned** elfdata)
 
 void __libc_init_common(uintptr_t *elfdata)
 {
+	puts(__FUNCTION__); puts("()\n");
+
     int     argc = *elfdata;
     char**  argv = (char**)(elfdata + 1);
     char**  envp = argv + argc + 1;
@@ -99,9 +99,6 @@ void __libc_init_common(uintptr_t *elfdata)
 
     /* setup environment pointer */
     environ = envp;
-
-    /* setup system properties - requires environment */
-    __system_properties_init();
 }
 
 /* This function will be called during normal program termination

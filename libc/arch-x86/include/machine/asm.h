@@ -49,7 +49,7 @@
 #define CNAME(csym)             csym
 #define HIDENAME(asmsym)        .asmsym
 
-#ifdef PIC
+#ifdef __PIC__
 #define PIC_PROLOGUE	\
 	pushl	%ebx;	\
 	call	666f;	\
@@ -97,7 +97,7 @@
 
 /* let kernels and others override entrypoint alignment */
 #ifndef _ALIGN_TEXT
-# define _ALIGN_TEXT .align 2, 0x90
+# define _ALIGN_TEXT .align 4
 #endif
 
 #define _ENTRY(x) \
@@ -106,8 +106,7 @@
 #define _ASM_SIZE(x)    .size x, .-x;
 
 #define _END(x) \
-	.fnend; \
-	_ASM_SIZE(x)
+	ret; _ASM_SIZE(x)
 
 #ifdef GPROF
 # define _PROF_PROLOGUE	\

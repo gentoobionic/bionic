@@ -12,14 +12,10 @@
  * and make the syscall.
  */
 
+#include <machine/asm.h>
 #include <sys/linux-syscalls.h>
 
-    .text
-    .type syscall, @function
-    .globl syscall
-    .align 4
-
-syscall:
+ENTRY(syscall)
     push    %ebx
     push    %esi
     push    %edi
@@ -36,7 +32,7 @@ syscall:
     jb      1f
     negl    %eax
     pushl   %eax
-    call    __set_errno
+    call    PIC_PLT(__set_errno)
     addl    $4, %esp
     orl     $-1, %eax
 1:
@@ -44,3 +40,4 @@ syscall:
     pop    %esi
     pop    %ebx
     ret
+END(syscall)

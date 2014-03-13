@@ -98,11 +98,7 @@ struct __res_state; /* forward */
  */
 
 #ifndef _PATH_RESCONF
-#if 0
-#define _PATH_RESCONF        "/etc/ppp/resolv.conf"
-#else
 #define _PATH_RESCONF        "/etc/resolv.conf"
-#endif
 #endif
 
 typedef enum { res_goahead, res_nextns, res_modified, res_done, res_error }
@@ -348,7 +344,7 @@ extern const struct res_sym __p_rcode_syms[];
 #define b64_pton		__b64_pton
 #endif
 
-#define dn_comp			__dn_comp
+//#define dn_comp			__dn_comp
 #define dn_count_labels		__dn_count_labels
 #define dn_skipname		__dn_skipname
 #define fp_resstat		__fp_resstat
@@ -368,10 +364,10 @@ extern const struct res_sym __p_rcode_syms[];
 #define p_sockun		__p_sockun
 #define putlong			__putlong
 #define putshort		__putshort
-#define res_dnok		__res_dnok
+//#define res_dnok		__res_dnok
 #define res_findzonecut		__res_findzonecut
 #define res_findzonecut2	__res_findzonecut2
-#define res_hnok		__res_hnok
+//#define res_hnok		__res_hnok
 #define res_hostalias		__res_hostalias
 #define res_mailok		__res_mailok
 #define res_nameinquery		__res_nameinquery
@@ -410,7 +406,7 @@ extern const struct res_sym __p_rcode_syms[];
 #define	res_servicename		__res_servicename
 #define	res_servicenumber	__res_servicenumber
 __BEGIN_DECLS
-int		res_hnok(const char *);
+extern int		res_hnok(const char *);
 int		res_ownok(const char *);
 int		res_mailok(const char *);
 int		res_dnok(const char *);

@@ -57,6 +57,9 @@ static void call_array(void(**list)())
     }
 }
 
+// FIXME: should be set in __libc_init_common()
+char** environ = NULL;
+
 __noreturn void __libc_init(uintptr_t *elfdata,
                        void (*onexit)(void),
                        int (*slingshot)(int, char**, char**),
@@ -91,6 +94,9 @@ __noreturn void __libc_init(uintptr_t *elfdata,
     argc = (int) *elfdata;
     argv = (char**)(elfdata + 1);
     envp = argv + argc + 1;
+
+    // FIXME: should be set in __libc_init_common()
+    environ = envp;
 
     /* The executable may have its own destructors listed in its .fini_array
      * so we need to ensure that these are called when the program exits

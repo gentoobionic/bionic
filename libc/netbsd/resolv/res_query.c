@@ -90,11 +90,8 @@ __RCSID("$NetBSD: res_query.c,v 1.7 2006/01/24 17:41:25 christos Exp $");
 #include <ctype.h>
 #include <errno.h>
 #include <netdb.h>
-#ifdef ANDROID_CHANGES
 #include "resolv_private.h"
-#else
 #include <resolv.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

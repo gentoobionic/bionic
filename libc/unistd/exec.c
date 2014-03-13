@@ -143,6 +143,7 @@ execvp(const char *name, char * const *argv)
 	 * Do not allow null name
 	 */
 	if (name == NULL || *name == '\0') {
+		printf("name is NULL\n");
 		errno = ENOENT;
 		return (-1);
  	}
@@ -208,6 +209,7 @@ retry:		(void)execve(bp, argv, environ);
 		case ELOOP:
 		case ENAMETOOLONG:
 		case ENOENT:
+			printf("execve set errno to ENOENT");
 			break;
 		case ENOEXEC:
 			for (cnt = 0; argv[cnt]; ++cnt)

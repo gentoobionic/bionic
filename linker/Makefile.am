@@ -1,45 +1,48 @@
-linker_src_files = linker.c linker_format.c linker_environ.c dlfcn.c debugger.c rt.c
-linker_cflags =  @COMMON_CFLAGS@ -DLINKER_DEBUG=0 -static-libgcc
-linker_cflags += -fno-stack-protector -Wstrict-overflow=5 -fvisibility=hidden
-linker_cflags += -I$(top_srcdir)/libc/private
-linker_cflags += -I$(top_srcdir)/linker/include
-my_linker_ldflags = @COMMON_LDFLAGS@
-my_linker_ldflags2 = $(subst -Wl$(COMMA)--exclude-libs=libgcc_eh.a,,$(subst -Wl$(COMMA)--exclude-libs=libgcc.a,,$(mylinker_ldflags)))
-linker_ldflags = $(my_linker_ldflags2)
-linker_ldflags += -Bstatic -shared
-linker_ldflags += -Wl,--start-group $(top_builddir)/libc/libc.a -Wl,--end-group 
-# would be nice to have -Wl,-soname,"ld-linux.so"
-linker_ldlibs = -lgcc
-linker_dep = libc-all
+.PHONY: linker-all linker-clean linker-install linker-install-exec-local
 
-if TARGET_ARCH_IS_X86
-linker_cflags += -DANDROID_X86_LINKER
-endif
+linker_common_cflags = $(subst -UDEBUG,,$(subst -DDEBUG,,@COMMON_CFLAGS@))
+linker_common_cflags += -DANDROID_$(shell echo @TARGET_ARCH@ | tr [:lower:] [:upper:])_LINKER
+linker_common_cflags += -fno-stack-protector -Wstrict-overflow=5 -fvisibility=hidden
+linker_common_cflags += -I$(top_srcdir)/libc/private
+linker_common_cflags += -I$(top_srcdir)/linker/include
 
-if TARGET_ARCH_IS_ARM
-if ARCH_ARM_HAVE_TLS_REGISTER
-linker_cflags += -DHAVE_ARM_TLS_REGISTER
-endif
-linker_cflags += -DANDROID_ARM_LINKER
-endif 
+# ========================================================
+# begin.o
+# ========================================================
 
-if TARGET_ARCH_IS_X86_OR_ARM
 begin_src_files = arch/@TARGET_ARCH@/begin.S
-endif
+
+begin_cflags = $(linker_common_cflags)
 
 begin_src = $(addprefix $(top_srcdir)/linker/,$(begin_src_files))
-begin_cflags = $(linker_cflags)
 begin_obj =
+begin_dep =
 $(foreach f,$(begin_src), $(eval $(call compile-one-file,$(f),begin,$(begin_dep))))
+
+# ========================================================
+# linker
+# ========================================================
+
+linker_src_files = linker.c linker_format.c linker_environ.c dlfcn.c rt.c debugger.c
+
+linker_cflags = $(linker_common_cflags)
+
+linker_ldflags = -shared -Wl,--exclude-libs,ALL
+linker_ldflags += -Bstatic @COMMON_LDFLAGS@
 
 linker_src = $(addprefix $(top_srcdir)/linker/,$(linker_src_files))
 linker_obj =
+linker_dep = $(begin_obj) libc-all
 $(foreach f,$(linker_src), $(eval $(call compile-one-file,$(f),linker,$(linker_dep))))
 
-$(top_builddir)/linker/linker: $(begin_obj) $(linker_obj) libc-all
-	@CC@ -o $@ $(linker_ldflags) $(begin_obj) $(linker_obj) $(linker_ldlibs)
+$(top_builddir)/linker/linker: $(begin_obj) $(linker_obj) $(top_builddir)/libc/libc_nomalloc.a
+	mkdir -p $(dir $@)
+	@CC@ -o $@ $(linker_ldflags) $(begin_obj) $(linker_obj) -Wl,--start-group $(top_builddir)/libc/libc_nomalloc.a -Wl,--end-group
+	@OBJCOPY@ --prefix-symbols=__dl_ $@
 
-.PHONY: linker-all linker-clean linker-install linker-install-exec-local
+# ========================================================
+# common targets
+# ========================================================
 
 linker-all: $(top_builddir)/linker/linker
 

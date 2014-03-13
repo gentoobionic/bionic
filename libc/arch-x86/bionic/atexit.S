@@ -25,11 +25,10 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-	.text
-	.p2align 4,,15
-	.globl	atexit
-	.type	atexit, @function
-atexit:
+
+#include <machine/asm.h>
+
+ENTRY(atexit)
 	pushl	%ebp
 	movl	%esp, %ebp
 	pushl	%ebx
@@ -46,7 +45,7 @@ atexit:
 	popl	%ebx
 	popl	%ebp
 	ret
-	.size	atexit, .-atexit
+END(atexit)
 
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
@@ -63,3 +62,4 @@ __x86.get_pc_thunk.bx:
 	nop
 	movl	(%esp), %ebx
 	ret
+END(__x86.get_pc_thunk.bx)
