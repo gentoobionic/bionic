@@ -8,3 +8,21 @@
 2014-01-22	Christopher Friedt	<chrisfriedt@gmail.com>
 	* modified build system to use non-recursive automake
 	* updated TODO
+2014-01-29	Christopher Friedt	<chrisfriedt@gmail.com>
+	* validated linking in binaries added crtfiles
+	* linker seems to be broken, added debug info by default
+	* fixed .S files to include machine/asm.h as necessary, using
+	  PIC_PLT, etc, macros, avoiding DT_TEXTRELs in shared objects
+2014-02-02	Christopher Friedt	<chrisfriedt@gmail.com>
+	* added a few misc functions and syscalls (glob, timerfd)
+	* modified makefiles, configure.ac
+2014-03-12	Christopher Friedt	<chrisfriedt@gmail.com>
+	* added forgotten 'ret' in libc/arch-x86/bionic/__get_sp.S that
+	  was causing segfault (execution of non-.text segment).
+	* added implimentations for moddi3, divdi3, udivdi, umoddi
+          borrowed from llvm codebase
+	* added weak implimentations for __[de]register_frame_info_bases
+	* tuned up the makefiles system so that all dependencies are resolved and
+          builds are not interrupted
+        * removed a whack of Android-specific dead code (e.g. dns resolution,
+          system properties, etc).
