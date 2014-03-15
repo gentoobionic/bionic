@@ -1,32 +1,19 @@
 TODO
 =-=-
 
--2) change gensyscalls.py to output into build directory
--1) build properly in a different build directory (maybe works already?)
-   - this did work, it might be broken now
-0) build without any interruptions
-   - should not complain about any undefined references with e.g. make -j7
-1) gensyscalls.py should actually generate all the syscalls
-   - currently 'make' has to be run twice for everything to successfully compile
-   - need to debug that make step
-2) verify linkage entirely, using custom linker rules in Makefile.am
-   - see http://dev.gentoo.org/~vapier/crt.txt
-   - that means, I should be able to drop it in my /usr/i686-pc-linux-bionic chroot
-     and it should Just Work (TM)
-3) Add install targets
-4) Add headers to install targets (note: gentoo-bionic had a separate 
+0) Add headers to install targets (note: gentoo-bionic had a separate 
    bionic-kernel-headers package)
-5) maybe block arm build right now, until .arm file extension is sorted out
+1) maybe block arm build right now, until .arm file extension is sorted out
    - identify and properly compile .thumb / .arm compilation targets
    - generate rules
-6) change the behaviour of /bin/linker - I want this to be more like ld-linux.so
+2) change the behaviour of /bin/linker - I want this to be more like ld-linux.so
    - this means it should work as a drop-in replacement with ldd(1)
    - also a rename to /lib/ld-linux.so would be awesome
    - net result is that people can use the same semantics as a -gnu* toolchain
-7) modify the crt*.o, possibly, so that we don't need an -mbionic 
+3) modify the crt*.o, possibly, so that we don't need an -mbionic 
    - rename crt*.o to be compatible with crti.o, crt1.o, crtn.o, etc
    - net result is that people can use the same semantics as a -gnu* toolchain
-8) add a testsuite
+4) add a testsuite
    - or use an existing one, e.g. http://posixtest.sourceforge.net/
 
 FEATURE REQUESTS
