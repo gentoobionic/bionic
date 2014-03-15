@@ -31,6 +31,12 @@ please keep in mind, that if Program A links to bionic and Library B,
 regardless of whether Library B links to bionic, then Program A still must
 abide by the terms and conditions of the Library B software license.
 
+Occasionally, this fork of bionic might contain files from other projects that
+are similarly, permissively licensed. This is to be considered a temporary 
+solution until BSD licensed functionality can be implemented from scratch or
+found elsewhere. If a file comes from a project that is under a different
+license, that license will be included at the top of the file.
+
 Modifications
 =-=-=-=-=-=-=
 
