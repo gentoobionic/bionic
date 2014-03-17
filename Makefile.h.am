@@ -67,7 +67,6 @@ includesys_HEADERS = \
 		sys/ipc.h \
 		sys/klog.h \
 		sys/limits.h \
-		sys/linux-syscalls.h \
 		sys/mman.h \
 		sys/mount.h \
 		sys/msg.h \
@@ -212,6 +211,11 @@ include_HEADERS = \
 		utmp.h \
 		wchar.h \
 		wctype.h \
+	)
+
+include_HEADERS += \
+	$(addprefix $(top_builddir)/libc/include/, \
+		sys/linux-syscalls.h \
 	)
 
 # ========================================================
