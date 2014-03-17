@@ -499,6 +499,5 @@
 #endif
 
 #define  __BIONIC__   1
-#include <android/api-level.h>
 
 #endif /* !_SYS_CDEFS_H_ */

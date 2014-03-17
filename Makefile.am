@@ -2,6 +2,8 @@ ALL_LOCAL =
 CLEAN_LOCAL =
 INSTALL_EXEC_LOCAL =
 
+BIONIC_DATADIR = $(datadir)/bionic
+
 include mk/rules.mk
 include libc/Makefile.syscalls.am
 include libc/Makefile.crt.am
@@ -13,6 +15,10 @@ include libstdc++/Makefile.am
 include linker/Makefile.am
 include libc/zoneinfo/Makefile.am
 
+# headers 
+include Makefile.h.am
+
 all-local: $(ALL_LOCAL)
 clean-local: $(CLEAN_LOCAL)
 install-exec-local: $(INSTALL_EXEC_LOCAL)
+install-headers: install-data-am

@@ -36,6 +36,8 @@
 #ifndef _SYS_ENDIAN_H_
 #define _SYS_ENDIAN_H_
 
+#include <machine/endian.h>
+
 #include <sys/cdefs.h>
 #include <machine/_types.h>
 

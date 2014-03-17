@@ -498,6 +498,7 @@ common_cppflags = @COMMON_CFLAGS@
 libc_common_cflags = $(common_cppflags)
 
 libc_common_cflags += \
+		-DBIONIC_DATADIR=\"$(BIONIC_DATADIR)\" \
 		-DWITH_ERRLIST			\
 		-DUSE_LOCKS 			\
 		-DREALLOC_ZERO_BYTES_FREES 	\

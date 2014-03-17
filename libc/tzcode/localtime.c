@@ -22,7 +22,6 @@ static char elsieid[] = "@(#)localtime.c    8.3";
 #include "float.h"  /* for FLT_MAX and DBL_MAX */
 
 #include "thread_private.h"
-#include <sys/system_properties.h>
 
 #ifndef TZ_ABBR_MAX_LEN
 #define TZ_ABBR_MAX_LEN 16
@@ -37,8 +36,8 @@ static char elsieid[] = "@(#)localtime.c    8.3";
 #define TZ_ABBR_ERR_CHAR    '_'
 #endif /* !defined TZ_ABBR_ERR_CHAR */
 
-#define INDEXFILE "/usr/share/zoneinfo/zoneinfo.idx"
-#define DATAFILE "/usr/share/zoneinfo/zoneinfo.dat"
+#define INDEXFILE BIONIC_DATADIR  "/zoneinfo.idx"
+#define DATAFILE  BIONIC_DATADIR  "/zoneinfo.dat"
 #define NAMELEN 40
 #define INTLEN 4
 #define READLEN (NAMELEN + 3 * INTLEN)
