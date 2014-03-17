@@ -11,7 +11,10 @@ $(top_builddir)/libc/include/sys/linux-syscalls.h: $(SYSCALLS_STAMP)
 syscalls-all: $(SYSCALLS_STAMP) $(top_builddir)/libc/include/sys/linux-syscalls.h
 
 syscalls-clean:
-	rm -f $(SYSCALLS_STAMP) $(top_builddir)/libc/include/sys/linux-syscalls.h
+	rm -f $(SYSCALLS_STAMP) \
+		$(top_builddir)/libc/include/sys/linux-syscalls.h \
+		$(addprefix $(top_srcdir)/libc/,$(shell if [ -e $(SYSCALLS_STAMP) ]; then cat $(SYSCALLS_STAMP); fi ))
+		
 
 ALL_LOCAL += syscalls-all
 CLEAN_LOCAL += syscalls-clean 
