@@ -1,0 +1,275 @@
+# ========================================================
+# libc headers
+# ========================================================
+
+includearpadir = $(includedir)/arpa
+includearpa_HEADERS = \
+	$(addprefix $(top_srcdir)/libc/include/, \
+		arpa/inet.h \
+		arpa/nameser.h \
+		arpa/telnet.h \
+	)
+
+includenetdir = $(includedir)/net
+includenet_HEADERS = \
+	$(addprefix $(top_srcdir)/libc/include/, \
+		net/ethernet.h \
+		net/ethertypes.h \
+		net/if.h \
+		net/if_arp.h \
+		net/if_dl.h \
+		net/if_ether.h \
+		net/if_ieee1394.h \
+		net/if_packet.h \
+		net/if_slip.h \
+		net/if_types.h \
+		net/route.h \
+	)
+
+includenetinetdir = $(includedir)/netinet
+includenetinet_HEADERS = \
+	$(addprefix $(top_srcdir)/libc/include/, \
+		netinet/ether.h \
+		netinet/icmp6.h \
+		netinet/if_ether.h \
+		netinet/in.h \
+		netinet/in6.h \
+		netinet/in_systm.h \
+		netinet/ip.h \
+		netinet/ip6.h \
+		netinet/ip_icmp.h \
+		netinet/tcp.h \
+		netinet/udp.h \
+		netpacket/packet.h \
+	)
+
+includesysdir = $(includedir)/sys
+includesys_HEADERS = \
+	$(addprefix $(top_srcdir)/libc/include/, \
+		sys/_errdefs.h \
+		sys/_sigdefs.h \
+		sys/_types.h \
+		sys/atomics.h \
+		sys/cdefs.h \
+		sys/cdefs_elf.h \
+		sys/dir.h \
+		sys/dirent.h \
+		sys/endian.h \
+		sys/epoll.h \
+		sys/errno.h \
+		sys/eventfd.h \
+		sys/exec_elf.h \
+		sys/file.h \
+		sys/fsuid.h \
+		sys/inotify.h \
+		sys/ioctl.h \
+		sys/ioctl_compat.h \
+		sys/ipc.h \
+		sys/klog.h \
+		sys/limits.h \
+		sys/linux-syscalls.h \
+		sys/mman.h \
+		sys/mount.h \
+		sys/msg.h \
+		sys/mtio.h \
+		sys/param.h \
+		sys/personality.h \
+		sys/poll.h \
+		sys/prctl.h \
+		sys/ptrace.h \
+		sys/queue.h \
+		sys/reboot.h \
+		sys/resource.h \
+		sys/select.h \
+		sys/sem.h \
+		sys/sendfile.h \
+		sys/shm.h \
+		sys/signalfd.h \
+		sys/socket.h \
+		sys/socketcalls.h \
+		sys/stat.h \
+		sys/statfs.h \
+		sys/swap.h \
+		sys/syscall.h \
+		sys/sysconf.h \
+		sys/sysinfo.h \
+		sys/syslimits.h \
+		sys/sysmacros.h \
+		sys/time.h \
+		sys/timeb.h \
+		sys/timerfd.h \
+		sys/times.h \
+		sys/timex.h \
+		sys/ttychars.h \
+		sys/ttydev.h \
+		sys/types.h \
+		sys/uio.h \
+		sys/un.h \
+		sys/user.h \
+		sys/utime.h \
+		sys/utsname.h \
+		sys/vfs.h \
+		sys/vt.h \
+		sys/wait.h \
+		sys/xattr.h \
+	)
+
+if TARGET_ARCH_IS_X86_OR_ARM
+
+includemachinedir = $(includedir)/machine
+includemachine_HEADERS = \
+	$(addprefix $(top_srcdir)/libc/arch-@TARGET_ARCH@/include/, \
+		machine/_types.h \
+		machine/asm.h \
+		machine/cdefs.h \
+		machine/endian.h \
+		machine/exec.h \
+		machine/ieee.h \
+		machine/internal_types.h \
+		machine/kernel.h \
+		machine/limits.h \
+		machine/setjmp.h \
+	)
+
+if TARGET_ARCH_IS_X86
+includemachine_HEADERS += \
+	$(addprefix $(top_srcdir)/libc/arch-x86/include/, \
+		machine/fpu_control.h \
+		machine/sigcontext.h \
+		machine/wordsize.h \
+	)
+endif
+
+if TARGET_ARCH_IS_ARM
+includemachine_HEADERS += \
+	$(addprefix $(top_srcdir)/libc/arch-x86/include/, \
+		machine/cpu-features.h \
+	)
+endif
+
+endif
+
+include_HEADERS = \
+	$(addprefix $(top_srcdir)/libc/include/, \
+		alloca.h \
+		ar.h \
+		assert.h \
+		byteswap.h \
+		ctype.h \
+		dirent.h \
+		dlfcn.h \
+		elf.h \
+		endian.h \
+		err.h \
+		errno.h \
+		fcntl.h \
+		features.h \
+		fnmatch.h \
+		fts.h \
+		getopt.h \
+		glob.h \
+		grp.h \
+		inttypes.h \
+		langinfo.h \
+		lastlog.h \
+		libgen.h \
+		limits.h \
+		locale.h \
+		malloc.h \
+		memory.h \
+		mntent.h \
+		netdb.h \
+		nsswitch.h \
+		pathconf.h \
+		paths.h \
+		poll.h \
+		pthread.h \
+		pty.h \
+		pwd.h \
+		regex.h \
+		resolv.h \
+		sched.h \
+		search.h \
+		semaphore.h \
+		setjmp.h \
+		sgtty.h \
+		sha1.h \
+		shadow.h \
+		signal.h \
+		stdint.h \
+		stdio.h \
+		stdlib.h \
+		string.h \
+		strings.h \
+		syslog.h \
+		termio.h \
+		termios.h \
+		time.h \
+		time64.h \
+		unistd.h \
+		util.h \
+		utime.h \
+		utmp.h \
+		wchar.h \
+		wctype.h \
+	)
+
+# ========================================================
+# libm headers
+# ========================================================
+
+include_HEADERS += \
+	$(addprefix $(top_srcdir)/libm/include/, \
+		math.h \
+	)
+
+if TARGET_ARCH_IS_X86
+include_HEADERS += \
+	$(addprefix $(top_srcdir)/libm/include/i387/, \
+		fenv.h \
+	)
+endif
+
+if TARGET_ARCH_IS_ARM
+include_HEADERS += \
+	$(addprefix $(top_srcdir)/libm/include/arm/, \
+		fenv.h \
+	)
+endif
+
+# ========================================================
+# libthread_db headers
+# ========================================================
+
+includesys_HEADERS += \
+	$(addprefix $(top_srcdir)/libthread_db/include/, \
+		sys/procfs.h \
+	)
+
+# ========================================================
+# libstdc++ headers
+# ========================================================
+
+includec++dir = $(includedir)/c++
+includec++_HEADERS = \
+	$(addprefix $(top_srcdir)/libthread_db/include/, \
+		cassert \
+		cctype \
+		cerrno \
+		cfloat \
+		climits \
+		cmath \
+		csetjmp \
+		csignal \
+		cstddef \
+		cstdint \
+		cstdio \
+		cstdlib \
+		cstring \
+		ctime \
+		cwchar \
+		new \
+		stl_pair.h \
+		typeinfo \
+		utility \
+	)
