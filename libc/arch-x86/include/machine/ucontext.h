@@ -9,8 +9,8 @@
  ***
  ****************************************************************************
  ****************************************************************************/
-#ifndef _SYS_UCONTEXT_H
-#define _SYS_UCONTEXT_H 1
+#ifndef _MACHINE_UCONTEXT_H
+#define _MACHINE_UCONTEXT_H 1
 
 #include <features.h>
 #include <signal.h>
