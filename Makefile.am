@@ -22,3 +22,14 @@ all-local: $(ALL_LOCAL)
 clean-local: $(CLEAN_LOCAL)
 install-exec-local: $(INSTALL_EXEC_LOCAL)
 install-headers: install-data-am
+
+bionicdir   = $(BIONIC_DATADIR)
+bionic_DATA = \
+	$(addprefix $(top_srcdir)/, \
+		AUTHORS \
+		ChangeLog \
+		COPYING \
+		NEWS \
+		README \
+		TODO \
+	)

@@ -33,9 +33,22 @@ libstdc++-all: $(SYSCALLS_STAMP) $(top_builddir)/libstdc++/libstdc++.a $(top_bui
 libstdc++-clean:
 	rm -f $(libstdc++_obj) $(top_builddir)/libstdc++/libstdc++.a $(top_builddir)/libstdc++/libstdc++.so
 
+# /lib is the standard place for C shared libraries, so create a symlink to that in /usr/lib 
 libstdc++-install-exec-local: libstdc++-all
-	$(INSTALL) -D $(top_builddir)/libstdc++/libstdc++.a $(DESTDIR)$(libdir)/libstdc++.a
-	$(INSTALL) -D $(top_builddir)/libstdc++/libstdc++.so $(DESTDIR)$(libdir)/libstdc++.so
+	$(INSTALL) -m 644 -D $(top_builddir)/libstdc++/libstdc++.a $(DESTDIR)$(libdir)/libstdc++.a
+	$(INSTALL) -m 644 -D $(top_builddir)/libstdc++/libstdc++.so $(DESTDIR)$(libdir)/libstdc++.so
+	if [ "$(libdir)" != "/lib" ]; then \
+		$(INSTALL) -d $(DESTDIR)/lib && \
+		cd $(DESTDIR)/lib && \
+		ln -sf $(libdir)/libstdc++.so .; \
+	fi
+
+libstdc++dir   = $(BIONIC_DATADIR)/libstdc++
+libstdc++_DATA = \
+	$(addprefix libstdc++/, \
+		MODULE_LICENSE_BSD \
+		NOTICE \
+	)
 
 ALL_LOCAL += libstdc++-all
 CLEAN_LOCAL += libstdc++-clean

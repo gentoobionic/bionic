@@ -36,8 +36,8 @@ static char elsieid[] = "@(#)localtime.c    8.3";
 #define TZ_ABBR_ERR_CHAR    '_'
 #endif /* !defined TZ_ABBR_ERR_CHAR */
 
-#define INDEXFILE BIONIC_DATADIR  "/zoneinfo.idx"
-#define DATAFILE  BIONIC_DATADIR  "/zoneinfo.dat"
+#define INDEXFILE BIONIC_DATADIR  "/zoneinfo/zoneinfo.idx"
+#define DATAFILE  BIONIC_DATADIR  "/zoneinfo/zoneinfo.dat"
 #define NAMELEN 40
 #define INTLEN 4
 #define READLEN (NAMELEN + 3 * INTLEN)

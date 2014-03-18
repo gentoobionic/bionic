@@ -26,9 +26,22 @@ libthread_db-all: $(top_builddir)/libthread_db/libthread_db.a $(top_builddir)/li
 libthread_db-clean:
 	rm -f $(libthread_db_obj) $(top_builddir)/libthread_db/libthread_db.a $(top_builddir)/libthread_db/libthread_db.so
 
+# /lib is the standard place for C shared libraries, so create a symlink to that in /usr/lib
 libthread_db-install-exec-local: libthread_db-all
-	$(INSTALL) -D $(top_builddir)/libthread_db/libthread_db.a $(DESTDIR)$(libdir)/libthread_db.a
-	$(INSTALL) -D $(top_builddir)/libthread_db/libthread_db.so $(DESTDIR)$(libdir)/libthread_db.so
+	$(INSTALL) -m 644 -D $(top_builddir)/libthread_db/libthread_db.a $(DESTDIR)$(libdir)/libthread_db.a
+	$(INSTALL) -m 644 -D $(top_builddir)/libthread_db/libthread_db.so $(DESTDIR)$(libdir)/libthread_db.so
+	if [ "$(libdir)" != "/lib" ]; then \
+		$(INSTALL) -d $(DESTDIR)/lib && \
+		cd $(DESTDIR)/lib && \
+		ln -sf $(libdir)/libthread_db.so .; \
+	fi
+	
+libthreaddbdir   = $(BIONIC_DATADIR)/libthread_db
+libthreaddb_DATA = \
+	$(addprefix libthread_db/, \
+		MODULE_LICENSE_BSD \
+		NOTICE \
+	)
 
 ALL_LOCAL += libthread_db-all
 CLEAN_LOCAL += libthread_db-clean

@@ -51,8 +51,17 @@ linker-clean:
 		$(linker_obj) \
 		$(begin_obj)
 
+# the linker is hard-coded at /bin/linker
 linker-install-exec-local: linker-all
-	$(INSTALL) -D $(top_builddir)/linker/linker $(DESTDIR)/$(bindir)/linker
+	$(INSTALL) -m 755 -D $(top_builddir)/linker/linker $(DESTDIR)/bin/linker
+
+linkerdir   = $(BIONIC_DATADIR)/linker
+linker_DATA = \
+	$(addprefix linker/, \
+		MODULE_LICENSE_APACHE2 \
+		NOTICE \
+		README.TXT \
+	)
 
 ALL_LOCAL += linker-all
 CLEAN_LOCAL += linker-clean
