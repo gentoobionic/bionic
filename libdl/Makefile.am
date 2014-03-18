@@ -23,9 +23,22 @@ libdl-all: $(top_builddir)/libdl/libdl.a $(top_builddir)/libdl/libdl.so
 libdl-clean:
 	rm -f $(libdl_obj) $(top_builddir)/libdl/libdl.a $(top_builddir)/libdl/libdl.so
 
+# /lib is the standard place for C shared libraries, so create a symlink to that in /usr/lib
 libdl-install-exec-local: libdl-all
-	$(INSTALL) -D $(top_builddir)/libdl/libdl.a $(DESTDIR)$(libdir)/libdl.a
-	$(INSTALL) -D $(top_builddir)/libdl/libdl.so $(DESTDIR)$(libdir)/libdl.so
+	$(INSTALL) -m 644 -D $(top_builddir)/libdl/libdl.a $(DESTDIR)$(libdir)/libdl.a
+	$(INSTALL) -m 644 -D $(top_builddir)/libdl/libdl.so $(DESTDIR)$(libdir)/libdl.so
+	if [ "$(libdir)" != "/lib" ]; then \
+		$(INSTALL) -d $(DESTDIR)/lib && \
+		cd $(DESTDIR)/lib && \
+		ln -sf $(libdir)/libdl.so .; \
+	fi
+
+libdldir   = $(BIONIC_DATADIR)/libdl
+libdl_DATA = \
+	$(addprefix libdl/, \
+		MODULE_LICENSE_BSD \
+		NOTICE \
+	)
 
 ALL_LOCAL += libdl-all
 CLEAN_LOCAL += libdl-clean

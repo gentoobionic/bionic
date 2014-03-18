@@ -685,9 +685,40 @@ libc-clean:
 		$(top_builddir)/libc/libc_generated_sources.mk \
 		$(libc_dynamic_src_files)
 
+# /lib is the standard place for C shared libraries, so create a symlink to that in /usr/lib
 libc-install-exec-local: libc-all
-	$(INSTALL) -D $(top_builddir)/libc/libc.a $(DESTDIR)$(libdir)/libc.a
-	$(INSTALL) -D $(top_builddir)/libc/libc.so $(DESTDIR)$(libdir)/libc.so
+	$(INSTALL) -m 644 -D $(top_builddir)/libc/libc.a $(DESTDIR)$(libdir)/libc.a
+	$(INSTALL) -m 644 -D $(top_builddir)/libc/libc.so $(DESTDIR)$(libdir)/libc.so
+	if [ "$(libdir)" != "/lib" ]; then \
+		$(INSTALL) -d $(DESTDIR)/lib && \
+		cd $(DESTDIR)/lib && \
+		ln -sf $(libdir)/libc.so .; \
+	fi
+
+libcdir   = $(BIONIC_DATADIR)/libc
+libc_DATA = \
+	$(addprefix libc/, \
+		MODULE_LICENSE_BSD \
+		NOTICE \
+		README \
+		CAVEATS \
+	)
+
+libckerneldir   = $(BIONIC_DATADIR)/libc/kernel
+libckernel_DATA = \
+	$(addprefix libc/kernel/, \
+		README.TXT \
+		$(addprefix tools/, \
+			clean_header.py \
+			cpp.py \
+			defaults.py \
+			find_headers.py \
+			find_users.py \
+			kernel.py \
+			update_all.py \
+			utils.py \
+		) \
+	)
 
 ALL_LOCAL += libc-all
 CLEAN_LOCAL += libc-clean

@@ -85,7 +85,7 @@ crtfiles-clean:
 
 crtfiles-install-exec-local: crtfiles-all
 	$(INSTALL) -d $(DESTDIR)$(libdir)
-	$(INSTALL) -t $(DESTDIR)$(libdir) $(CRTFILES)
+	$(INSTALL) -m 644 -t $(DESTDIR)$(libdir) $(CRTFILES)
 
 ALL_LOCAL += crtfiles-all
 CLEAN_LOCAL += crtfiles-clean

@@ -200,9 +200,22 @@ libm-all: $(top_builddir)/libm/libm.a $(top_builddir)/libm/libm.so
 libm-clean:
 	rm -f $(libm_obj) $(top_builddir)/libm/libm.a $(top_builddir)/libm/libm.so
 
+# /lib is the standard place for C shared libraries, so create a symlink to that in /usr/lib
 libm-install-exec-local: libm-all
-	$(INSTALL) -D $(top_builddir)/libm/libm.a $(DESTDIR)$(libdir)/libm.a
-	$(INSTALL) -D $(top_builddir)/libm/libm.so $(DESTDIR)$(libdir)/libm.so
+	$(INSTALL) -m 644 -D $(top_builddir)/libm/libm.a $(DESTDIR)$(libdir)/libm.a
+	$(INSTALL) -m 644 -D $(top_builddir)/libm/libm.so $(DESTDIR)$(libdir)/libm.so
+	if [ "$(libdir)" != "/lib" ]; then \
+		$(INSTALL) -d $(DESTDIR)/lib && \
+		cd $(DESTDIR)/lib && \
+		ln -sf $(libdir)/libm.so .; \
+	fi
+
+libmdir   = $(BIONIC_DATADIR)/libm
+libm_DATA = \
+	$(addprefix libm/, \
+		MODULE_LICENSE_BSD_LIKE \
+		NOTICE \
+	)	
 
 ALL_LOCAL += libm-all
 CLEAN_LOCAL += libm-clean
