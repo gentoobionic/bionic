@@ -25,7 +25,7 @@ COMMON_CFLAGS="${COMMON_CFLAGS} -Werror=sequence-point -fno-strict-aliasing"
 COMMON_CFLAGS="${COMMON_CFLAGS} -DANDROID"
 
 AC_ARG_ENABLE([debug],
-[  --enable-debug    Enable debugging symbols and assertions],
+[  --enable-debug            Enable debugging symbols and assertions],
 [case "${enableval}" in
   yes|"") DEBUG_BIONIC_LIBC=true ;;
   no)     DEBUG_BIONIC_LIBC=false ;;
@@ -41,7 +41,7 @@ else
 fi
 
 AC_ARG_ENABLE([linker-debug],
-[  --enable-linker-debug    Enable linker debugging],
+[  --enable-linker-debug     Enable linker debugging],
 [case "${enableval}" in
   yes|"") LINKER_DEBUG=true ;;
   no)     LINKER_DEBUG=false ;;
@@ -123,7 +123,7 @@ AM_CONDITIONAL([TARGET_ARCH_IS_X86_OR_ARM],[test x$TARGET_ARCH = xarm || test x$
 AC_SUBST(TARGET_ARCH_IS_X86_OR_ARM)
 
 AC_ARG_ENABLE([smp],
-[  --enable-smp    Enable smp-optimizations],
+[  --enable-smp              Enable SMP optimizations],
 [case "${enableval}" in
   yes|"")
      TARGET_CPU_SMP=true
@@ -143,7 +143,7 @@ else
 fi
 
 AC_ARG_ENABLE([sse2],
-[  --enable-sse2    Enable sse2-optimizations],
+[  --enable-sse2             Enable SSE2 optimizations],
 [if test x"${TARGET_ARCH_IS_X86}" = xtrue ; then
   case "${enableval}" in
     yes|"") ARCH_X86_HAVE_SSE2=true ;;
@@ -155,7 +155,7 @@ AM_CONDITIONAL([ARCH_X86_HAVE_SSE2], [test x$ARCH_X86_HAVE_SSE2 = xtrue])
 AC_SUBST(ARCH_X86_HAVE_SSE2)
 
 AC_ARG_ENABLE([ssse3],
-[  --enable-ssse3    Enable ssse3-optimizations],
+[  --enable-ssse3            Enable SSSE3 optimizations],
 [if test x"${TARGET_ARCH_IS_X86}" = xtrue ; then
   case "${enableval}" in
     yes|"") ARCH_X86_HAVE_SSSE3=true ;;
@@ -167,7 +167,7 @@ AM_CONDITIONAL([ARCH_X86_HAVE_SSSE3], [test x$ARCH_X86_HAVE_SSSE3 = xtrue])
 AC_SUBST(ARCH_X86_HAVE_SSSE3)
 
 AC_ARG_ENABLE([tls],
-[  --enable-tls    Enable thread-local storage],
+[  --enable-tls              Enable thread-local storage (TLS)],
 [if test x"${TARGET_ARCH}" = xarm ; then
   case "${enableval}" in
     yes|"")
@@ -182,7 +182,7 @@ AM_CONDITIONAL([ARCH_ARM_HAVE_TLS_REGISTER], [test x$ARCH_ARM_HAVE_TLS_REGISTER 
 AC_SUBST(ARCH_ARM_HAVE_TLS_REGISTER)
 
 AC_ARG_ENABLE([neon],
-[  --enable-neon    Enable NEON SIMD],
+[  --enable-neon             Enable NEON optimizations],
 [if test x"${TARGET_ARCH}" = xARM ; then
   case "${enableval}" in
     yes|"")
@@ -190,12 +190,69 @@ AC_ARG_ENABLE([neon],
       ;;
     no)
       ARCH_ARM_HAVE_NEON=false
-    ;;
+      ;;
     *) AC_MSG_ERROR([bad value ${enableval} for --enable-neon]) ;;
   esac
 fi],[ARCH_ARM_HAVE_NEON=false])
 AM_CONDITIONAL([ARCH_ARM_HAVE_NEON], [test x$ARCH_ARM_HAVE_NEON = xtrue])
 AC_SUBST(ARCH_ARM_HAVE_NEON)
+
+AC_ARG_ENABLE([cxx],
+[  --enable-cxx              Enable C++ headers and libraries],
+[case "${enableval}" in
+  yes|"") ENABLE_CXX=true ;;
+  no)     ENABLE_CXX=false ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --enable-cxx]) ;;
+esac],[ENABLE_CXX=false])
+AM_CONDITIONAL([ENABLE_CXX], [test x$ENABLE_CXX = xtrue])
+AC_SUBST(ENABLE_CXX)
+
+AC_ARG_ENABLE([headers-only],
+[  --enable-headers-only     Only prepare / install header files],
+[case "${enableval}" in
+  yes|"")
+    HEADERS_ONLY=true
+    ;;
+  no)
+    HEADERS_ONLY=false
+    ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --enable-headers-only]) ;;
+esac],[HEADERS_ONLY=false])
+AM_CONDITIONAL([HEADERS_ONLY], [test x$HEADERS_ONLY = xtrue])
+AC_SUBST(HEADERS_ONLY)
+
+AC_ARG_ENABLE([kernel-headers],
+[  --enable-kernel-headers   Install sanitized kernel headers],
+[case "${enableval}" in
+  yes|"")
+    KERNEL_HEADERS=true
+    ;;
+  no)
+    KERNEL_HEADERS=false
+    ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --enable-kernel-headers]) ;;
+esac],[KERNEL_HEADERS=false])
+AM_CONDITIONAL([KERNEL_HEADERS], [test x$KERNEL_HEADERS = xtrue])
+AC_SUBST(KERNEL_HEADERS)
+
+AC_ARG_ENABLE([kh-only],
+[  --enable-kh-only          Only install sanitized kernel headers],
+[case "${enableval}" in
+  yes|"")
+    KH_ONLY=true
+    HEADERS_ONLY=true
+    ;;
+  no)
+    KH_ONLY=false
+    ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --enable-kh-only]) ;;
+esac],[KH_ONLY=false])
+AM_CONDITIONAL([KH_ONLY], [test x$KH_ONLY = xtrue])
+AC_SUBST(KH_ONLY)
+AC_SUBST(HEADERS_ONLY)
+
+AM_CONDITIONAL([KERNEL_HEADERS_OR_KH_ONLY], [test x$KERNEL_HEADERS = xtrue || test x$KH_ONLY = xtrue])
+AC_SUBST(KERNEL_HEADERS_OR_KH_ONLY)
 
 COMMON_CFLAGS="${COMMON_CFLAGS} ${COMMON_INCLUDES}"
 

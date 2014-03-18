@@ -55,6 +55,8 @@ linker-clean:
 linker-install-exec-local: linker-all
 	$(INSTALL) -m 755 -D $(top_builddir)/linker/linker $(DESTDIR)/bin/linker
 
+if ! HEADERS_ONLY
+
 linkerdir   = $(BIONIC_DATADIR)/linker
 linker_DATA = \
 	$(addprefix linker/, \
@@ -62,6 +64,8 @@ linker_DATA = \
 		NOTICE \
 		README.TXT \
 	)
+
+endif
 
 ALL_LOCAL += linker-all
 CLEAN_LOCAL += linker-clean

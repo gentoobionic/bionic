@@ -210,12 +210,16 @@ libm-install-exec-local: libm-all
 		ln -sf $(libdir)/libm.so .; \
 	fi
 
+if ! HEADERS_ONLY
+
 libmdir   = $(BIONIC_DATADIR)/libm
 libm_DATA = \
 	$(addprefix libm/, \
 		MODULE_LICENSE_BSD_LIKE \
 		NOTICE \
 	)	
+
+endif
 
 ALL_LOCAL += libm-all
 CLEAN_LOCAL += libm-clean

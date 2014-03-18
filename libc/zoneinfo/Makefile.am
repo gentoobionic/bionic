@@ -1,3 +1,5 @@
+if ! HEADERS_ONLY
+
 zoneinfodir   = $(datadir)/zoneinfo
 zoneinfo_DATA = \
 	$(addprefix libc/zoneinfo/, \
@@ -16,6 +18,8 @@ zoneinfotools_DATA = \
 	$(addprefix libc/zoneinfo/, \
 		MODULE_LICENSE_PUBLIC_DOMAIN \
 	)
+
+endif
 
 # TODO: make a sysconfdir variable / define, edit libc/tzcode/tzfile.h and so on instead of hard-coding TZDIR="/etc"
 # also need to figure out how to make the timezones behave like the glibc variant

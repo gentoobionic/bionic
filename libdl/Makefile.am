@@ -33,12 +33,16 @@ libdl-install-exec-local: libdl-all
 		ln -sf $(libdir)/libdl.so .; \
 	fi
 
+if ! HEADERS_ONLY
+
 libdldir   = $(BIONIC_DATADIR)/libdl
 libdl_DATA = \
 	$(addprefix libdl/, \
 		MODULE_LICENSE_BSD \
 		NOTICE \
 	)
+
+endif
 
 ALL_LOCAL += libdl-all
 CLEAN_LOCAL += libdl-clean
