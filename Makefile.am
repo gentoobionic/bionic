@@ -18,10 +18,11 @@ include libc/zoneinfo/Makefile.am
 # headers 
 include Makefile.h.am
 
+if ! HEADERS_ONLY
+
 all-local: $(ALL_LOCAL)
 clean-local: $(CLEAN_LOCAL)
 install-exec-local: $(INSTALL_EXEC_LOCAL)
-install-headers: install-data-am
 
 bionicdir   = $(BIONIC_DATADIR)
 bionic_DATA = \
@@ -33,3 +34,5 @@ bionic_DATA = \
 		README \
 		TODO \
 	)
+
+endif

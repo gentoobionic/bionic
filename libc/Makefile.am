@@ -531,7 +531,7 @@ if TARGET_ARCH_IS_ARM
 if ARCH_ARM_HAVE_TLS_REGISTER
     libc_common_cflags += -DHAVE_ARM_TLS_REGISTER
 endif
-if !ARCH_ARM_HAVE_NEON
+if ! ARCH_ARM_HAVE_NEON
     libc_common_cflags += -DARCH_ARM_USE_NON_NEON_MEMCPY
 endif
 endif
@@ -695,6 +695,8 @@ libc-install-exec-local: libc-all
 		ln -sf $(libdir)/libc.so .; \
 	fi
 
+if ! HEADERS_ONLY
+
 libcdir   = $(BIONIC_DATADIR)/libc
 libc_DATA = \
 	$(addprefix libc/, \
@@ -727,6 +729,8 @@ libckernel_DATA = \
 			utils.py \
 		) \
 	)
+
+endif
 
 ALL_LOCAL += libc-all
 CLEAN_LOCAL += libc-clean

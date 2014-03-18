@@ -35,13 +35,17 @@ libthread_db-install-exec-local: libthread_db-all
 		cd $(DESTDIR)/lib && \
 		ln -sf $(libdir)/libthread_db.so .; \
 	fi
-	
+
+if ! HEADERS_ONLY
+
 libthreaddbdir   = $(BIONIC_DATADIR)/libthread_db
 libthreaddb_DATA = \
 	$(addprefix libthread_db/, \
 		MODULE_LICENSE_BSD \
 		NOTICE \
 	)
+
+endif
 
 ALL_LOCAL += libthread_db-all
 CLEAN_LOCAL += libthread_db-clean
