@@ -703,6 +703,14 @@ libc_DATA = \
 		README \
 		CAVEATS \
 	)
+# the following is mainly for historical purposes
+libc_DATA += \
+	$(addprefix libc/docs/, \
+		CHANGES.TXT \
+		ISSUES.TXT \
+		OVERVIEW.TXT \
+		SYSV-IPC.TXT \
+	)
 
 libckerneldir   = $(BIONIC_DATADIR)/libc/kernel
 libckernel_DATA = \

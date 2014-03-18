@@ -12,6 +12,9 @@ zoneinfotools_DATA = \
 		generate \
 		ZoneCompactor.java \
 		ZoneInfo.java \
+	) \
+	$(addprefix libc/zoneinfo/, \
+		MODULE_LICENSE_PUBLIC_DOMAIN \
 	)
 
 # TODO: make a sysconfdir variable / define, edit libc/tzcode/tzfile.h and so on instead of hard-coding TZDIR="/etc"
