@@ -240,6 +240,7 @@ AC_ARG_ENABLE([kh-only],
 [case "${enableval}" in
   yes|"")
     KH_ONLY=true
+    KERNEL_HEADERS=true
     HEADERS_ONLY=true
     ;;
   no)
