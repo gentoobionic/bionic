@@ -17,6 +17,7 @@ include libc/zoneinfo/Makefile.am
 
 # headers 
 include Makefile.h.am
+include Makefile.kh.am
 
 if ! HEADERS_ONLY
 
