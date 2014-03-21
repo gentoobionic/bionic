@@ -35,7 +35,7 @@ if bionic_root[-1] != '/':
 #print "syscalls.stamp is '%s'" % syscalls_stamp
 
 # temp directory where we store all intermediate files
-bionic_temp = "/tmp/bionic_gensyscalls/"
+bionic_temp = ""
 
 # all architectures, update as you see fit
 all_archs = [ "arm", "x86" ]
@@ -526,4 +526,5 @@ state.process_file(bionic_root+"SYSCALLS.TXT")
 arch = sys.argv[1]
 top_builddir = sys.argv[2]
 syscalls_subdir = sys.argv[3]
+bionic_temp = top_builddir + "/" + syscalls_subdir + "/.tmp/"
 state.regenerate(arch, top_builddir, syscalls_subdir)

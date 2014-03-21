@@ -1,7 +1,8 @@
 SYSCALLS_STAMP = $(top_builddir)/syscalls.stamp
+SYSCALLS_DIR   = $(top_builddir)/libc/arch-@TARGET_ARCH@/syscalls
 
 $(SYSCALLS_STAMP): $(top_srcdir)/libc/SYSCALLS.TXT $(top_srcdir)/libc/tools/gensyscalls.py
-	mkdir -p $(top_builddir)/libc/arch-@TARGET_ARCH@/syscalls
+	mkdir -p $(SYSCALLS_DIR)
 	python $(top_srcdir)/libc/tools/gensyscalls.py @TARGET_ARCH@ $(top_builddir)/ libc/arch-@TARGET_ARCH@/syscalls > $@
 
 $(top_builddir)/libc/include/sys/linux-syscalls.h: $(SYSCALLS_STAMP)
@@ -11,10 +12,9 @@ $(top_builddir)/libc/include/sys/linux-syscalls.h: $(SYSCALLS_STAMP)
 syscalls-all: $(SYSCALLS_STAMP) $(top_builddir)/libc/include/sys/linux-syscalls.h
 
 syscalls-clean:
-	rm -f $(SYSCALLS_STAMP) \
+	rm -Rf $(SYSCALLS_STAMP) \
 		$(top_builddir)/libc/include/sys/linux-syscalls.h \
-		$(addprefix $(top_srcdir)/libc/,$(shell if [ -e $(SYSCALLS_STAMP) ]; then cat $(SYSCALLS_STAMP); fi ))
-		
+		$(SYSCALLS_DIR)
 
 ALL_LOCAL += syscalls-all
-CLEAN_LOCAL += syscalls-clean 
+CLEAN_LOCAL += syscalls-clean
