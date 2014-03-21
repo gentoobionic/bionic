@@ -9,6 +9,11 @@ import sys, os.path, glob, re, commands, filecmp, shutil
 
 from bionic_utils import *
 
+if sys.version_info.major != 2:
+    print "error: please use Python 2 with this script. Your version is"
+    print "%s" % (sys.version)
+    sys.exit(1)
+
 # set this to 1 if you want to generate thumb stubs
 gen_thumb_stubs = 0
 
