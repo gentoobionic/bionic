@@ -37,7 +37,7 @@ $(foreach f,$(linker_src), $(eval $(call compile-one-file,$(f),linker,$(linker_d
 
 $(top_builddir)/linker/linker: $(begin_obj) $(linker_obj) $(top_builddir)/libc/libc_nomalloc.a
 	mkdir -p $(dir $@)
-	@CC@ -o $@ $(linker_ldflags) $(begin_obj) $(linker_obj) -Wl,--start-group $(top_builddir)/libc/libc_nomalloc.a -Wl,--end-group
+	@CC@ -o $@ $(linker_ldflags) $(begin_obj) $(linker_obj) -Wl,--start-group $(top_builddir)/libc/libc_nomalloc.a @COMMON_LDLIBS@ -Wl,--end-group
 	@OBJCOPY@ --prefix-symbols=__dl_ $@
 
 # ========================================================
