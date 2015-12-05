@@ -46,25 +46,53 @@
 
 ENTRY(ffs)
 	/* Standard trick to isolate bottom bit in r0 or 0 if r0 = 0 on entry */
- 	rsb     r1, r0, #0
- 	ands    r0, r0, r1
+    rsbs    r1, r0, #0
+    ands    r0, r0, r1
 #ifndef __ARM_HAVE_CLZ
+
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+
+    /*
+     * now r0 has at most one set bit, call this X
+     * if X = 0, all further instructions are skipped
+     */
+    beq     skip
+
+    adr     r2, .L_ffs_table
+    lsls    r0, r0, #4
+    orrs    r0, r0      /* r0 = X * 0x11 */
+    lsls    r0, r0, #6
+    orrs    r0, r0      /* r0 = X * 0x451 */
+    lsls    r0, r0, #16
+    rsbs    r0, r0, #0  /* r0 = X * 0x0450fbaf */
+
+    /* now lookup in table indexed on top 6 bits of r0 */
+    lsrs    r0, r0, #26
+    ldrb    r0, [ r2, r0 ]
+
+skip:
+
+#else
+
 	/*
 	 * now r0 has at most one set bit, call this X
 	 * if X = 0, all further instructions are skipped
 	 */
 	adrne   r2, .L_ffs_table
-	orrne   r0, r0, r0, lsl #4  /* r0 = X * 0x11 */ 
+	orrne   r0, r0, r0, lsl #4  /* r0 = X * 0x11 */
 	orrne   r0, r0, r0, lsl #6  /* r0 = X * 0x451 */
 	rsbne   r0, r0, r0, lsl #16 /* r0 = X * 0x0450fbaf */
-              
+
 	/* now lookup in table indexed on top 6 bits of r0 */
 	ldrneb  r0, [ r2, r0, lsr #26 ]
+
+#endif
 
 	bx		lr
 END(ffs)
 
 .text;
+.align 4
 .type .L_ffs_table, _ASM_TYPE_OBJECT;
 .L_ffs_table:
 /*               0   1   2   3   4   5   6   7           */
@@ -77,6 +105,10 @@ END(ffs)
 	.byte	31,  0,  0,  0,  0, 24,  0, 20  /* 48-55 */
 	.byte   30,  0, 23, 19, 29, 18, 17,  0  /* 56-63 */
 #else /* !defined(__ARM_HAVE_CLZ) */
+#if defined( __thumb2__ )
+	cmp	r0, #0
+	itt	ne
+#endif /* defined( __thumb2__ ) */
 	clzne	r0, r0
 	rsbne	r0, r0, #32
 	bx		lr
