@@ -38,9 +38,12 @@
 ENTRY(__on_dlclose)
         adr     r0, 0f
         ldr     r0, [r0]
-        b       __cxa_finalize
+	ldr	r1, =__cxa_finalize
+        bx      r1
 END(__on_dlclose)
 
+        @ in armv6-m, adr r0, <arg> requires <arg> to be word aligned
+        .align 4
 0:
         .long   __dso_handle
 
