@@ -391,8 +391,6 @@ libc_common_src_files += \
 	arch-arm/bionic/__get_sp.S \
 	arch-arm/bionic/_exit_with_stack_teardown.S \
 	arch-arm/bionic/_setjmp.S \
-	arch-arm/bionic/abort_arm.S \
-	arch-arm/bionic/atomics_arm.c \
 	arch-arm/bionic/clone.S \
 	arch-arm/bionic/eabi.c \
 	arch-arm/bionic/ffs.S \
@@ -401,32 +399,47 @@ libc_common_src_files += \
 	arch-arm/bionic/libgcc_compat.c \
 	arch-arm/bionic/tkill.S \
 	arch-arm/bionic/tgkill.S \
-	arch-arm/bionic/memcmp.S \
-	arch-arm/bionic/memcmp16.S \
-	arch-arm/bionic/memcpy.S \
-	arch-arm/bionic/memset.S \
 	arch-arm/bionic/setjmp.S \
 	arch-arm/bionic/sigsetjmp.S \
-	arch-arm/bionic/strlen.c.arm \
-	arch-arm/bionic/strcpy.S \
-	arch-arm/bionic/strcmp.S \
-	arch-arm/bionic/syscall.S \
-	string/memmove.c.arm \
+	arch-arm/bionic/strlen.c \
+	arch-arm/bionic/syscall.c \
+	arch-arm/bionic/__syscall.S \
+	string/memmove.c \
 	string/bcopy.c \
 	string/strncmp.c \
 	unistd/socketcalls.c
+
+## 20150504@CF: removing this for now - it doesn't seem to be used
+# 	arch-arm/bionic/atomics_arm.c
+
+## 20150430@CF: disabling these for the time being
+#	arch-arm/bionic/memcmp.S
+#	arch-arm/bionic/memcmp16.S
+#	arch-arm/bionic/memcpy.S
+#	arch-arm/bionic/memset.S
+libc_common_src_files += \
+	string/memcmp.c \
+	string/memcpy.c \
+	string/memset.c
+
+## 20150501@CF: disabling these for the time being
+#	arch-arm/bionic/strcpy.S
+#	arch-arm/bionic/strcmp.S
+libc_common_src_files += \
+	string/strcpy.c \
+	string/strcmp.c
 
 # These files need to be arm so that gdbserver
 # can set breakpoints in them without messing
 # up any thumb code.
 libc_common_src_files += \
-	bionic/pthread-atfork.c.arm \
-	bionic/pthread-rwlocks.c.arm \
-	bionic/pthread-timers.c.arm \
-	bionic/ptrace.c.arm
+	bionic/pthread-atfork.c \
+	bionic/pthread-rwlocks.c \
+	bionic/pthread-timers.c \
+	bionic/ptrace.c
 
 libc_static_common_src_files += \
-        bionic/pthread.c.arm
+        bionic/pthread.c
 
 # these are used by the static and dynamic versions of the libc
 # respectively
@@ -549,6 +562,7 @@ endif # x86
 # ========================================================
 libc_common_c_includes = \
 		$(top_srcdir)/libc/include  \
+		$(top_builddir)/libc/include  \
 		$(top_srcdir)/libc/stdlib  \
 		$(top_srcdir)/libc/string  \
 		$(top_srcdir)/libc/stdio   \
@@ -659,7 +673,7 @@ endif
 libc_dynamic_cflags += $(addprefix -I,$(libc_common_c_includes))
 libc_ldflags = @COMMON_LDFLAGS@
 libc_ldflags += -Bsymbolic -shared -Wl,-soname,libc.so
-libc_ldlibs = -ldl
+libc_ldlibs = @COMMON_LDLIBS@ -ldl
 
 $(foreach f,$(libc_dynamic_src), $(eval $(call compile-one-file,$(f),libc_dynamic,$(libc_dynamic_dep))))
 
