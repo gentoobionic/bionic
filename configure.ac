@@ -92,6 +92,9 @@ COMMON_LDLIBS_ARM="-lgcc"
 case $host_os in
   *linux*)
   ;;
+  dnl equivalent to 'none'
+  *eabi*)
+  ;;
   *)
   AC_MSG_ERROR([unsupported host os $host_os])
   ;;
