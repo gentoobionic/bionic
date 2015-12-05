@@ -39,13 +39,8 @@
 #define debug_log(format, ...)  \
     __libc_android_log_print(ANDROID_LOG_DEBUG, "libc-abort", (format), ##__VA_ARGS__ )
 
-#ifdef __arm__
-__LIBC_HIDDEN__ void
-__libc_android_abort(void)
-#else
 void
 abort(void)
-#endif
 {
 	struct atexit *p = __atexit;
 	static int cleanup_called = 0;
