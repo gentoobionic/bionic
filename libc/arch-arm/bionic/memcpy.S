@@ -58,12 +58,12 @@ ENTRY(memcpy)
         /* copy up to 15-bytes (count in r3) */
         sub         r2, r2, r3
         movs        ip, r3, lsl #31
-        ldrmib      lr, [r1], #1
-        strmib      lr, [r0], #1
-        ldrcsb      ip, [r1], #1
-        ldrcsb      lr, [r1], #1
-        strcsb      ip, [r0], #1
-        strcsb      lr, [r0], #1
+        ldrbmi      lr, [r1], #1
+        strbmi      lr, [r0], #1
+        ldrbcs      ip, [r1], #1
+        ldrbcs      lr, [r1], #1
+        strbcs      ip, [r0], #1
+        strbcs      lr, [r0], #1
         movs        ip, r3, lsl #29
         bge         1f
         // copies 4 bytes, destination 32-bits aligned
@@ -130,12 +130,12 @@ ENTRY(memcpy)
         vld4.8      {d0[0], d1[0], d2[0], d3[0]}, [r1]!
         vst4.8      {d0[0], d1[0], d2[0], d3[0]}, [r0]!
 2:      movs        ip, r2, lsl #31
-        ldrmib      r3, [r1], #1
-        ldrcsb      ip, [r1], #1
-        ldrcsb      lr, [r1], #1
-        strmib      r3, [r0], #1
-        strcsb      ip, [r0], #1
-        strcsb      lr, [r0], #1
+        ldrbmi      r3, [r1], #1
+        ldrbcs      ip, [r1], #1
+        ldrbcs      lr, [r1], #1
+        strbmi      r3, [r0], #1
+        strbcs      ip, [r0], #1
+        strbcs      lr, [r0], #1
 
         ldmfd       sp!, {r0, lr}
         bx          lr
@@ -186,12 +186,24 @@ ENTRY(memcpy)
 		 */
 		movs		r12, r3, lsl #31
 		sub			r2, r2, r3		/* we know that r3 <= r2 because r2 >= 4 */
-		ldrmib		r3, [r1], #1
-		ldrcsb		r4, [r1], #1
-		ldrcsb		r12,[r1], #1
-        strmib		r3, [r0], #1
-		strcsb		r4, [r0], #1
-		strcsb		r12,[r0], #1
+#ifdef __FORCE_THUMB2
+        it mi
+#endif
+		ldrbmi		r3, [r1], #1
+#ifdef __FORCE_THUMB2
+        itt cs
+#endif
+		ldrbcs		r4, [r1], #1
+		ldrbcs		r12,[r1], #1
+#ifdef __FORCE_THUMB2
+        it mi
+#endif
+        strbmi		r3, [r0], #1
+#ifdef __FORCE_THUMB2
+        itt cs
+#endif
+		strbcs		r4, [r0], #1
+		strbcs		r12,[r0], #1
 
 src_aligned:
 
@@ -210,15 +222,33 @@ src_aligned:
 		ands		r3, r3, #0x1C
 		beq         congruent_aligned32
 		cmp         r3, r2
+#ifdef __FORCE_THUMB2
+        it hi
+#endif
 		andhi		r3, r2, #0x1C
 
 		/* conditionnaly copies 0 to 7 words (length in r3) */
 		movs		r12, r3, lsl #28
-		ldmcsia		r1!, {r4, r5, r6, r7}	/* 16 bytes */
-		ldmmiia		r1!, {r8, r9}			/*  8 bytes */
-		stmcsia		r0!, {r4, r5, r6, r7}
-		stmmiia		r0!, {r8, r9}
+#ifdef __FORCE_THUMB2
+        it cs
+#endif
+		ldmiacs		r1!, {r4, r5, r6, r7}	/* 16 bytes */
+#ifdef __FORCE_THUMB2
+        it mi
+#endif
+		ldmiami		r1!, {r8, r9}			/*  8 bytes */
+#ifdef __FORCE_THUMB2
+        it cs
+#endif
+		stmiacs		r0!, {r4, r5, r6, r7}
+#ifdef __FORCE_THUMB2
+        it mi
+#endif
+		stmiami		r0!, {r8, r9}
 		tst         r3, #0x4
+#ifdef __FORCE_THUMB2
+        itt ne
+#endif
 		ldrne		r10,[r1], #4			/*  4 bytes */
 		strne		r10,[r0], #4
 		sub         r2, r2, r3
@@ -262,6 +292,9 @@ cached_aligned32:
         // for ARM9 preload will not be safely guarded by the preceding subs.
         // When it is safely guarded the only possibility to have SIGSEGV here
         // is because the caller overstates the length.
+#ifdef __FORCE_THUMB2
+        it hi
+#endif
         ldrhi       r3, [r12], #32      /* cheap ARM9 preload */
         stmia       r0!, { r4-r11 }
 		bhs         1b
@@ -285,18 +318,45 @@ less_than_32_left:
 
 		/* conditionnaly copies 0 to 31 bytes */
 		movs		r12, r2, lsl #28
-		ldmcsia		r1!, {r4, r5, r6, r7}	/* 16 bytes */
-		ldmmiia		r1!, {r8, r9}			/*  8 bytes */
-		stmcsia		r0!, {r4, r5, r6, r7}
-		stmmiia		r0!, {r8, r9}
+#ifdef __FORCE_THUMB2
+        it cs
+#endif
+		ldmiacs		r1!, {r4, r5, r6, r7}	/* 16 bytes */
+#ifdef __FORCE_THUMB2
+        it mi
+#endif
+		ldmiami		r1!, {r8, r9}			/*  8 bytes */
+#ifdef __FORCE_THUMB2
+        it cs
+#endif
+		stmiacs		r0!, {r4, r5, r6, r7}
+#ifdef __FORCE_THUMB2
+        it mi
+#endif
+		stmiami		r0!, {r8, r9}
 		movs		r12, r2, lsl #30
+#ifdef __FORCE_THUMB2
+        it cs
+#endif
 		ldrcs		r3, [r1], #4			/*  4 bytes */
-		ldrmih		r4, [r1], #2			/*  2 bytes */
+#ifdef __FORCE_THUMB2
+        it mi
+#endif
+		ldrhmi		r4, [r1], #2			/*  2 bytes */
+#ifdef __FORCE_THUMB2
+        it cs
+#endif
 		strcs		r3, [r0], #4
-		strmih		r4, [r0], #2
+#ifdef __FORCE_THUMB2
+        it mi
+#endif
+		strhmi		r4, [r0], #2
 		tst         r2, #0x1
-		ldrneb		r3, [r1]				/*  last byte  */
-		strneb		r3, [r0]
+#ifdef __FORCE_THUMB2
+        itt ne
+#endif
+		ldrbne		r3, [r1]				/*  last byte  */
+		strbne		r3, [r0]
 
 		/* we're done! restore everything and return */
 1:		ldmfd		sp!, {r5-r11}
@@ -336,11 +396,17 @@ non_congruent:
 		 * becomes aligned to 32 bits (r5 = nb of words to copy for alignment)
 		 */
 		movs		r5, r5, lsl #31
-		strmib		r3, [r0], #1
+#ifdef __FORCE_THUMB2
+        itt mi
+#endif
+		strbmi		r3, [r0], #1
 		movmi		r3, r3, lsr #8
-		strcsb		r3, [r0], #1
+#ifdef __FORCE_THUMB2
+        itttt cs
+#endif
+		strbcs		r3, [r0], #1
 		movcs		r3, r3, lsr #8
-		strcsb		r3, [r0], #1
+		strbcs		r3, [r0], #1
 		movcs		r3, r3, lsr #8
 
 		cmp			r2, #4
@@ -351,7 +417,14 @@ non_congruent:
 		beq			2f
 		ldr			r5, [r1], #4
 		sub         r2, r2, #4
-		orr			r4, r3, r5,		lsl lr
+#ifdef __FORCE_THUMB2
+        // XXX: cutting corners to get shit to compile
+        mov         r6, r5
+        lsl         r6, lr
+        orr         r4, r3, r6
+#else
+        orr         r4, r3, r5,     lsl lr
+#endif
 		mov			r3, r5,			lsr r12
 		str			r4, [r0], #4
         cmp         r2, #4
@@ -378,6 +451,9 @@ loop16:
 		ldmia		r1!, {   r5,r6,r7,  r8,r9,r10,r11}
         PLD         (r1, #64)
         subs        r2, r2, #32
+#ifdef __FORCE_THUMB2
+        it hs
+#endif
         ldrhs       r12, [r1], #4
 		orr			r3, r3, r4,		lsl #16
 		mov			r4, r4,			lsr #16
@@ -405,6 +481,9 @@ loop8:
 		ldmia		r1!, {   r5,r6,r7,  r8,r9,r10,r11}
         PLD         (r1, #64)
 		subs		r2, r2, #32
+#ifdef __FORCE_THUMB2
+        it hs
+#endif
         ldrhs       r12, [r1], #4
 		orr			r3, r3, r4,		lsl #24
 		mov			r4, r4,			lsr #8
@@ -432,6 +511,9 @@ loop24:
 		ldmia		r1!, {   r5,r6,r7,  r8,r9,r10,r11}
         PLD         (r1, #64)
 		subs		r2, r2, #32
+#ifdef __FORCE_THUMB2
+        it hs
+#endif
         ldrhs       r12, [r1], #4
 		orr			r3, r3, r4,		lsl #8
 		mov			r4, r4,			lsr #24
@@ -462,7 +544,13 @@ less_than_thirtytwo:
 
 1:		ldr			r5, [r1], #4
 		sub         r2, r2, #4
-		orr			r4, r3, r5,		lsl lr
+#ifdef __FORCE_THUMB2
+        mov         r6, r5
+        lsl         r6, lr
+        orr         r4, r3, r6
+#else
+        orr         r4, r3, r5,     lsl lr
+#endif
 		mov			r3,	r5,			lsr r12
 		str			r4, [r0], #4
         cmp         r2, #4
@@ -471,23 +559,41 @@ less_than_thirtytwo:
 partial_word_tail:
 		/* we have a partial word in the input buffer */
 		movs		r5, lr, lsl #(31-3)
-		strmib		r3, [r0], #1
+#ifdef __FORCE_THUMB2
+        itt mi
+#endif
+		strbmi		r3, [r0], #1
 		movmi		r3, r3, lsr #8
-		strcsb		r3, [r0], #1
+#ifdef __FORCE_THUMB2
+        ittt cs
+#endif
+		strbcs		r3, [r0], #1
 		movcs		r3, r3, lsr #8
-		strcsb		r3, [r0], #1
+		strbcs		r3, [r0], #1
 
 		/* Refill spilled registers from the stack. Don't update sp. */
 		ldmfd		sp, {r5-r11}
 
 copy_last_3_and_return:
 		movs		r2, r2, lsl #31	/* copy remaining 0, 1, 2 or 3 bytes */
-		ldrmib		r2, [r1], #1
-		ldrcsb		r3, [r1], #1
-		ldrcsb		r12,[r1]
-		strmib		r2, [r0], #1
-		strcsb		r3, [r0], #1
-		strcsb		r12,[r0]
+#ifdef __FORCE_THUMB2
+        it mi
+#endif
+		ldrbmi		r2, [r1], #1
+#ifdef __FORCE_THUMB2
+        itt cs
+#endif
+		ldrbcs		r3, [r1], #1
+		ldrbcs		r12,[r1]
+#ifdef __FORCE_THUMB2
+        it mi
+#endif
+		strbmi		r2, [r0], #1
+#ifdef __FORCE_THUMB2
+        itt cs
+#endif
+		strbcs		r3, [r0], #1
+		strbcs		r12,[r0]
 
         /* we're done! restore sp and spilled registers and return */
         add         sp,  sp, #28
