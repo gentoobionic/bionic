@@ -42,3 +42,7 @@ void*  memset(void*  dst, int c, size_t n)
 
   return dst;
 }
+
+void bzero(void* s, size_t n) {
+    memset(s, '\0', n);
+}
