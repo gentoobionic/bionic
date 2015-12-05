@@ -33,8 +33,6 @@
  * SUCH DAMAGE.
  */
 
-#define _ALIGN_TEXT .align 0
-
 #include <machine/asm.h>
 #include <machine/setjmp.h>
 
@@ -49,18 +47,26 @@
  */
 
 ENTRY(sigsetjmp)
-	teq	r1, #0
-	beq	PIC_SYM(_C_LABEL(_setjmp), PLT)
-	b	PIC_SYM(_C_LABEL(setjmp), PLT)
+    ldr r2, =_setjmp
+	cmp	r1, #0
+	beq	0f
+    ldr r2, =setjmp
+0:
+    bx  r2
 END(sigsetjmp)
 
-.L_setjmp_magic:
-	.word	_JB_MAGIC__SETJMP
-
 ENTRY(siglongjmp)
-	ldr	r2, .L_setjmp_magic
-	ldr	r3, [r0]
-	teq	r2, r3
-	beq	PIC_SYM(_C_LABEL(_longjmp), PLT)
-	b	PIC_SYM(_C_LABEL(longjmp), PLT)
+	ldr    r2, .L_setjmp_magic
+	ldr    r3, [r0]
+	subs   r2, r2, r3
+	ldr    r3, =_longjmp
+	movs   r2, r2
+    beq    1f
+    ldr    r3, =longjmp
+1:
+	bx     r3
+	.align 4
+.L_setjmp_magic:
+    .word   _JB_MAGIC__SETJMP
+
 END(siglongjmp)
