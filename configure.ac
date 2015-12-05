@@ -12,6 +12,11 @@ AM_INIT_AUTOMAKE([subdir-objects -Wno-portability])
 AM_PROG_AS
 AM_PROG_AR
 
+dnl LT_PREREQ([2.4.6])
+LT_INIT
+AC_PROG_LIBTOOL
+AM_PROG_LIBTOOL
+
 MKDIRP="mkdir -p"
 AC_SUBST(MKDIRP)
 
@@ -81,7 +86,8 @@ COMMON_LDFLAGS_ARM=""
 COMMON_LDLIBS=""
 dnl COMMON_LDLIBS_X86='$(shell $(CC) -print-file-name=libgcc_eh.a)'
 COMMON_LDLIBS_X86=""
-COMMON_LDLIBS_ARM=""
+dnl for __aeabi*
+COMMON_LDLIBS_ARM="-lgcc"
 
 case $host_os in
   *linux*)
@@ -257,9 +263,15 @@ AC_SUBST(KERNEL_HEADERS_OR_KH_ONLY)
 
 COMMON_CFLAGS="${COMMON_CFLAGS} ${COMMON_INCLUDES}"
 
+SYSCALLS_ARCH="${TARGET_ARCH}"
+if test "${TARGET_ARCH}" = "arm" -a "${CFLAGS/thumb/}" != "${CFLAGS}" ; then
+  SYSCALLS_ARCH="thumb"
+fi
+
 AC_SUBST(COMMON_CFLAGS)
 AC_SUBST(COMMON_LDFLAGS)
 AC_SUBST(COMMON_LDLIBS)
+AC_SUBST(SYSCALLS_ARCH)
 
 AC_CONFIG_FILES(
     Makefile
