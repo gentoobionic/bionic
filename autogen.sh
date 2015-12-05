@@ -1,45 +1,34 @@
 #!/bin/sh
 
-PROJ=bionic
+NAME=bionic
 
-if [ "$(grep "AC_INIT(${PROJ}" configure.ac)" = "" ]; then
-  echo "autogen.sh must be run in PWD of ${PROJ} source"
+if [ "$(grep "AC_INIT(${NAME}" configure.ac)" = "" ]; then
+  echo "autogen.sh must be run in PWD of ${NAME} source"
   exit 1
 fi
 
 if [ "$1" = clean ]; then
-  if [ -e "Makefile" ]; then
-    make clean
+  if [ -e Makefile ]; then
+    make clean &> /dev/null || true
   fi
-  for e in la lo lai o so m4 stamp; do
+  for e in la lo lai o so in m4 jar; do
     rm -f $(find . -name "*.${e}" -type f)
   done
-  for e in Makefile.in Makefile depcomp INSTALL config.guess config.sub config.log config.status configure install-sh ltmain.sh missing libtool; do
+  for e in Makefile depcomp INSTALL config.guess config.sub config.log config.status configure install-sh ltmain.sh missing libtool compile; do
     rm -f $(find . -name "${e}" -type f -o -type l)
   done
-  for e in autom4te.cache .libs .deps; do
+  for e in autom4te.cache .libs .deps bin; do
     rm -Rf $(find . -name "${e}" -type d)
   done
+elif [ "$1" = reconf ]; then
+  autoreconf -i --warnings=none
 else
-	#	cp libc/Makefile.am.in blah
-	#	for arch in arm x86; do
-    # a little magic to have automake properly informed of the gensyscalls output
-    #_top_builddir=${PWD}
-    #_top_scrdir="${0/configure/}"
-    #SYSCALLS_TO_COMPILE="$(python ${_top_srcdir}libc/tools/gensyscalls.py ${arch})"
-    #SYSCALLS_TO_COMPILE="$(echo ${SYSCALLS_TO_COMPILE})"
-    #echo "${SYSTOOLS_TO_COMPILE}"
-    #python ${_top_srcdir}libc/tools/sed.py libc/Makefile.am.in libc/Makefile.am "#SYSCALLS_TO_COMPILE_$(echo ${arch} | tr [:lower:] [:upper:])#" "${SYSCALLS_TO_COMPILE}" 
-
-  if [ "$(which libtoolize)" != "" ]; then
-    libtoolize && aclocal && automake --add-missing && autoconf
-  else
-    if [ "$(which glibtoolize)" != "" ]; then
-      glibtoolize && aclocal && automake --add-missing && autoconf
-    else
-      echo "missing (g)libtoolize"
-      exit 1
-    fi
+  LIBTOOLIZE="$(which glibtoolize)"
+  if [ "${LIBTOOLIZE}x" = "" ]; then
+    LIBTOOLIZE="$(which libtoolize)"
   fi
+  if [ "${LIBTOOLIZE}x" = "" ]; then
+    exit 1
+  fi
+  ${LIBTOOLIZE} && aclocal && automake --add-missing --warnings=none && autoconf
 fi
-
