@@ -30,8 +30,16 @@
 
 ENTRY(__pthread_clone)
     @ insert the args onto the new stack
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    subs    r1, #4
+    mov     r0, r1
+    subs    r1, #4
+    mov     r3, r1
+    adds    r1, #8
+#else
     str     r0, [r1, #-4]
     str     r3, [r1, #-8]
+#endif
 
     @ do the system call
     @ get flags
@@ -41,7 +49,15 @@ ENTRY(__pthread_clone)
     @ new sp is already in r1
 
 #if __ARM_EABI__
+# if defined( __thumb__ ) && ! defined( __thumb2__ )
+    push    {r3}
+    mov     r3, sp
+    stm     r3!, {r4, r7}
+    mov     sp, r3
+    pop     {r3}
+# else
     stmfd   sp!, {r4, r7}
+# endif
     ldr     r7, =__NR_clone
     swi     #0
 #else
@@ -50,23 +66,54 @@ ENTRY(__pthread_clone)
 
     movs    r0, r0
 #if __ARM_EABI__
+# if defined( __thumb__ ) || defined( __thumb2__ )
+    beq     dontunstack
+    push    {r3}
+    mov     r3, sp
+    ldm     r3!, {r4, r7}
+    mov     sp, r3
+    pop     {r3}
+dontunstack:
+# else
     ldmnefd sp!, {r4, r7}
+# endif
 #endif
     blt     __error
-    bxne    lr
 
+#if defined( __thumb__ ) || defined( __thumb2__ )
+    movs    r0, r0
+    beq     dontbx
+    bx      lr
+dontbx:
+#else
+    bxne    lr
+#endif
 
     @ pick the function arg and call address off the stack and jump
     @ to the C __thread_entry function which does some setup and then
     @ calls the thread's start function
 
+#if defined( __thumb__ ) || defined( __thumb2__ )
+    mov     r2, sp
+    subs    r2, #4
+    ldr     r0, [ r2, #0 ]
+    subs    r2, #4
+    ldr     r1, [ r2, #0 ]
+#else
     ldr     r0, [sp, #-4]
     ldr     r1, [sp, #-8]
-    mov     r2, sp			@ __thread_entry needs the TLS pointer
-    b       __thread_entry
+#endif
+    mov     r2, sp          @ __thread_entry needs the TLS pointer
+    ldr     r3, =__thread_entry
+    bx      r3
 
 __error:
-    mov     r0, #-1
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    movs    r0, #0
+    subs    r0, #1
+#else
+    movs    r0, #-1
+#endif
     bx      lr
 END(__pthread_clone)
 
@@ -89,14 +136,37 @@ ENTRY(__bionic_clone)
     .save   {r4, r5, r6, r7}
 
     # save registers to parent stack
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    push    {r3}
+    mov     r3, sp
+    stm     r3!, {r4, r5, r6, r7}
+    mov     sp, r3
+    pop     {r3}
+#else
     stmfd   sp!, {r4, r5, r6, r7}
+#endif
 
     # load extra parameters
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    push    {r3}
+    mov     r3, ip
+    ldm     r3!, {r4, r5, r6}
+    pop     {r3}
+#else
     ldmfd   ip, {r4, r5, r6}
+#endif
 
     # store 'fn' and 'arg' to the child stack
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    subs    r1, #4
+    str     r5, [ r1, #0 ]
+    subs    r1, #4
+    str     r6, [ r1, #0 ]
+    adds    r1, #8
+#else
     str     r5, [r1, #-4]
     str     r6, [r1, #-8]
+#endif
 
     # system call
     ldr     r7, =__NR_clone
@@ -108,11 +178,29 @@ ENTRY(__bionic_clone)
     # then either exit or error
     #
     ldmfd   sp!, {r4, r5, r6, r7}
+#if defined( __thumb__ ) || defined( __thumb2__ )
+    movs r0, r0
+    beq     dontbx2
+    bx      lr
+dontbx2:
+#else
     bxne    lr
-    b       __set_syscall_errno
+#endif
+    ldr     r1, =__set_syscall_errno
+    bx      r1
 
 1:  # in the child - pick arguments
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    mov    r2, sp
+    subs   r2, #4
+    ldr    r0, [ r2, #0 ]
+    subs   r2, #4
+    ldr    r1, [ r2, #0 ]
+    ldr    r2, =__bionic_clone_entry
+    bx     r2
+#else
     ldr    r0, [sp, #-4]
     ldr    r1, [sp, #-8]
     b      __bionic_clone_entry
+#endif
 END(__bionic_clone)
