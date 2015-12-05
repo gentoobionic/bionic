@@ -33,7 +33,7 @@
  *
  * Define three helper macros to implement this:
  */
-#if defined(__thumb__) && !defined(__thumb2__)
+#if defined( __THUMB_INTERWORK__ )
 #  define  __ATOMIC_SWITCH_TO_ARM \
             "adr r3, 5f\n" \
             "bx  r3\n" \
@@ -51,12 +51,13 @@
 #  define __ATOMIC_CLOBBERS   "r3"  /* list of clobbered registers */
 
 /* Warn the user that ARM mode should really be preferred! */
-#  warning Rebuilding this source file in ARM mode is highly recommended for performance!!
+// 20150501@CF: ignorable warnings can be ignored
+// #  warning Rebuilding this source file in ARM mode is highly recommended for performance!!
 
 #else
-#  define  __ATOMIC_SWITCH_TO_ARM   /* nothing */
-#  define  __ATOMIC_SWITCH_TO_THUMB /* nothing */
-#  define  __ATOMIC_CLOBBERS        /* nothing */
+#  define  __ATOMIC_SWITCH_TO_ARM   ""
+#  define  __ATOMIC_SWITCH_TO_THUMB ""
+#  define  __ATOMIC_CLOBBERS        ""
 #endif
 
 
@@ -200,6 +201,7 @@ __bionic_swap(int32_t new_value, volatile int32_t* ptr)
     return prev;
 }
 #else /* !__ARM_HAVE_LDREX_STREX */
+#  if defined( __ARM_HAVE_SWP )
 __ATOMIC_INLINE__ int32_t
 __bionic_swap(int32_t new_value, volatile int32_t* ptr)
 {
@@ -211,6 +213,15 @@ __bionic_swap(int32_t new_value, volatile int32_t* ptr)
                           : "cc");
     return prev;
 }
+#  else /* ! __ARM_HAVE_SWP */
+__ATOMIC_INLINE__ int32_t
+__bionic_swap(int32_t new_value, volatile int32_t* ptr)
+{
+	int32_t prev = *ptr;
+	*ptr = new_value;
+	return prev;
+}
+#  endif /* __ARM_HAVE_SWP */
 #endif /* !__ARM_HAVE_LDREX_STREX */
 
 /* Atomic increment - without any barriers
