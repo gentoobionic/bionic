@@ -50,13 +50,17 @@
 #ifndef __ARM_ARCH__
 
 #  if defined __ARM_ARCH_7__   || defined __ARM_ARCH_7A__ || \
-      defined __ARM_ARCH_7R__  || defined __ARM_ARCH_7M__
+      defined __ARM_ARCH_7R__  || defined __ARM_ARCH_7M__ || \
+	  defined __ARM_ARCH_7S__  || defined __ARM_ARCH_7EM__ || \
+	  defined __ARM_ARCH_7SM__
 
 #    define __ARM_ARCH__ 7
 
 #  elif defined __ARM_ARCH_6__   || defined __ARM_ARCH_6J__ || \
       defined __ARM_ARCH_6K__  || defined __ARM_ARCH_6Z__ || \
-      defined __ARM_ARCH_6KZ__ || defined __ARM_ARCH_6T2__
+      defined __ARM_ARCH_6KZ__ || defined __ARM_ARCH_6T2__ || \
+	  defined __ARM_ARCH_6M__  || defined __ARM_ARCH_6SM__ || \
+	  defined __ARM_ARCH_6S__
 #
 #    define __ARM_ARCH__ 6
 #
@@ -152,7 +156,7 @@
 /* define __ARM_HAVE_LDREX_STREX for ARMv6 and ARMv7 architecture to be
  * used in replacement of deprecated swp instruction
  */
-#if __ARM_ARCH__ >= 6
+#if __ARM_ARCH__ >= 7 || defined __ARM_ARCH_6T2__
 #  define __ARM_HAVE_LDREX_STREX
 #endif
 
@@ -166,7 +170,7 @@
  * (also present in ARMv6K, but not implemented in ARMv7-M, neither of which
  * we care about)
  */
-#if __ARM_ARCH__ >= 7
+#if ( __ARM_ARCH__ >= 7 || defined __ARM_ARCH_6K__ ) && ! defined __ARM_ARCH_7M__
 #  define __ARM_HAVE_LDREXD
 #endif
 
@@ -184,9 +188,6 @@
 #  define __ARM_HAVE_NEON
 #endif
 
-/* Assembly-only macros */
-#ifdef __ASSEMBLY__
-
 /* define a handy PLD(address) macro since the cache preload
  * is an optional opcode
  */
@@ -196,6 +197,39 @@
 #  define  PLD(reg,offset)    /* nothing */
 #endif
 
-#endif /* ! __ASSEMBLY__ */
+#if defined __ARM_ARCH_7M__ || \
+	defined __ARM_ARCH_7S__  || defined __ARM_ARCH_7EM__ || \
+	defined __ARM_ARCH_7M__ || \
+	defined __ARM_ARCH_6T2__ || \
+	defined __ARM_ARCH_6M__  || defined __ARM_ARCH_6S__
+// #define __ARM_ARCH_M__
+// if __THUMB_INTERWORK__ defined, throw an error??
+#undef __THUMB_INTERWORK__
+#define __NO_THUMB_INTERWORK__
+#endif
+
+#if ( defined __ARM_ARCH_7M__ || \
+	defined __ARM_ARCH_7S__  || \
+	defined __ARM_ARCH_7M__ || \
+	defined __ARM_ARCH_6T2__ || \
+	defined __ARM_ARCH_6M__  || defined __ARM_ARCH_6S__ ) && ! defined __ARM_ARCH_7EM__
+#undef __ARM_HAVE_VFP
+#endif
+
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+#  undef __ARM_HAVE_HALFWORD_MULTIPLY
+#  undef __ARM_HAVE_PC_INTERWORK
+#  undef __ARM_HAVE_SATURATED_ARITHMETIC
+#  undef __ARM_HAVE_PAIR_LOAD_STORE
+#  undef __ARM_HAVE_LDREXD
+#  undef __ARM_HAVE_CLZ
+#  undef __ARM_HAVE_PLD
+#  undef __ARM_HAVE_SWP
+#  undef __ARM_HAVE_LDC2
+#  undef __ARM_HAVE_MCR2
+#  undef __ARM_HAVE_MRC2
+#  undef PLD
+#  define PLD(reg,offset)    /* nothing */
+#endif
 
 #endif /* _ARM_MACHINE_CPU_FEATURES_H */
