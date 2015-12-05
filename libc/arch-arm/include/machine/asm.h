@@ -69,8 +69,13 @@
  */
 #define _ASM_TYPE_FUNCTION	#function
 #define _ASM_TYPE_OBJECT	#object
+#ifdef __FORCE_THUMB2
+#define _ENTRY(x) \
+	.text; _ALIGN_TEXT; .globl x; .thumb; .syntax unified; .type x,_ASM_TYPE_FUNCTION; x: .fnstart
+#else
 #define _ENTRY(x) \
 	.text; _ALIGN_TEXT; .globl x; .type x,_ASM_TYPE_FUNCTION; x: .fnstart
+#endif
 
 #define _ASM_SIZE(x)	.size x, .-x;
 
