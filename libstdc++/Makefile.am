@@ -12,7 +12,7 @@ libstdc++_cxxflags += -I$(top_srcdir)/libstdc++/include
 libstdc++_cxxflags += -I$(top_srcdir)/libc/private
 libstdc++_ldflags = @COMMON_LDFLAGS@
 libstdc++_ldflags += -Bsymbolic -shared -Wl,-soname,libstdc++.so
-libstdc++_ldlibs  = -lc
+libstdc++_ldlibs  = @COMMON_LDLIBS@ -lc
 libstdc++_dep = $(CRTFILES) libc-all
 libstdc++_obj =
 
