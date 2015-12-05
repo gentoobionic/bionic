@@ -160,7 +160,7 @@ endif
 
 if TARGET_ARCH_IS_ARM
 libm_src_files += \
-	arm/arm-fenv.c \
+	arm/fenv.c \
 	src/e_ldexpf.c \
 	src/s_scalbln.c \
 	src/s_scalbn.c \
@@ -172,7 +172,7 @@ libm_obj =
 libm_cflags = @COMMON_CFLAGS@
 libm_ldflags = @COMMON_LDFLAGS@
 libm_ldflags += -Bsymbolic -shared -Wl,-soname,libm.so
-libm_ldlibs = -lc
+libm_ldlibs = @COMMON_LDLIBS@ -lc
 libm_dep = $(CRTFILES) libc-all
 
 if TARGET_ARCH_IS_X86
