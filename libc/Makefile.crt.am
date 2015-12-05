@@ -1,6 +1,5 @@
 CRTFILES =
 
-libc_crt_target_cflags = @COMMON_CFLAGS@
 if DEBUG_BIONIC_LIBC
 libc_crt_target_cflags += -DDEBUG -g -O0
 endif
