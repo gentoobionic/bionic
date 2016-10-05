@@ -41,11 +41,37 @@
 #endif
 
 ENTRY(tkill)
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    mov     r3, sp
+    stm     r3!, {r4-r7}
+    mov     r4, ip
+    mov     r5, lr
+    stm     r3!, {r4,r5}
+    mov     sp, r3
+    ldr     r7, =__NR_tkill
+    swi     #0
+    mov     r3, sp
+    ldm     r3!, {r4,r5}
+    mov     ip, r4
+    mov     lr, r5
+    ldm     r3!, {r4-r7}
+    mov     sp, r3
+    mov     r3, lr
+    movs    r0, r0
+    bpl     0f
+    ldr     r3, =__set_syscall_errno
+0:
+    bx      r3
+#else
     stmfd   sp!, {r4-r7, ip, lr}
     ldr     r7, =__NR_tkill
     swi     #0
     ldmfd   sp!, {r4-r7, ip, lr}
     movs    r0, r0
+#if defined( __thumb2__ )
+    it      pl
+#endif /* defined ( __thumb2__ ) */
     bxpl    lr
     b       __set_syscall_errno
+#endif
 END(tkill)

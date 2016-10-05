@@ -26,7 +26,7 @@
  * $FreeBSD: src/lib/msun/arm/fenv.c,v 1.1 2004/06/06 10:03:59 das Exp $
  */
 
-#include <fenv.h>
+#include "fenv.h"
 
 /*
  * Hopefully the system ID byte is immutable, so it's valid to use

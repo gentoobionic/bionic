@@ -50,13 +50,33 @@
 
 ENTRY(setjmp)
 	/* Block all signals and retrieve the old signal mask */
-	stmfd	sp!, {r0, r14}
-	mov	r0, #0x00000000
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    push    {r3}
+    mov     sp, r3
+    stm     r3!, {r0}
+    mov     r0, r14
+    stm     r3!, {r0}
+    mov     sp, r3
+    pop     {r3}
+#else
+    stmfd   sp!, {r0, r14}
+#endif
+    movs r0, #0x00000000
 
 	bl	PIC_SYM(_C_LABEL(sigblock), PLT)
 	mov	r1, r0
 
-	ldmfd	sp!, {r0, r14}
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    push    {r3}
+    mov     sp, r3
+    ldm     r3!, {r0}
+    mov     r14, r0
+    ldm     r3!, {r0}
+    mov     sp, r3
+    pop     {r3}
+#else
+    ldmfd   sp!, {r0, r14}
+#endif
 
 	/* Store signal mask */
 	str	r1, [r0, #(_JB_SIGMASK * 4)]
@@ -65,8 +85,23 @@ ENTRY(setjmp)
 	str	r1, [r0, #(_JB_MAGIC * 4)]
 
 	/* Store core registers */
-	add     r1, r0, #(_JB_CORE_BASE * 4)
+	adds    r1, r0
+	adds    r1, #(_JB_CORE_BASE * 4)
+#if defined( __thumb__ ) || defined( __thumb2__ )
+    @ since we're not pushing to the stack pointer, we cannot use push!!!
+    stm     r1!, {r4-r7}
+    mov     r2, r8
+    mov     r3, r9
+    mov     r4, r10
+    mov     r5, r11
+    mov     r6, r12
+    mov     r7, r13
+    stm     r1!, {r2-r7}
+    mov     r2, r14
+    stm     r1!, {r2}
+#else
 	stmia   r1, {r4-r14}
+#endif
 
 #ifdef __ARM_HAVE_VFP
 	/* Store floating-point registers */
@@ -77,32 +112,47 @@ ENTRY(setjmp)
 	str     r1, [r0, #(_JB_FLOAT_STATE * 4)]
 #endif  /* __ARM_HAVE_VFP */
 
-	mov	r0, #0x00000000
+	movs    r0, #0x00000000
 	bx      lr
 END(setjmp)
-
-.Lsetjmp_magic:
-	.word	_JB_MAGIC_SETJMP
-
 
 ENTRY(longjmp)
 	ldr	r2, .Lsetjmp_magic
 	ldr	r3, [r0, #(_JB_MAGIC * 4)]
-	teq	r2, r3
+	cmp	r2, r3
 	bne	botch
 
 	/* Fetch signal mask */
 	ldr	r2, [r0, #(_JB_SIGMASK * 4)]
 
 	/* Set signal mask */
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    push    {r3}
+    mov     r3, sp
+    stm     r3!, {r0, r1}
+    mov     r0, r14
+    stm     r3!, {r0}
+    mov     sp, r3
+    pop     {r3}
+#else
 	stmfd	sp!, {r0, r1, r14}
+#endif
 	sub	sp, sp, #4	/* align the stack */
 
 	mov	r0, r2
 	bl	PIC_SYM(_C_LABEL(sigsetmask), PLT)
 
 	add	sp, sp, #4	/* unalign the stack */
-	ldmfd	sp!, {r0, r1, r14} 
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    push    {r3}
+    mov     r3, sp
+	ldm     r3!, {r0}
+	mov     r14, r0
+    ldm     r3!, {r0, r1}
+    pop     {r3}
+#else
+    ldmfd   sp!, {r0, r1, r14}
+#endif
 
 #ifdef __ARM_HAVE_VFP
 	/* Restore floating-point registers */
@@ -114,20 +164,64 @@ ENTRY(longjmp)
 #endif /* __ARM_HAVE_VFP */
 
 	/* Restore core registers */
-	add     r2, r0, #(_JB_CORE_BASE * 4)
+	adds    r2, r0
+	adds    r2, #(_JB_CORE_BASE * 4)
+#if defined( __thumb__ ) || defined( __thumb2__ )
+    @ since we're not popping from the stack pointer, we cannot use pop!!!
+    @ have to pop 5 at a time since r0, r1, r2 seem to be used
+
+    @ precompensate r2, pop r10-r14
+    adds    r2, r2, #( 6 * 4 )
+    ldm     r2!, {r3-r7}
+    mov     r14, r7
+    mov     r13, r6
+    mov     r12, r5
+    mov     r11, r4
+    mov     r10, r3
+
+    @ precompensate r2, pop r5-r9
+    subs    r2, #( (6+5) * 4 )
+    ldm     r2!, {r3-r7}
+    mov     r9, r7
+    mov     r8, r6
+    mov     r7, r5
+    mov     r6, r4
+    mov     r5, r3
+
+    @ precompensate r2, pop r4
+    subs    r2, #( 1 * 4 )
+    ldm     r2, {r4}
+#else
 	ldmia   r2, {r4-r14}
+#endif
 
 	/* Validate sp and r14 */
+#if defined( __thumb__ ) || defined( __thumb2__ )
+    mov     r0, sp
+    cmp     r0, #0
+    beq     botch
+    mov     r0, r14
+    cmp     r0, #0
+#else
 	teq	sp, #0
 	teqne	r14, #0
+#endif
 	beq	botch
 
 	/* Set return value */
+#if defined( __thumb__ ) || defined( __thumb2__ )
+    movs    r0, r1
+    bne     bxlr
+    movs    r0, #1
+bxlr:
+    bx      lr
+#else
+    mov r0, r1
+    teq r0, #0x00000000
+    moveq   r0, #0x00000001
+    bx      lr
+#endif
 
-	mov	r0, r1
-	teq	r0, #0x00000000
-	moveq	r0, #0x00000001
-        bx      lr
 #ifdef __ARM_26__
 	mov	r15, r14
 #else
@@ -139,4 +233,9 @@ botch:
 	bl	PIC_SYM(_C_LABEL(longjmperror), PLT)
 	bl	PIC_SYM(_C_LABEL(abort), PLT)
 	b	. - 8		/* Cannot get here */
+
+	.align 4
+.Lsetjmp_magic:
+    .word   _JB_MAGIC_SETJMP
+
 END(longjmp)

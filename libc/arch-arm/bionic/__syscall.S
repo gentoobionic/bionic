@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2008 The Android Open Source Project
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,18 +25,70 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+#include <sys/linux-syscalls.h>
 
-#include <machine/asm.h>
 
-/*
- * Coding the abort function in assembly so that registers are guaranteed to
- * be preserved properly regardless of GCC's assumption on the "noreturn"
- * attribute. When the registers are not properly preserved we won't be able
- * to unwind the stack all the way to the bottom to fully reveal the call
- * sequence when the crash happens.
- */
-ENTRY(abort)
-    .save   {r3, r14}
-    stmfd   sp!, {r3, r14}
-    blx     PIC_SYM(_C_LABEL(__libc_android_abort), PLT)
-END(abort)
+	.text
+	.align 4
+	.type __syscall,#function
+	.globl __syscall
+
+	.text
+	.align
+#ifdef __FORCE_THUMB2
+    .thumb
+    .syntax unified
+#endif
+
+#if __ARM_EABI__
+
+__syscall:
+    mov     ip, sp
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    push    {r3}
+    mov     r3, sp
+    stm     r3!, {r4, r5, r6, r7}
+    mov     sp, r3
+    pop     {r3}
+#else
+    stmfd   sp!, {r4, r5, r6, r7}
+#endif
+    mov     r7, r0
+    mov     r0, r1
+    mov     r1, r2
+    mov     r2, r3
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    push    {r2}
+    mov     r2, ip
+    ldm     r2!, {r3, r4, r5, r6}
+    pop     {r2}
+#else
+    ldm.w   sp,{r3,r4,r5,r6}
+#endif
+    swi     #0
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    mov     r3, sp
+    ldm     r3!, {r4, r5, r6, r7}
+    mov     sp, r3
+#else
+    ldmfd   sp!, {r4, r5, r6, r7}
+#endif
+    bx      lr
+
+#else
+
+#ifndef __NR_syscall
+#define __NR_syscall    113
+#endif
+
+__syscall:
+    stmfd   sp!, {r4, r5, lr}
+    ldr     r4, [sp, #12]
+    ldr     r5, [sp, #16]
+    swi     __NR_syscall
+    ldmfd   sp!, {r4, r5, lr}
+    movs    r0, r0
+    bxpl    lr
+    b       __set_syscall_errno
+
+#endif

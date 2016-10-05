@@ -30,7 +30,7 @@
 #include <sys/types.h>
 
 /* shared with sbrk.c */
-char *__bionic_brk;
+extern char *__bionic_brk;
 
 int brk(void*  end_data)
 {

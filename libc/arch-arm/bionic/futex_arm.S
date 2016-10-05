@@ -52,15 +52,41 @@
 #if __ARM_EABI__
 
 ENTRY(__futex_syscall3)
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    mov     r3, sp
+    stm     r3!, {r4, r7}
+    .save   {r4, r7}
+    ldr     r7, =__NR_futex
+    swi     #0
+    ldm     r3!, {r4, r7}
+    mov     sp, r3
+    bx      lr
+#else
     stmdb   sp!, {r4, r7}
     .save   {r4, r7}
     ldr     r7, =__NR_futex
     swi     #0
     ldmia   sp!, {r4, r7}
     bx      lr
+#endif
 END(__futex_syscall3)
 
 ENTRY(__futex_wait)
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    mov     r3, sp
+    stm     r3!, {r4, r7}
+    .save   {r4, r7}
+    push    {r3}
+    mov     r3, r2
+    mov     r2, r1
+    movs    r1, #FUTEX_WAIT
+    ldr     r7, =__NR_futex
+    swi     #0
+    pop     {r3}
+    ldm     r3!, {r4, r7}
+    mov     sp, r3
+    bx      lr
+#else
     stmdb   sp!, {r4, r7}
     .save   {r4, r7}
     mov     r3, r2
@@ -70,17 +96,31 @@ ENTRY(__futex_wait)
     swi     #0
     ldmia   sp!, {r4, r7}
     bx      lr
+#endif
 END(__futex_wait)
 
 ENTRY(__futex_wake)
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+    mov     r3, sp
+    stm     r3!, {r4, r7}
     .save   {r4, r7}
+    mov     r2, r1
+    movs    r1, #FUTEX_WAKE
+    ldr     r7, =__NR_futex
+    swi     #0
+    ldm     r3!, {r4, r7}
+    mov     sp, r3
+    bx      lr
+#else
     stmdb   sp!, {r4, r7}
+    .save   {r4, r7}
     mov     r2, r1
     mov     r1, #FUTEX_WAKE
     ldr     r7, =__NR_futex
     swi     #0
     ldmia   sp!, {r4, r7}
     bx      lr
+#endif
 END(__futex_wake)
 
 #else
@@ -108,5 +148,14 @@ END(__futex_wake)
 #endif
 
 ENTRY(__futex_syscall4)
+#if defined( __thumb__ ) && ! defined( __thumb2__ )
+# clobbers r11
+    push    {r0}
+    ldr     r0, =__futex_syscall3
+    mov     r11, r0
+    pop     {r0}
+    bx      r11
+#else
     b __futex_syscall3
+#endif
 END(__futex_syscall4)

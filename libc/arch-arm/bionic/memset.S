@@ -48,6 +48,9 @@ ENTRY(memset)
 		rsb			r3, r0, #0
 		ands		r3, r3, #3
         cmp         r3, r2
+#ifdef __FORCE_THUMB2
+        it hi
+#endif
         movhi       r3, r2
 
         /* splat r1 */
@@ -56,11 +59,20 @@ ENTRY(memset)
         orr         r1, r1, r1, lsr #16
 
 		movs		r12, r3, lsl #31
-		strcsb		r1, [r0], #1    /* can't use strh (alignment unknown) */
-		strcsb		r1, [r0], #1
-		strmib		r1, [r0], #1
+#ifdef __FORCE_THUMB2
+        itt cs
+#endif
+		strbcs		r1, [r0], #1    /* can't use strh (alignment unknown) */
+		strbcs		r1, [r0], #1
+#ifdef __FORCE_THUMB2
+        it mi
+#endif
+		strbmi		r1, [r0], #1
 		subs		r2, r2, r3
-        ldmlsfd     sp!, {r0, r4-r7, lr}   /* return */
+#ifdef __FORCE_THUMB2
+        itt ls
+#endif
+        ldmfdls     sp!, {r0, r4-r7, lr}   /* return */
         bxls        lr
 
 		/* align the destination to a cache-line */
@@ -75,15 +87,27 @@ ENTRY(memset)
 		ands		r3, r3, #0x1C
 		beq         3f
 		cmp         r3, r2
+#ifdef __FORCE_THUMB2
+        it hi
+#endif
 		andhi		r3, r2, #0x1C
 		sub         r2, r2, r3
 
 		/* conditionnaly writes 0 to 7 words (length in r3) */
 		movs		r3, r3, lsl #28
-		stmcsia		r0!, {r1, lr}
-		stmcsia		r0!, {r1, lr}
-		stmmiia		r0!, {r1, lr}
+#ifdef __FORCE_THUMB2
+        itt cs
+#endif
+		stmiacs		r0!, {r1, lr}
+		stmiacs		r0!, {r1, lr}
+#ifdef __FORCE_THUMB2
+        it mi
+#endif
+		stmiami		r0!, {r1, lr}
 		movs		r3, r3, lsl #2
+#ifdef __FORCE_THUMB2
+        it cs
+#endif
         strcs       r1, [r0], #4
 
 3:
@@ -97,13 +121,28 @@ ENTRY(memset)
 
 		/* conditionnaly stores 0 to 31 bytes */
 		movs		r2, r2, lsl #28
-		stmcsia		r0!, {r1,r3,r12,lr}
-		stmmiia		r0!, {r1, lr}
+#ifdef __FORCE_THUMB2
+        it cs
+#endif
+		stmiacs		r0!, {r1,r3,r12,lr}
+#ifdef __FORCE_THUMB2
+        it mi
+#endif
+		stmiami		r0!, {r1, lr}
 		movs		r2, r2, lsl #2
+#ifdef __FORCE_THUMB2
+        it cs
+#endif
         strcs       r1, [r0], #4
-		strmih		r1, [r0], #2
+#ifdef __FORCE_THUMB2
+        it mi
+#endif
+		strhmi		r1, [r0], #2
 		movs		r2, r2, lsl #2
-		strcsb		r1, [r0]
+#ifdef __FORCE_THUMB2
+        it cs
+#endif
+		strbcs		r1, [r0]
         ldmfd		sp!, {r0, r4-r7, lr}
         bx          lr
 END(memset)

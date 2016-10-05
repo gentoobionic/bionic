@@ -29,6 +29,14 @@
 #include <stdint.h>
 #include <machine/cpu-features.h>
 
+#if 1
+size_t strlen(const char *s) {
+	char *ss;
+	for( ss=(char *)s; *ss; ss++);
+	return (size_t)(ss - s);
+}
+#else
+
 size_t strlen(const char *s)
 {
     __builtin_prefetch(s);
@@ -127,3 +135,5 @@ size_t strlen(const char *s)
 done:
     return l;
 }
+
+#endif
