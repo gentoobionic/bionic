@@ -60,12 +60,6 @@ bionic_DATA = \
 		NEWS \
 		README \
 		TODO \
-		libc/NOTICE \
-		libdl/NOTICE \
-		libm/NOTICE \
-		libstdc++/NOTICE \
-		libthread_db/NOTICE \
-		linker/NOTICE \
 	)
 
 endif
